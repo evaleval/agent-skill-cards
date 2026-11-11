@@ -30,7 +30,7 @@ Every run has its own folder. A phase reads what the phases before it put there 
 - `evidence.json` says where each value on the card came from.
 - `validation.json` says what was checked and what was flagged.
 
-For the parts to connect, every phase needs to stick to a few things. A phase only adds its own files, it does not change the files of another phase. The validation checks the card but does not change it. And we only read the files of a skill, we never run them.
+The phases only connect if each of them follows these rules. A phase only adds its own files, it does not change the files of another phase. The validation checks the card but does not change it. And we only read the files of a skill, we never run them.
 
 ## License
 
