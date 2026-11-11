@@ -24,21 +24,13 @@ The pipeline generates a Skill Card for one skill. It has four phases. Each phas
 Every run has its own folder. A phase reads what the phases before it put there and adds its own files.
 
 - `files/` is a copy of the files of the skill.
-- `snapshot.json` says where the files came from, lists them and gives their hash.
+- `snapshot.json` says where the files came from, lists them and gives their hash. How the hash is computed is described in [schema/guides/which-files-filling-guide.md](schema/guides/which-files-filling-guide.md).
 - `sources/` holds what was collected, each item as it was fetched, with a note of where and when.
 - `card.json` is the card.
 - `evidence.json` says where each value on the card came from.
 - `validation.json` says what was checked and what was flagged.
 
-Three rules hold for every phase.
-
-- A phase does not change a file that another phase wrote.
-- Validation does not change the card.
-- The files of a skill are read and never run.
-
-## The hash
-
-The hash says exactly which files a card is about. Every file gets a sha256. One line is written per file, with the sha256, two spaces and the path, and the lines are sorted by path. The sha256 of that list is the hash. It is taken over the files exactly as the repository stores them. Every card in `cards/` states the hash of its skill, so an identification step is right when it gives the same hashes.
+For the parts to connect, every phase needs to stick to a few things. A phase only adds its own files, it does not change the files of another phase. The validation checks the card but does not change it. And we only read the files of a skill, we never run them.
 
 ## License
 
