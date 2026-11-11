@@ -12,12 +12,14 @@ This repository holds three things.
 
 The pipeline generates a Skill Card for one skill. It has four phases. Each phase can be built in its own way, as long as it reads and writes the files below. The pipeline for BenchmarkCards is a reference for it: https://github.com/evaleval/auto-benchmarkcard
 
+![The four phases of the pipeline: skill identification, source collection, card composition and card validation](docs/pipeline.png)
+
 | Phase | What it does | Reads | Writes |
 |---|---|---|---|
 | Skill identification | Pins down which skill and which files a card is about. | The skill, as a local folder or as a repository with a path and a commit | `files/` and `snapshot.json` |
 | Source collection | Collects what is known about the skill outside its own files. | `snapshot.json` | `sources/` |
-| Composition | Fills in the schema from the files and the collected sources. | `snapshot.json`, `files/` and `sources/` | `card.json` and `evidence.json` |
-| Validation | Checks the card against the files and the sources. | Everything above | `validation.json` |
+| Card composition | Fills in the schema from the files and the collected sources. | `snapshot.json`, `files/` and `sources/` | `card.json` and `evidence.json` |
+| Card validation | Checks the card against the files and the sources. | Everything above | `validation.json` |
 
 Every run has its own folder. A phase reads what the phases before it put there and adds its own files.
 
