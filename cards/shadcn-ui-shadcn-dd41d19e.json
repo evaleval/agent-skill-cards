@@ -13,7 +13,6 @@
       "author and build custom registries",
       "turn a DESIGN.md or brand spec into a themed app and design system page"
     ],
-    "author_description": "Manages shadcn components and projects — adding, searching, fixing, debugging, styling, and composing UI, including chat interfaces. Provides project context, component docs, and usage examples. Applies when working with shadcn/ui, component registries, presets, --preset codes, or any project with a components.json file. Also triggers for \"shadcn init\", \"create an app with --preset\", \"switch to --preset\", and for building a design system or applying a DESIGN.md or brand spec to shadcn/ui.",
     "outputs": [
       {
         "what": "component, block and hook source files added or updated in the project",
@@ -816,12 +815,6 @@
   "about_this_card": {
     "schema": "Skill Card v1.2",
     "date": "2026-11-11",
-    "by": "Claude Opus 5.5, claude-opus-5-5, by hand from the skill files, the skills.sh listing and audits, and GitHub metadata, with the hash, file list, sizes, harness limits and repository figures computed by script",
-    "skill_run": false,
-    "scripts_analysed": false,
-    "security_check_run": false,
-    "external_service_contacted": false,
-    "registry_read": true,
-    "empty_values": 52
+    "by": "Claude Opus 5.5, claude-opus-5-5, by hand from the skill files, the skills.sh listing and audits, and GitHub metadata, with the hash, file list, sizes, harness limits and repository figures computed by script"
   }
 }

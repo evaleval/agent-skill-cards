@@ -13,7 +13,6 @@
       "tailor audits by disabling rules that do not apply to the site",
       "start the fix loop from a squirrelscan channel event"
     ],
-    "author_description": "Audit a website with the squirrelscan CLI and fix the findings in code. Runs SEO, performance, security, technical, content, accessibility, and 16 other rule categories (300+ rules), returns an LLM-optimized report, then drives an iterative fix loop, mapping issues to source files, applying fixes, and re-auditing until the site scores well. Use to discover and assess website or webapp issues and drive them to fixed.",
     "outputs": [
       {
         "what": "audit report with health score, grade, issues by category, broken links and recommendations",
@@ -557,12 +556,6 @@
   "about_this_card": {
     "schema": "Skill Card v1.2",
     "date": "2026-11-11",
-    "by": "Claude Opus 5.5, claude-opus-5-5, by hand from the skill files, the skills.sh listing and audits, and GitHub metadata, with the hash, file list, sizes, harness limits and repository figures computed by script",
-    "skill_run": false,
-    "scripts_analysed": false,
-    "security_check_run": false,
-    "external_service_contacted": false,
-    "registry_read": true,
-    "empty_values": 38
+    "by": "Claude Opus 5.5, claude-opus-5-5, by hand from the skill files, the skills.sh listing and audits, and GitHub metadata, with the hash, file list, sizes, harness limits and repository figures computed by script"
   }
 }

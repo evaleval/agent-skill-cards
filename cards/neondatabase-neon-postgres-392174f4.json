@@ -14,7 +14,6 @@
       "set up vector, full-text and hybrid search with Lakebase Search",
       "covers the Neon access path to Lakebase Postgres, not the Databricks one"
     ],
-    "author_description": "Guides and best practices for working with Lakebase Postgres on Neon: connections, pooled vs direct, schema migrations, branching (including schema-only, reset-from-parent, and branch-per-PR workflows), autoscaling, scale-to-zero, instant restore, read replicas, IP allow lists, logical replication, egress optimization, and Lakebase Search. Use when the work is an existing DATABASE_URL, SQL, schema, inspect, or search. New backends, Auth, files, Functions, and LLM calls go to the parent `neon` skill. Live queries, reactive UIs, and realtime data go to `neon-realtime`. Also use for \"@neondatabase/serverless\", \"@neon/neon-js\", \"neon inspect db\", \"neon postgres computes\", \"Neon branch\", \"schema-only branch\", \"reset branch\", \"branch per PR\", high database bills, network transfer or egress, SELECT * optimization, query overfetching, \"semantic search\", \"vector search\", \"full-text search\", \"BM25\", or \"hybrid search\".",
     "outputs": [
       {
         "what": "a new Neon branch, normal or schema-only, with its connection string",
@@ -793,12 +792,6 @@
   "about_this_card": {
     "schema": "Skill Card v1.2",
     "date": "2026-11-11",
-    "by": "Claude Opus 5.5, claude-opus-5-5, by hand from the skill files, the skills.sh listing and audits, and GitHub metadata, with the hash, file list, sizes, harness limits and repository figures computed by script",
-    "skill_run": false,
-    "scripts_analysed": false,
-    "security_check_run": false,
-    "external_service_contacted": false,
-    "registry_read": true,
-    "empty_values": 71
+    "by": "Claude Opus 5.5, claude-opus-5-5, by hand from the skill files, the skills.sh listing and audits, and GitHub metadata, with the hash, file list, sizes, harness limits and repository figures computed by script"
   }
 }

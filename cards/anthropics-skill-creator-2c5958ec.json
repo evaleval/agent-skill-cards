@@ -14,7 +14,6 @@
       "optimize the description for triggering accuracy",
       "package a skill as a .skill file"
     ],
-    "author_description": "Create new skills, modify and improve existing skills, and measure skill performance. Use when users want to create a skill from scratch, edit, or optimize an existing skill, run evals to test a skill, benchmark skill performance with variance analysis, or optimize a skill's description for better triggering accuracy.",
     "outputs": [
       {
         "what": "a new or edited skill folder with SKILL.md and bundled resources",
@@ -763,12 +762,6 @@
   "about_this_card": {
     "schema": "Skill Card v1.2",
     "date": "2026-11-11",
-    "by": "Claude Opus 5.5, claude-opus-5-5, by hand from the skill files, the skills.sh listing and audits, and GitHub metadata, with the hash, file list, sizes, harness limits and repository figures computed by script",
-    "skill_run": false,
-    "scripts_analysed": false,
-    "security_check_run": false,
-    "external_service_contacted": false,
-    "registry_read": true,
-    "empty_values": 49
+    "by": "Claude Opus 5.5, claude-opus-5-5, by hand from the skill files, the skills.sh listing and audits, and GitHub metadata, with the hash, file list, sizes, harness limits and repository figures computed by script"
   }
 }

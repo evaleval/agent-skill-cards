@@ -14,7 +14,6 @@
       "check build status and connect the dev client to Metro",
       "launch the dev client without onboarding, dev menu or Tools button"
     ],
-    "author_description": "Build and distribute Expo development clients locally or via TestFlight for internal testing. For production TestFlight releases and store submission, use the eas-app-stores skill.",
     "outputs": [
       {
         "what": "a development profile with developmentClient, autoIncrement and appVersionSource settings",
@@ -555,12 +554,6 @@
   "about_this_card": {
     "schema": "Skill Card v1.2",
     "date": "2026-11-11",
-    "by": "Claude Opus 5.5, claude-opus-5-5, by hand from the skill files, the skills.sh listing and audits, and GitHub metadata, with the hash, file list, sizes, harness limits and repository figures computed by script",
-    "skill_run": false,
-    "scripts_analysed": false,
-    "security_check_run": false,
-    "external_service_contacted": false,
-    "registry_read": true,
-    "empty_values": 58
+    "by": "Claude Opus 5.5, claude-opus-5-5, by hand from the skill files, the skills.sh listing and audits, and GitHub metadata, with the hash, file list, sizes, harness limits and repository figures computed by script"
   }
 }

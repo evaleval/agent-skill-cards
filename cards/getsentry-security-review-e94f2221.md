@@ -7,7 +7,6 @@
 | **Name** | security-review |
 | **Description** | Instructions and reference guides for a security code review of a file, diff or component the user names. The agent researches the whole codebase to trace data flow, upstream validation and framework protections, then reports only high-confidence exploitable vulnerabilities with location, impact, evidence and fix, and notes medium-confidence ones as needing verification. Seventeen OWASP-derived vulnerability references, Python and JavaScript framework guides and a Dockerfile guide are loaded by code type. Use it when asked for a security review, to find vulnerabilities or for an OWASP review. |
 | **Tasks** | • review a file, diff or component for exploitable vulnerabilities<br>• trace data flow to confirm attacker-controlled input before flagging<br>• classify findings by severity and confidence<br>• check Django, Flask, FastAPI, Express, React, Vue and Next.js patterns<br>• review Dockerfiles for container security<br>• report findings in a fixed format with a fix for each |
-| **Author's description** | "Security code review for vulnerabilities. Use when asked to "security review", "find vulnerabilities", "check for security issues", "audit security", "OWASP review", or review code for injection, XSS, authentication, authorization, cryptography issues. Provides systematic review with confidence-based reporting." |
 | **Outputs** | • security review report with summary, findings and items that need verification (information), Markdown text in the fixed Security Review format, with VULN and VERIFY entries, to a reply to the user<br>• a fix for each high-confidence finding (recommendation), a Fix line in each finding, to the report<br>• a statement that nothing was found (information), one sentence, to a reply to the user |
 | **Sample output** | `No high-confidence vulnerabilities identified.` |
 | **Inputs** | • the code to report on, a file, diff, pull request or component the user names, required for every task, example `security review this`<br>• the surrounding codebase, with settings, config files and middleware, files the agent can read, required for researching each candidate finding, example not declared |
@@ -78,5 +77,3 @@
 |---|---|
 | **Schema** | Skill Card v1.2 |
 | **Assembled by** | Claude Opus 5.5, claude-opus-5-5, by hand from the skill files, the skills.sh listing and audits, and GitHub metadata, with the hash, file list, sizes, harness limits and repository figures computed by script, 11 November 2026 |
-| **Not done** | • skill run: no<br>• scripts analysed: no<br>• security check run: no<br>• external service contacted: no<br>• registry read: yes |
-| **Count of empty values** | 30 |
