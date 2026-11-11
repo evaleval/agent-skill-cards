@@ -1,0 +1,2 @@
+# The example skill is hashed byte for byte in the tests, so its line endings stay as stored.
+tests/fixtures/** -text
