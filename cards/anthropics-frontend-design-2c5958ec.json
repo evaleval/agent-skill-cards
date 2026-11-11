@@ -1,0 +1,340 @@
+{
+  "schema": "Skill Card v1.2",
+  "skill": "frontend-design",
+  "version": "anthropics/skills at 2c5958ec",
+  "what_it_does": {
+    "name": "frontend-design",
+    "summary": "Instructions only, for the visual design of a new UI or the reshaping of an existing one, working from the client's design brief. The agent grounds the design in the subject, drafts a compact plan of color, type, layout and principles, reviews it against the brief and against common AI-generated defaults, then writes the code and critiques it. Guidance covers the hero, typography, visual structure, motion, a quality floor for accessibility and interface copy. Use it when building or reshaping a UI where a distinctive, non-templated look is wanted.",
+    "tasks": [
+      "identify the subject, audience and primary job of the design",
+      "plan a token system with 4 to 6 named hex colors, typefaces, layout and principles",
+      "review the plan against the brief and common generated-design defaults",
+      "write the front-end code following the revised plan",
+      "critique the build, with screenshots where the environment supports it",
+      "write interface copy, calls to action, errors and empty states"
+    ],
+    "author_description": "Guidance for distinctive, intentional visual design when building new UI or reshaping an existing one. Helps with aesthetic direction, typography, and making choices that don't read as templated defaults.",
+    "outputs": [
+      {
+        "what": "a proposed subject, audience and primary job when the brief names none",
+        "kind": "recommendation",
+        "form": "text",
+        "destination": "the client, to confirm"
+      },
+      {
+        "what": "a short design plan with palette, typefaces and roles, layout concept with ASCII wireframes, and principles",
+        "kind": "information",
+        "form": "text",
+        "destination": "the conversation"
+      },
+      {
+        "what": "a note of what was changed in the plan after review and why",
+        "kind": "information",
+        "form": "text",
+        "destination": "the conversation"
+      },
+      {
+        "what": "the front-end code with its copy and placeholder content",
+        "kind": "information",
+        "form": "code with CSS",
+        "destination": "not declared"
+      },
+      {
+        "what": "notes on what was tried, where a space for notes exists",
+        "kind": "information",
+        "form": "notes",
+        "destination": "a space for notes, if the environment has one"
+      }
+    ],
+    "sample_output": "Save changes",
+    "inputs": [
+      {
+        "what": "a design brief",
+        "type": "a request in natural language",
+        "required": "required",
+        "for": "every task",
+        "example": "a dashboard for financial analysts"
+      },
+      {
+        "what": "an existing UI to reshape",
+        "type": "existing front-end code",
+        "required": "conditional",
+        "for": "reshaping an existing UI",
+        "example": "not declared"
+      },
+      {
+        "what": "the brief's real content",
+        "type": "text for the design",
+        "required": "optional",
+        "for": "every task",
+        "example": "not declared"
+      },
+      {
+        "what": "the client's preferences or context from memory",
+        "type": "information in the agent's memory",
+        "required": "optional",
+        "for": "grounding the design",
+        "example": "not declared"
+      }
+    ],
+    "when_input_is_missing": [
+      {
+        "case": "the brief does not identify the product or subject matter",
+        "behaviour": "the agent proposes one concrete subject, audience and primary job and confirms with the client"
+      },
+      {
+        "case": "the brief contains no real content",
+        "behaviour": "the agent comes up with copy and placeholder content"
+      },
+      {
+        "case": "the brief leaves a visual axis free",
+        "behaviour": "the agent avoids the listed generated-design defaults on that axis"
+      }
+    ],
+    "exclusions": "not declared",
+    "adoption": [
+      {
+        "registry": "skills.sh",
+        "installs": "1.1M",
+        "first_seen": "2026-01-19",
+        "counts": "the skill",
+        "read": "2026-11-11"
+      },
+      {
+        "registry": "GitHub",
+        "stars": 192784,
+        "forks": 22682,
+        "counts": "the anthropics/skills repository, which holds 20 skills",
+        "read": "2026-11-11"
+      }
+    ]
+  },
+  "what_it_needs": {
+    "compatibility": {
+      "harnesses": "not declared",
+      "models": "not declared",
+      "capabilities": "not declared",
+      "fits": {
+        "Agent Skills specification": "fits, name 15 characters, description 204 characters, body 66 lines and about 2,276 tokens",
+        "Codex": "does not fit, SKILL.md is 9,390 bytes, 1,390 over the 8,000 byte cut on the injected file",
+        "Claude Code": "fits, 71 lines, listing text 204 characters",
+        "ClawHub": "fits, folder 19,564 bytes"
+      }
+    },
+    "software_dependencies": "none",
+    "credentials": "none",
+    "cost": {
+      "context_tokens": {
+        "discovery": 51,
+        "load": 2348,
+        "on_demand": 0,
+        "on_demand_files": "none"
+      },
+      "run_tokens": "not examined",
+      "services": "none"
+    }
+  },
+  "what_it_touches": {
+    "side_effects": {
+      "install": "read only",
+      "run": "changes state",
+      "changes": [
+        {
+          "what": "writes front-end code for a new UI",
+          "affects": "workspace",
+          "confirmation": "not declared",
+          "reversible": "not declared"
+        },
+        {
+          "what": "changes the code of an existing UI when reshaping it",
+          "affects": "workspace",
+          "confirmation": "not declared",
+          "reversible": "not declared"
+        }
+      ]
+    },
+    "network_access": "none",
+    "tools_and_permissions": {
+      "allowed_tools": "none",
+      "tools": [
+        {
+          "tool": "file tools of the agent",
+          "kind": "agent tool",
+          "for": "writing the front-end code",
+          "origin": "built in"
+        },
+        {
+          "tool": "screenshots of the build",
+          "kind": "agent tool",
+          "for": "reviewing the work while building, if the environment supports it",
+          "origin": "built in"
+        },
+        {
+          "tool": "memory or a space for notes",
+          "kind": "agent tool",
+          "for": "client preferences as a hint, and notes on what was tried",
+          "origin": "built in"
+        }
+      ]
+    },
+    "machine_access": {
+      "paths": [
+        {
+          "path": "front-end code files at paths the agent chooses",
+          "operation": "write",
+          "scope": "unknown"
+        },
+        {
+          "path": "the code of an existing UI being reshaped",
+          "operation": "read",
+          "scope": "unknown"
+        }
+      ],
+      "settings": "none"
+    }
+  },
+  "what_is_known": {
+    "checks": [
+      {
+        "id": "C1",
+        "tool": "Snyk, skills.sh audit, version not stated",
+        "date": "2026-09-15",
+        "scope": "unknown",
+        "result": "pass, risk level LOW, no issues detected",
+        "report": "https://skills.sh/anthropics/skills/frontend-design/security/snyk"
+      },
+      {
+        "id": "C2",
+        "tool": "Gen Agent Trust Hub, skills.sh audit, version not stated",
+        "date": "2026-09-15",
+        "scope": "the skill's instructional content, no files named",
+        "result": "pass, risk level SAFE, purely instructional content without executable code, network operations or sensitive file access, user design briefs noted as an entry point",
+        "report": "https://skills.sh/anthropics/skills/frontend-design/security/agent-trust-hub"
+      },
+      {
+        "id": "C3",
+        "tool": "Socket, skills.sh audit, version not stated",
+        "date": "2026-09-15",
+        "scope": "the skill package, hash 7e9c2af00fd5b3144f49ce6fb1b16037b392ab9c2f049423b0b6114d99381ba2",
+        "result": "pass, checks for malicious behaviour, security concerns, code obfuscation and suspicious patterns",
+        "report": "https://skills.sh/anthropics/skills/frontend-design/security/socket"
+      }
+    ],
+    "vulnerabilities": "none",
+    "risks": [
+      {
+        "risk": "Instructions placed in a design brief from an outside source reach the agent, since the skill processes user-provided briefs as its entry point for external data.",
+        "source": "check C2",
+        "severity": "SAFE overall by C2",
+        "mitigation": "none in the files, C2 rates the risk effectively null as the skill names no shell, file system or network operations",
+        "taxonomy": "https://www.ibm.com/docs/en/watsonx/saas?topic=ai-risk-atlas"
+      },
+      {
+        "risk": "Existing UI code can be lost when the agent reshapes it, since the files ask for no confirmation and name no way to undo a change.",
+        "source": "model",
+        "severity": "none",
+        "mitigation": "none stated",
+        "taxonomy": "not examined"
+      },
+      {
+        "risk": "Details about a client held in the agent's memory can appear in a design or its copy shown to others, since memory is used as a hint.",
+        "source": "model",
+        "severity": "none",
+        "mitigation": "none stated",
+        "taxonomy": "not examined"
+      }
+    ],
+    "limitations": [
+      "Visual self-critique with screenshots works only where the environment supports taking them.",
+      "Notes on what was tried carry over to later passes only where the environment offers a space to jot them down."
+    ],
+    "known_problems": [
+      {
+        "problem": "CSS classes cancel each other out, often with padding and margin between sections",
+        "workaround": "structure CSS selector specificities with care"
+      },
+      {
+        "problem": "part of the design plan reads like the generic default for any similar page",
+        "workaround": "revise that part before building and say what changed and why"
+      }
+    ],
+    "evaluations": "none"
+  },
+  "who_stands_behind_it": {
+    "authorship": {
+      "author": "not declared",
+      "publisher": "the anthropics organisation on GitHub",
+      "signer": "none",
+      "contact": "not declared"
+    },
+    "license": {
+      "frontmatter": "Complete terms in LICENSE.txt",
+      "license_file": "LICENSE.txt, Apache License Version 2.0, January 2004, terms for use, reproduction and distribution, with no copyright notice naming a licensor",
+      "registry": "not declared",
+      "repository": "none"
+    },
+    "maintenance": {
+      "last_change": "2026-09-03",
+      "registry_update": "not declared",
+      "deprecated": "not declared",
+      "first_seen": "2025-12-01",
+      "content_changes": 3,
+      "releases": 0,
+      "last_release": "none"
+    }
+  },
+  "which_files": {
+    "version": {
+      "hash": "sha256:bfaf399ef64709e44984c746e0ba0d6d8f24b2de4d5579dd9daae98c84965293",
+      "left_out": "none",
+      "author_version": "not declared",
+      "registry_version": "not declared",
+      "commit": "2c5958ec"
+    },
+    "source": {
+      "kind": "repository",
+      "location": "GitHub anthropics/skills, path skills/frontend-design",
+      "commit": "2c5958ec",
+      "retrieved": "2026-11-11",
+      "also_listed_on": "skills.sh, https://skills.sh/anthropics/skills/frontend-design",
+      "homepage": "not declared",
+      "produced_by": "none"
+    },
+    "files": [
+      {
+        "path": "LICENSE.txt",
+        "bytes": 10174,
+        "sha256": "0d542e0c8804e39aa7f37eb00da5a762149dc682d7829451287e11b938e94594",
+        "kind": "document",
+        "in_hash": true,
+        "executable": false
+      },
+      {
+        "path": "SKILL.md",
+        "bytes": 9390,
+        "sha256": "d91970639e9f5c37682ac7ab60094d35f1c7c1f38d731bd56396563aee10c1d3",
+        "kind": "document",
+        "in_hash": true,
+        "executable": false
+      }
+    ],
+    "counts": {
+      "script": 0,
+      "document": 2,
+      "data": 0,
+      "binary": 0
+    },
+    "composition": "instructions only"
+  },
+  "about_this_card": {
+    "schema": "Skill Card v1.2",
+    "date": "2026-11-11",
+    "by": "Claude Opus 5.5, claude-opus-5-5, by hand from the skill files, the skills.sh listing and audits, and GitHub metadata, with the hash, file list, sizes, harness limits and repository figures computed by script",
+    "skill_run": false,
+    "scripts_analysed": false,
+    "security_check_run": false,
+    "external_service_contacted": false,
+    "registry_read": true,
+    "empty_values": 42
+  }
+}

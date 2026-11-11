@@ -1,0 +1,587 @@
+{
+  "schema": "Skill Card v1.2",
+  "skill": "hf-cli",
+  "version": "huggingface/skills at 25910b3d",
+  "what_it_does": {
+    "name": "hf-cli",
+    "summary": "A single SKILL.md, generated with huggingface_hub v2.4.0, that lists the commands and options of the Hugging Face Hub CLI hf. It covers downloading and uploading files, managing repos, buckets, collections, discussions and pull requests, browsing models, datasets, spaces and papers, querying datasets with SQL, running jobs and sandboxes on Hugging Face infrastructure, and deploying Inference Endpoints. Results are files on disk, changes on the Hub, and command output in auto, human, agent, json or quiet format. Use it whenever the user mentions hf, huggingface or Hugging Face, or wants to do anything in the Hugging Face ecosystem.",
+    "tasks": [
+      "download, upload, copy and sync files between local paths, repos and buckets",
+      "manage repos, branches, tags, collections, discussions and pull requests on the Hub",
+      "browse and search models, datasets, spaces and papers, and query datasets with DuckDB SQL",
+      "run and schedule Jobs and sandboxes on Hugging Face infrastructure",
+      "deploy and manage Inference Endpoints and configure Spaces",
+      "manage authentication, the local cache, webhooks, extensions and skills"
+    ],
+    "author_description": "Hugging Face Hub CLI (`hf`) for downloading, uploading, and managing models, datasets, spaces, buckets, repos, papers, jobs, and more on the Hugging Face Hub. Use when: handling authentication; managing local cache; managing Hugging Face Buckets; running or scheduling jobs on Hugging Face infrastructure; managing Hugging Face repos; discussions and pull requests; browsing models, datasets and spaces; reading, searching, or browsing academic papers; managing collections; querying datasets; configuring spaces; setting up webhooks; or deploying and managing HF Inference Endpoints. Make sure to use this skill whenever the user mentions 'hf', 'huggingface', 'Hugging Face', 'huggingface-cli', or 'hugging face cli', or wants to do anything related to the Hugging Face ecosystem and to AI and ML in general. Also use for cloud storage needs like training checkpoints, data pipelines, or agent traces. Use even if the user doesn't explicitly ask for a CLI command. Replaces the deprecated `huggingface-cli`.",
+    "outputs": [
+      {
+        "what": "files downloaded from Hub repos and buckets",
+        "kind": "information",
+        "form": "model, dataset or space files",
+        "destination": "the Hugging Face cache, --cache-dir or --local-dir"
+      },
+      {
+        "what": "listings, info, cards, papers, logs and query results",
+        "kind": "information",
+        "form": "terminal text in auto, human, agent, json or quiet format",
+        "destination": "the terminal the agent runs hf in"
+      },
+      {
+        "what": "files uploaded, synced, copied or deleted on the Hub and in buckets",
+        "kind": "action",
+        "form": "commits, pull requests and bucket changes",
+        "destination": "Hub repos and Hugging Face Buckets"
+      },
+      {
+        "what": "repos, collections, discussions, webhooks and settings created, changed or deleted",
+        "kind": "action",
+        "form": "changes to the user's Hub account",
+        "destination": "the Hugging Face Hub"
+      },
+      {
+        "what": "Jobs, scheduled Jobs, sandboxes and Inference Endpoints started, paused, scaled or deleted",
+        "kind": "action",
+        "form": "running workloads on Hugging Face infrastructure",
+        "destination": "Hugging Face Jobs and Inference Endpoints"
+      }
+    ],
+    "sample_output": "not declared",
+    "inputs": [
+      {
+        "what": "a repo, bucket, collection, job, endpoint or space identifier",
+        "type": "a positional argument",
+        "required": "required",
+        "for": "every command that acts on one item",
+        "example": "hf-mount start repo openai-community/gpt2 /tmp/gpt2"
+      },
+      {
+        "what": "a User Access Token",
+        "type": "the HF_TOKEN environment variable or the --token option",
+        "required": "conditional",
+        "for": "authenticated and write operations",
+        "example": "hf-mount start --hf-token $HF_TOKEN bucket myuser/my-bucket /tmp/data"
+      },
+      {
+        "what": "local files or a folder",
+        "type": "a path argument",
+        "required": "conditional",
+        "for": "uploading, copying and syncing",
+        "example": "not declared"
+      },
+      {
+        "what": "a container image and command, or a UV script",
+        "type": "positional arguments, the script a local file or URL",
+        "required": "conditional",
+        "for": "running and scheduling Jobs",
+        "example": "not declared"
+      },
+      {
+        "what": "a SQL query",
+        "type": "a positional argument",
+        "required": "conditional",
+        "for": "querying datasets with hf datasets sql",
+        "example": "not declared"
+      },
+      {
+        "what": "environment variables and secrets for remote workloads",
+        "type": "--env, --secrets, --env-file or --secrets-file options",
+        "required": "optional",
+        "for": "Jobs, sandboxes, Spaces, repos and Inference Endpoints",
+        "example": "not declared"
+      }
+    ],
+    "when_input_is_missing": "not declared",
+    "exclusions": "not declared",
+    "adoption": [
+      {
+        "registry": "skills.sh",
+        "installs": "3.6K",
+        "first_seen": "2026-03-06",
+        "counts": "the skill",
+        "read": "2026-11-11"
+      },
+      {
+        "registry": "GitHub",
+        "stars": 11333,
+        "forks": 792,
+        "counts": "the huggingface/skills repository, which holds 26 skills",
+        "read": "2026-11-11"
+      }
+    ]
+  },
+  "what_it_needs": {
+    "compatibility": {
+      "harnesses": "not declared",
+      "models": "not declared",
+      "capabilities": "not declared",
+      "fits": {
+        "Agent Skills specification": "fits, name 6 characters, description 1,008 characters, body 239 lines and about 8,288 tokens, over the recommended 5,000 tokens",
+        "Codex": "does not fit, SKILL.md is 34,197 bytes, 26,197 over the 8,000 byte cut on the injected file",
+        "Claude Code": "fits, 243 lines, listing text 1,008 characters",
+        "ClawHub": "fits, folder 34,197 bytes"
+      }
+    },
+    "software_dependencies": [
+      {
+        "name": "hf CLI from huggingface_hub",
+        "kind": "package",
+        "version": "v2.4.0, the version the command list was generated with",
+        "for": "run"
+      },
+      {
+        "name": "curl and bash",
+        "kind": "binary",
+        "version": "not declared",
+        "for": "install"
+      },
+      {
+        "name": "hf-mount",
+        "kind": "binary",
+        "version": "not declared",
+        "for": "example"
+      },
+      {
+        "name": "brew",
+        "kind": "binary",
+        "version": "not declared",
+        "for": "example"
+      }
+    ],
+    "credentials": [
+      {
+        "kind": "token",
+        "name": "User Access Token, HF_TOKEN",
+        "used_for": "authenticating to the Hugging Face Hub",
+        "from": "environment variable",
+        "goes_to": "huggingface.co"
+      },
+      {
+        "kind": "password",
+        "name": "--container-registry-password",
+        "used_for": "pulling a custom image for an Inference Endpoint",
+        "from": "command argument",
+        "goes_to": "huggingface.co"
+      },
+      {
+        "kind": "other",
+        "name": "--secrets and --secrets-file",
+        "used_for": "secrets for Jobs, sandboxes, Spaces, repos and Inference Endpoints",
+        "from": "command argument",
+        "goes_to": "huggingface.co"
+      },
+      {
+        "kind": "other",
+        "name": "webhook --secret",
+        "used_for": "signing webhook calls",
+        "from": "command argument",
+        "goes_to": "huggingface.co"
+      }
+    ],
+    "cost": {
+      "context_tokens": {
+        "discovery": 252,
+        "load": 8549,
+        "on_demand": 0,
+        "on_demand_files": "none"
+      },
+      "run_tokens": "not examined",
+      "services": [
+        {
+          "name": "Hugging Face Jobs and sandboxes, with hardware flavors from cpu-basic to h200x8",
+          "needs": "account",
+          "price": "not declared",
+          "quota": "not declared",
+          "calls_per_use": "not declared"
+        },
+        {
+          "name": "Hugging Face Inference Endpoints",
+          "needs": "account",
+          "price": "not declared",
+          "quota": "not declared",
+          "calls_per_use": "not declared"
+        },
+        {
+          "name": "ZeroGPU on Spaces",
+          "needs": "account",
+          "price": "not declared",
+          "quota": "remaining GPU time and reset date, shown by hf spaces zero-gpu quota",
+          "calls_per_use": "not declared"
+        }
+      ]
+    }
+  },
+  "what_it_touches": {
+    "side_effects": {
+      "install": "changes state",
+      "run": "changes state",
+      "changes": [
+        {
+          "what": "installs the hf CLI by piping https://hf.co/cli/install.sh to bash",
+          "affects": "software environment",
+          "confirmation": "not declared",
+          "reversible": "not declared"
+        },
+        {
+          "what": "updates the CLI, installs extensions from GitHub and installs skills",
+          "affects": "software environment",
+          "confirmation": "not declared",
+          "reversible": "not declared"
+        },
+        {
+          "what": "downloads files into the cache or a local directory, and removes cached files with hf cache rm and prune",
+          "affects": "user home",
+          "confirmation": "not declared",
+          "reversible": "not declared"
+        },
+        {
+          "what": "uploads, copies, syncs and deletes files in Hub repos and buckets",
+          "affects": "external service",
+          "confirmation": "not declared",
+          "reversible": "not declared"
+        },
+        {
+          "what": "deletes a repo from the Hub, an irreversible operation",
+          "affects": "external service",
+          "confirmation": "not declared",
+          "reversible": "no"
+        },
+        {
+          "what": "deletes an Inference Endpoint or a webhook permanently",
+          "affects": "external service",
+          "confirmation": "not declared",
+          "reversible": "no"
+        },
+        {
+          "what": "creates, moves and changes repos, buckets, collections, discussions, settings, secrets and variables",
+          "affects": "external service",
+          "confirmation": "not declared",
+          "reversible": "not declared"
+        },
+        {
+          "what": "runs Jobs and sandboxes and deploys, scales or pauses Inference Endpoints",
+          "affects": "external service",
+          "confirmation": "not declared",
+          "reversible": "not declared"
+        },
+        {
+          "what": "stores the token in the git credential store with --add-to-git-credential",
+          "affects": "user home",
+          "confirmation": "not declared",
+          "reversible": "not declared"
+        }
+      ]
+    },
+    "network_access": [
+      {
+        "host": "hf.co",
+        "purpose": "install",
+        "when": "once, when the CLI is installed with the install script",
+        "sends": [
+          "none"
+        ],
+        "receives": "the install script install.sh"
+      },
+      {
+        "host": "huggingface.co",
+        "purpose": "other",
+        "when": "every Hub command, for reading, uploading, syncing, running Jobs and deploying endpoints",
+        "sends": [
+          "credential",
+          "query text",
+          "file content",
+          "user content"
+        ],
+        "receives": "files, listings, cards, papers, logs and job output"
+      },
+      {
+        "host": "github.com",
+        "purpose": "install",
+        "when": "when extensions are searched, installed or updated, or hf-mount is downloaded",
+        "sends": [
+          "query text"
+        ],
+        "receives": "extension code and hf-mount binaries"
+      },
+      {
+        "host": "the Homebrew package host, not named in the files",
+        "purpose": "install",
+        "when": "when hf-mount is installed with brew",
+        "sends": [
+          "none"
+        ],
+        "receives": "the hf-mount package"
+      }
+    ],
+    "tools_and_permissions": {
+      "allowed_tools": "none",
+      "tools": [
+        {
+          "tool": "hf",
+          "kind": "program",
+          "for": "every Hub, cache, job, endpoint and auth operation",
+          "origin": "third party"
+        },
+        {
+          "tool": "curl -LsSf https://hf.co/cli/install.sh | bash -s",
+          "kind": "shell command",
+          "for": "installing the hf CLI",
+          "origin": "third party"
+        },
+        {
+          "tool": "hf-mount",
+          "kind": "program",
+          "for": "mounting repos and buckets as local filesystems",
+          "origin": "third party"
+        },
+        {
+          "tool": "brew install hf-mount",
+          "kind": "shell command",
+          "for": "installing hf-mount",
+          "origin": "third party"
+        },
+        {
+          "tool": "hf extensions",
+          "kind": "program",
+          "for": "installing and executing extensions from public GitHub repositories",
+          "origin": "third party"
+        },
+        {
+          "tool": "shell tool of the agent",
+          "kind": "agent tool",
+          "for": "running hf and hf-mount commands",
+          "origin": "built in"
+        }
+      ]
+    },
+    "machine_access": {
+      "paths": [
+        {
+          "path": "the Hugging Face cache or the directory given with --cache-dir",
+          "operation": "write",
+          "scope": "unknown"
+        },
+        {
+          "path": "cached repositories, revisions and incomplete downloads removed by hf cache rm and prune",
+          "operation": "delete",
+          "scope": "unknown"
+        },
+        {
+          "path": "the directory given with --local-dir",
+          "operation": "write",
+          "scope": "unknown"
+        },
+        {
+          "path": "local files and folders uploaded, copied or synced",
+          "operation": "read",
+          "scope": "unknown"
+        },
+        {
+          "path": "local files deleted by hf sync --delete",
+          "operation": "delete",
+          "scope": "unknown"
+        },
+        {
+          "path": "files given with --env-file, --secrets-file, --body-file and --identity-file",
+          "operation": "read",
+          "scope": "unknown"
+        },
+        {
+          "path": "mount points such as /tmp/gpt2 and /tmp/data",
+          "operation": "write",
+          "scope": "system"
+        },
+        {
+          "path": "the skill destination given with --dest or --global",
+          "operation": "write",
+          "scope": "unknown"
+        }
+      ],
+      "settings": [
+        {
+          "name": "git credential store",
+          "access": "set",
+          "reason": "with --add-to-git-credential, so git can use the access token"
+        }
+      ]
+    }
+  },
+  "what_is_known": {
+    "checks": [
+      {
+        "id": "C1",
+        "tool": "Snyk, skills.sh audit, version not stated",
+        "date": "2026-10-30",
+        "scope": "unknown",
+        "result": "warn, risk level MEDIUM, 1 issue, W011 third-party content exposure, indirect prompt injection risk, scored medium risk 0.30",
+        "report": "https://skills.sh/huggingface/skills/hf-cli/security/snyk"
+      },
+      {
+        "id": "C2",
+        "tool": "Gen Agent Trust Hub, skills.sh audit, version not stated",
+        "date": "2026-10-30",
+        "scope": "the commands of SKILL.md, as cited in its analysis",
+        "result": "pass, risk level SAFE, tags EXTERNAL_DOWNLOADS, REMOTE_CODE_EXECUTION, COMMAND_EXECUTION, CREDENTIALS_UNSAFE and INDIRECT_PROMPT_INJECTION, six surfaces described",
+        "report": "https://skills.sh/huggingface/skills/hf-cli/security/agent-trust-hub"
+      },
+      {
+        "id": "C3",
+        "tool": "Socket, skills.sh audit, version not stated",
+        "date": "2026-10-30",
+        "scope": "the skill package, hash 5e956f66479b98cb38530a42a0b71ef535c0f5ca15b265dcd079241b21a4b5e9",
+        "result": "pass, checks for malicious behaviour, security concerns, code obfuscation and suspicious patterns",
+        "report": "https://skills.sh/huggingface/skills/hf-cli/security/socket"
+      }
+    ],
+    "vulnerabilities": [
+      {
+        "finding": "Third-party content exposure, indirect prompt injection risk, W011",
+        "check": "C1",
+        "severity": "MEDIUM, scored 0.30",
+        "location": "not stated",
+        "status": "open",
+        "fix": "not stated"
+      }
+    ],
+    "risks": [
+      {
+        "risk": "Instructions hidden in outsider-authored discussions, pull requests, model cards, dataset info or papers reach the agent when it reads them through hf.",
+        "source": "check C1, check C2",
+        "severity": "MEDIUM by C1, SAFE overall by C2",
+        "mitigation": "none in the files",
+        "taxonomy": "https://www.ibm.com/docs/en/watsonx/saas?topic=ai-risk-atlas"
+      },
+      {
+        "risk": "The install command pipes a script fetched from hf.co straight into bash, so whatever that script contains runs on the machine.",
+        "source": "check C2",
+        "severity": "none",
+        "mitigation": "none stated",
+        "taxonomy": "not examined"
+      },
+      {
+        "risk": "hf auth token prints the current access token to stdout, where it enters the agent's context and terminal logs.",
+        "source": "check C2",
+        "severity": "none",
+        "mitigation": "none stated",
+        "taxonomy": "not examined"
+      },
+      {
+        "risk": "hf extensions install downloads third-party code from public GitHub repositories, which then runs through hf extensions exec.",
+        "source": "check C2",
+        "severity": "none",
+        "mitigation": "none stated",
+        "taxonomy": "not examined"
+      },
+      {
+        "risk": "hf jobs run, hf jobs uv run and hf sandbox exec execute arbitrary code on Hugging Face infrastructure under the user's account.",
+        "source": "check C2",
+        "severity": "none",
+        "mitigation": "none stated",
+        "taxonomy": "not examined"
+      },
+      {
+        "risk": "A repo removed with hf repos delete is lost, since the operation is irreversible.",
+        "source": "author",
+        "severity": "none",
+        "mitigation": "none stated",
+        "taxonomy": "not examined"
+      },
+      {
+        "risk": "Jobs, sandboxes and Inference Endpoints started on GPU flavors such as a100x8 or h200x8 keep incurring charges until they are cancelled, paused or deleted.",
+        "source": "model",
+        "severity": "none",
+        "mitigation": "none stated, --timeout and --scale-to-zero-timeout exist as options",
+        "taxonomy": "not examined"
+      },
+      {
+        "risk": "An access token passed with --token stays in shell history or logs.",
+        "source": "model",
+        "severity": "none",
+        "mitigation": "the files recommend setting HF_TOKEN instead of passing --token",
+        "taxonomy": "not examined"
+      }
+    ],
+    "limitations": [
+      "Secret values of a Space are write-only and are not returned by hf spaces secrets list.",
+      "Sandboxes on Hugging Face Jobs are experimental.",
+      "A repo mounted with hf-mount is read-only, a bucket is read-write.",
+      "The command list reflects huggingface_hub v2.4.0, full options and examples come from hf <command> --help."
+    ],
+    "known_problems": [
+      {
+        "problem": "the huggingface-cli command is deprecated",
+        "workaround": "use hf, with auth commands under hf auth"
+      }
+    ],
+    "evaluations": "none"
+  },
+  "who_stands_behind_it": {
+    "authorship": {
+      "author": "not declared",
+      "publisher": "the huggingface organisation on GitHub",
+      "signer": "none",
+      "contact": "not declared"
+    },
+    "license": {
+      "frontmatter": "not declared",
+      "license_file": "none",
+      "registry": "not declared",
+      "repository": "Apache-2.0, as GitHub detects it"
+    },
+    "maintenance": {
+      "last_change": "2026-10-29",
+      "registry_update": "not declared",
+      "deprecated": "not declared",
+      "first_seen": "2026-03-06",
+      "content_changes": 45,
+      "releases": 0,
+      "last_release": "none"
+    }
+  },
+  "which_files": {
+    "version": {
+      "hash": "sha256:ed52172e86a292ddbeac3aa34cc899adeb2b4f5f4000cb7368cb40360d8155de",
+      "left_out": "none",
+      "author_version": "not declared",
+      "registry_version": "not declared",
+      "commit": "25910b3d"
+    },
+    "source": {
+      "kind": "repository",
+      "location": "GitHub huggingface/skills, path skills/hf-cli",
+      "commit": "25910b3d",
+      "retrieved": "2026-11-11",
+      "also_listed_on": "skills.sh, https://skills.sh/huggingface/skills/hf-cli",
+      "homepage": "not declared",
+      "produced_by": "huggingface_hub v2.4.0, as SKILL.md states, regenerated with hf skills add --force"
+    },
+    "files": [
+      {
+        "path": "SKILL.md",
+        "bytes": 34197,
+        "sha256": "a60115f0ca8fa0468e2e7878730925fc4dbf2fffdbed15391d14429a9830c4c1",
+        "kind": "document",
+        "in_hash": true,
+        "executable": false
+      }
+    ],
+    "counts": {
+      "script": 0,
+      "document": 1,
+      "data": 0,
+      "binary": 0
+    },
+    "composition": "instructions only"
+  },
+  "about_this_card": {
+    "schema": "Skill Card v1.2",
+    "date": "2026-11-11",
+    "by": "Claude Opus 5.5, claude-opus-5-5, by hand from the skill files, the skills.sh listing and audits, and GitHub metadata, with the hash, file list, sizes, harness limits and repository figures computed by script",
+    "skill_run": false,
+    "scripts_analysed": false,
+    "security_check_run": false,
+    "external_service_contacted": false,
+    "registry_read": true,
+    "empty_values": 78
+  }
+}

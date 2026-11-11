@@ -1,0 +1,566 @@
+{
+  "schema": "Skill Card v1.2",
+  "skill": "expo-dev-client",
+  "version": "expo/skills at a9e5bd3f",
+  "what_it_does": {
+    "name": "expo-dev-client",
+    "summary": "Instructions for building, installing and using Expo development clients, builds of an app that bundle expo-dev-client for testing native code changes on physical devices. They set up a development profile in eas.json, build with EAS Build in the cloud with submission to TestFlight, or locally into .ipa, .apk or .aab files, install the builds on simulators and devices, and connect the client to the Metro bundler. Use it when an app needs local Expo modules, Apple targets, third-party native modules not in Expo Go, config plugins, or testing of remote push notifications and App or Universal Links.",
+    "tasks": [
+      "decide whether a development client is needed instead of Expo Go",
+      "configure a development profile in eas.json",
+      "build an iOS dev client in the cloud and submit it to TestFlight",
+      "build dev clients locally for iOS and Android",
+      "install local builds on a simulator, an iOS device or an Android device",
+      "check build status and connect the dev client to Metro",
+      "launch the dev client without onboarding, dev menu or Tools button"
+    ],
+    "author_description": "Build and distribute Expo development clients locally or via TestFlight for internal testing. For production TestFlight releases and store submission, use the eas-app-stores skill.",
+    "outputs": [
+      {
+        "what": "a development profile with developmentClient, autoIncrement and appVersionSource settings",
+        "kind": "information",
+        "form": "JSON file",
+        "destination": "eas.json in the project"
+      },
+      {
+        "what": "an iOS development client built in the cloud and submitted to App Store Connect",
+        "kind": "action",
+        "form": "a TestFlight build",
+        "destination": "TestFlight, with an email when the build is ready"
+      },
+      {
+        "what": "a locally built development client",
+        "kind": "information",
+        "form": ".ipa file for iOS, .apk or .aab file for Android, a .tar.gz with the .app for the simulator",
+        "destination": "the machine the build runs on"
+      },
+      {
+        "what": "a development client installed on a simulator or device",
+        "kind": "action",
+        "form": "an installed app",
+        "destination": "the booted iOS simulator, an iOS device or an Android device"
+      },
+      {
+        "what": "recent builds and build details",
+        "kind": "information",
+        "form": "terminal text",
+        "destination": "the terminal"
+      },
+      {
+        "what": "a feedback report on errors in the skill or on failed Expo tasks",
+        "kind": "action",
+        "form": "a report sent through @expo/agent-cli",
+        "destination": "Expo"
+      }
+    ],
+    "sample_output": "build.ipa",
+    "inputs": [
+      {
+        "what": "an Expo project with a development profile in eas.json",
+        "type": "a project folder with eas.json",
+        "required": "required",
+        "for": "every build",
+        "example": "\"development\": { \"autoIncrement\": true, \"developmentClient\": true }"
+      },
+      {
+        "what": "the target platform",
+        "type": "the -p flag of eas build",
+        "required": "optional",
+        "for": "building for one platform, both when omitted",
+        "example": "eas build -p ios --profile development"
+      },
+      {
+        "what": "the development server URL",
+        "type": "a URL entered in the dev client or a QR code",
+        "required": "conditional",
+        "for": "connecting the dev client to Metro",
+        "example": "<scheme>://?__expo_url=<encoded dev server URL>&__expo_disable_onboarding=1&__expo_disable_fab=1&__expo_disable_auto_launch=1"
+      },
+      {
+        "what": "a build file to install",
+        "type": "a path to an .app, .ipa or .apk file",
+        "required": "conditional",
+        "for": "installing a local build",
+        "example": "adb install build.apk"
+      },
+      {
+        "what": "feedback text",
+        "type": "a command argument with category and subject",
+        "required": "conditional",
+        "for": "reporting errors in the skill or a failed Expo task",
+        "example": "npx --yes @expo/agent-cli@latest feedback --category skills --subject \"expo-dev-client\" \"<actionable feedback>\""
+      }
+    ],
+    "when_input_is_missing": "not declared",
+    "exclusions": [
+      "not for production TestFlight releases and store submission, use the eas-app-stores skill"
+    ],
+    "adoption": [
+      {
+        "registry": "skills.sh",
+        "installs": "75.0K",
+        "first_seen": "2026-01-19",
+        "counts": "the skill",
+        "read": "2026-11-11"
+      },
+      {
+        "registry": "GitHub",
+        "stars": 4111,
+        "forks": 268,
+        "counts": "the expo/skills repository, which holds 25 skills",
+        "read": "2026-11-11"
+      }
+    ]
+  },
+  "what_it_needs": {
+    "compatibility": {
+      "harnesses": "not declared",
+      "models": "not declared",
+      "capabilities": "not declared",
+      "fits": {
+        "Agent Skills specification": "fits, name 15 characters, description 180 characters, body 178 lines and about 1,303 tokens",
+        "Codex": "fits, SKILL.md is 5,449 bytes, under the 8,000 byte cut",
+        "Claude Code": "fits, 183 lines, listing text 180 characters",
+        "ClawHub": "fits, folder 5,780 bytes"
+      }
+    },
+    "software_dependencies": [
+      {
+        "name": "EAS CLI, eas",
+        "kind": "package",
+        "version": ">= 16.0.1",
+        "for": "run"
+      },
+      {
+        "name": "expo-dev-client",
+        "kind": "package",
+        "version": "not declared",
+        "for": "run"
+      },
+      {
+        "name": "Expo CLI, npx expo",
+        "kind": "package",
+        "version": "SDK 58+ for launches without the dev menu, else not declared",
+        "for": "run"
+      },
+      {
+        "name": "Xcode with xcrun simctl",
+        "kind": "binary",
+        "version": "not declared",
+        "for": "run"
+      },
+      {
+        "name": "ideviceinstaller",
+        "kind": "binary",
+        "version": "not declared",
+        "for": "example"
+      },
+      {
+        "name": "adb",
+        "kind": "binary",
+        "version": "not declared",
+        "for": "run"
+      },
+      {
+        "name": "tar",
+        "kind": "binary",
+        "version": "not declared",
+        "for": "example"
+      },
+      {
+        "name": "@expo/agent-cli",
+        "kind": "package",
+        "version": "latest",
+        "for": "run"
+      }
+    ],
+    "credentials": [
+      {
+        "kind": "certificate",
+        "name": "iOS signing credentials, managed with eas credentials",
+        "used_for": "signing builds for devices and TestFlight",
+        "from": "unknown",
+        "goes_to": "unknown"
+      },
+      {
+        "kind": "other",
+        "name": "a paid Apple Developer account",
+        "used_for": "device and TestFlight distribution",
+        "from": "unknown",
+        "goes_to": "App Store Connect, host not named in the files"
+      }
+    ],
+    "cost": {
+      "context_tokens": {
+        "discovery": 45,
+        "load": 1362,
+        "on_demand": 0,
+        "on_demand_files": "none"
+      },
+      "run_tokens": "not examined",
+      "services": [
+        {
+          "name": "EAS Build",
+          "needs": "subscription",
+          "price": "cloud builds are paid, see https://expo.dev/pricing",
+          "quota": "uses your EAS plan's build minutes",
+          "calls_per_use": "not declared"
+        },
+        {
+          "name": "Apple Developer account",
+          "needs": "account",
+          "price": "paid, amount not declared",
+          "quota": "not declared",
+          "calls_per_use": "not declared"
+        }
+      ]
+    }
+  },
+  "what_it_touches": {
+    "side_effects": {
+      "install": "read only",
+      "run": "changes state",
+      "changes": [
+        {
+          "what": "adds a development profile to eas.json",
+          "affects": "workspace",
+          "confirmation": "not declared",
+          "reversible": "not declared"
+        },
+        {
+          "what": "builds in the cloud and submits the build to App Store Connect with eas build --submit",
+          "affects": "external service",
+          "confirmation": "not declared",
+          "reversible": "not declared"
+        },
+        {
+          "what": "increments build numbers on EAS with autoIncrement and appVersionSource remote",
+          "affects": "external service",
+          "confirmation": "not declared",
+          "reversible": "not declared"
+        },
+        {
+          "what": "writes local build files and extracts build-*.tar.gz",
+          "affects": "workspace",
+          "confirmation": "not declared",
+          "reversible": "not declared"
+        },
+        {
+          "what": "installs the app on a simulator or device with xcrun simctl, ideviceinstaller or adb",
+          "affects": "system",
+          "confirmation": "not declared",
+          "reversible": "not declared"
+        },
+        {
+          "what": "clears the build cache with --clear-cache",
+          "affects": "external service",
+          "confirmation": "not declared",
+          "reversible": "not declared"
+        },
+        {
+          "what": "fetches and runs @expo/agent-cli@latest with npx --yes",
+          "affects": "software environment",
+          "confirmation": "no",
+          "reversible": "not declared"
+        },
+        {
+          "what": "sends a feedback report to Expo",
+          "affects": "external service",
+          "confirmation": "not declared",
+          "reversible": "not declared"
+        }
+      ]
+    },
+    "network_access": [
+      {
+        "host": "EAS Build servers, not named in the files",
+        "purpose": "other",
+        "when": "cloud builds, build status and credentials commands",
+        "sends": [
+          "file content"
+        ],
+        "receives": "the build and build details"
+      },
+      {
+        "host": "App Store Connect and TestFlight, not named in the files",
+        "purpose": "publish",
+        "when": "eas build with --submit",
+        "sends": [
+          "file content"
+        ],
+        "receives": "a TestFlight build and an email when it is ready"
+      },
+      {
+        "host": "npm registry, not named in the files",
+        "purpose": "install",
+        "when": "npx --yes @expo/agent-cli@latest runs",
+        "sends": [
+          "none"
+        ],
+        "receives": "the @expo/agent-cli package"
+      },
+      {
+        "host": "Expo feedback service, not named in the files",
+        "purpose": "other",
+        "when": "the agent submits feedback on the skill or a failed Expo task",
+        "sends": [
+          "user content"
+        ],
+        "receives": "not declared"
+      },
+      {
+        "host": "the local Metro bundler URL",
+        "purpose": "data source",
+        "when": "the dev client connects to the development server",
+        "sends": [
+          "none"
+        ],
+        "receives": "not declared"
+      }
+    ],
+    "tools_and_permissions": {
+      "allowed_tools": "none",
+      "tools": [
+        {
+          "tool": "eas build, eas build:list, eas build:view, eas credentials, eas update",
+          "kind": "shell command",
+          "for": "building, submitting, checking builds and fixing signing errors",
+          "origin": "third party"
+        },
+        {
+          "tool": "npx expo start --dev-client",
+          "kind": "shell command",
+          "for": "starting the Metro bundler",
+          "origin": "third party"
+        },
+        {
+          "tool": "tar, xcrun simctl, ideviceinstaller, adb",
+          "kind": "shell command",
+          "for": "unpacking and installing local builds",
+          "origin": "third party"
+        },
+        {
+          "tool": "Xcode",
+          "kind": "program",
+          "for": "local iOS builds and installing on devices",
+          "origin": "third party"
+        },
+        {
+          "tool": "npx --yes @expo/agent-cli@latest feedback",
+          "kind": "shell command",
+          "for": "reporting errors in the skill and failed Expo tasks",
+          "origin": "third party"
+        },
+        {
+          "tool": "shell and file tools of the agent",
+          "kind": "agent tool",
+          "for": "running the commands and editing eas.json",
+          "origin": "built in"
+        }
+      ]
+    },
+    "machine_access": {
+      "paths": [
+        {
+          "path": "eas.json",
+          "operation": "write",
+          "scope": "workspace"
+        },
+        {
+          "path": "build-*.tar.gz and the extracted ./path/to/App.app",
+          "operation": "write",
+          "scope": "workspace"
+        },
+        {
+          "path": "local build files, .ipa, .apk or .aab",
+          "operation": "write",
+          "scope": "unknown"
+        },
+        {
+          "path": "../expo-overview/references/launch-without-dev-menu.md",
+          "operation": "read",
+          "scope": "unknown"
+        }
+      ],
+      "settings": [
+        {
+          "name": "developmentClient in eas.json",
+          "access": "set",
+          "reason": "bundles expo-dev-client for development builds"
+        },
+        {
+          "name": "autoIncrement in eas.json",
+          "access": "set",
+          "reason": "automatically increments build numbers"
+        },
+        {
+          "name": "appVersionSource in eas.json",
+          "access": "set",
+          "reason": "uses EAS as the source of truth for version numbers"
+        },
+        {
+          "name": "-EXDevMenu* launch arguments",
+          "access": "set",
+          "reason": "skip the dev menu when launching on SDK 57 and earlier"
+        }
+      ]
+    }
+  },
+  "what_is_known": {
+    "checks": [
+      {
+        "id": "C1",
+        "tool": "Snyk, skills.sh audit, version not stated",
+        "date": "2026-10-28",
+        "scope": "unknown",
+        "result": "pass, risk level LOW, no issues detected",
+        "report": "https://skills.sh/expo/skills/expo-dev-client/security/snyk"
+      },
+      {
+        "id": "C2",
+        "tool": "Gen Agent Trust Hub, skills.sh audit, version not stated",
+        "date": "2026-10-28",
+        "scope": "the commands in the skill instructions, as cited in its analysis",
+        "result": "pass, risk level SAFE, three surfaces described, official CLI tools are run, npx --yes @expo/agent-cli@latest is downloaded, and user text reaches the feedback command",
+        "report": "https://skills.sh/expo/skills/expo-dev-client/security/agent-trust-hub"
+      },
+      {
+        "id": "C3",
+        "tool": "Socket, skills.sh audit, version not stated",
+        "date": "2026-10-28",
+        "scope": "the skill package, hash 3440257a11472689881847ec7904cf2b84a154bf4f2b0b0c466b4d44ae7147ef",
+        "result": "pass, checks for malicious behavior, security concerns, code obfuscation and suspicious patterns",
+        "report": "https://skills.sh/expo/skills/expo-dev-client/security/socket"
+      }
+    ],
+    "vulnerabilities": "none",
+    "risks": [
+      {
+        "risk": "A changed or compromised release of @expo/agent-cli runs on the machine, since the feedback command fetches the latest version with npx --yes and no pinned version.",
+        "source": "check C2",
+        "severity": "SAFE overall by C2",
+        "mitigation": "none stated",
+        "taxonomy": "not examined"
+      },
+      {
+        "risk": "Instructions placed in user-provided text reach the feedback command, since that text is passed to it as an argument.",
+        "source": "check C2",
+        "severity": "SAFE overall by C2",
+        "mitigation": "none stated, C2 judges it a standard ingestion point for a reporting tool",
+        "taxonomy": "https://www.ibm.com/docs/en/watsonx/saas?topic=ai-risk-atlas"
+      },
+      {
+        "risk": "A cloud build uses paid EAS build minutes and a paid Apple Developer account when the agent builds or distributes through EAS Build or TestFlight.",
+        "source": "author",
+        "severity": "none",
+        "mitigation": "building locally is free, no confirmation step stated",
+        "taxonomy": "not examined"
+      },
+      {
+        "risk": "Task details and project context leave the machine to Expo when the agent submits a feedback report, which the files ask for after repeated failures or user intervention.",
+        "source": "model",
+        "severity": "none",
+        "mitigation": "none stated",
+        "taxonomy": "not examined"
+      }
+    ],
+    "limitations": [
+      "Local iOS builds require Xcode.",
+      "Installing an iOS build on a device requires signing.",
+      "Device and TestFlight distribution needs a paid Apple Developer account.",
+      "Expo CLI skips the onboarding sheet and dev menu only on SDK 58+ and only for launches it starts from a non-interactive shell."
+    ],
+    "known_problems": [
+      {
+        "problem": "build fails with signing errors",
+        "workaround": "run eas credentials"
+      },
+      {
+        "problem": "a stale build cache",
+        "workaround": "rebuild with eas build -p ios --profile development --clear-cache"
+      },
+      {
+        "problem": "errors, misleading or outdated information in the skill",
+        "workaround": "report it with the @expo/agent-cli feedback command"
+      }
+    ],
+    "evaluations": "none"
+  },
+  "who_stands_behind_it": {
+    "authorship": {
+      "author": "Expo, from the feedback section of SKILL.md",
+      "publisher": "the expo organisation on GitHub",
+      "signer": "none",
+      "contact": "the feedback command npx --yes @expo/agent-cli@latest feedback, from SKILL.md"
+    },
+    "license": {
+      "frontmatter": "MIT",
+      "license_file": "none",
+      "registry": "not declared",
+      "repository": "MIT, as GitHub detects it"
+    },
+    "maintenance": {
+      "last_change": "2026-10-28",
+      "registry_update": "not declared",
+      "deprecated": "not declared",
+      "first_seen": "2026-03-13",
+      "content_changes": 10,
+      "releases": 0,
+      "last_release": "none"
+    }
+  },
+  "which_files": {
+    "version": {
+      "hash": "sha256:819f7f519fee1f4264b50bf3b650840a7c6265ed2e51ca2066e804acb0e7523d",
+      "left_out": "none",
+      "author_version": "not declared",
+      "registry_version": "not declared",
+      "commit": "a9e5bd3f"
+    },
+    "source": {
+      "kind": "repository",
+      "location": "GitHub expo/skills, path plugins/expo/skills/expo-dev-client",
+      "commit": "a9e5bd3f",
+      "retrieved": "2026-11-11",
+      "also_listed_on": "skills.sh, https://skills.sh/expo/skills/expo-dev-client",
+      "homepage": "not declared",
+      "produced_by": "none"
+    },
+    "files": [
+      {
+        "path": "SKILL.md",
+        "bytes": 5449,
+        "sha256": "aef70e6f0fcfb9c80337f2e529da19d440ba0627622376cdc61ab2563525651b",
+        "kind": "document",
+        "in_hash": true,
+        "executable": false
+      },
+      {
+        "path": "agents/openai.yaml",
+        "bytes": 331,
+        "sha256": "5264dcf91147638731286e38421b65de4bd60858bba93707ab6b4f1f1ad854aa",
+        "kind": "data",
+        "in_hash": true,
+        "executable": false
+      }
+    ],
+    "counts": {
+      "script": 0,
+      "document": 1,
+      "data": 1,
+      "binary": 0
+    },
+    "composition": "instructions only"
+  },
+  "about_this_card": {
+    "schema": "Skill Card v1.2",
+    "date": "2026-11-11",
+    "by": "Claude Opus 5.5, claude-opus-5-5, by hand from the skill files, the skills.sh listing and audits, and GitHub metadata, with the hash, file list, sizes, harness limits and repository figures computed by script",
+    "skill_run": false,
+    "scripts_analysed": false,
+    "security_check_run": false,
+    "external_service_contacted": false,
+    "registry_read": true,
+    "empty_values": 58
+  }
+}

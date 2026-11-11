@@ -1,0 +1,674 @@
+{
+  "schema": "Skill Card v1.2",
+  "skill": "browser-use",
+  "version": "browser-use/browser-use at 7fdd63c0",
+  "what_it_does": {
+    "name": "browser-use",
+    "summary": "One SKILL.md for direct browser control via CDP through the browser-use CLI, which runs Python helpers such as new_tab, page_info, click_at_xy, js and cdp from heredocs. It drives the user's local Chrome or Chromium, or managed Chrome instances in Browser Use cloud, and can record traces of browser work. Results are printed page information and extracted content, actions on web pages and optional recordings. Use it when a task needs interaction, the user's logged-in session, JS rendering or a bot-protected page, and not for a basic fetch of public information.",
+    "tasks": [
+      "navigate, click and type on web pages",
+      "scrape and extract content through the accessibility tree or js",
+      "take screenshots and test sites and apps",
+      "run isolated cloud browsers for parallel tasks or bot-sensitive sites",
+      "record browser work as traces and videos",
+      "diagnose connection problems with browser-use --doctor"
+    ],
+    "author_description": "Direct browser control via CDP for web interaction: automation, scraping, testing, screenshots, and site/app work. Also covers hosted cloud browsers for AI agents: the browser-use Python library (Browser()), Playwright, Puppeteer or any CDP client.",
+    "outputs": [
+      {
+        "what": "page information and extracted page content",
+        "kind": "information",
+        "form": "printed text",
+        "destination": "the terminal and the agent's context"
+      },
+      {
+        "what": "clicks, typing and navigation on web pages, as the user when Chrome is signed in",
+        "kind": "action",
+        "form": "CDP input events in the browser",
+        "destination": "the websites the browser visits"
+      },
+      {
+        "what": "a cloud browser started with start_remote_daemon",
+        "kind": "action",
+        "form": "a managed Chrome instance with a live-view URL",
+        "destination": "Browser Use cloud"
+      },
+      {
+        "what": "recordings of browser work when recording is enabled",
+        "kind": "information",
+        "form": "local background traces",
+        "destination": "the directory start_recording returns"
+      },
+      {
+        "what": "a feedback report on a failure of browser-use itself",
+        "kind": "action",
+        "form": "text sent with browser-use feedback",
+        "destination": "the Browser Use team"
+      }
+    ],
+    "sample_output": "ready",
+    "inputs": [
+      {
+        "what": "Python helper code to run in the browser context",
+        "type": "a heredoc passed to browser-use",
+        "required": "required",
+        "for": "every task",
+        "example": "print(page_info())"
+      },
+      {
+        "what": "the address of the page to open",
+        "type": "a URL",
+        "required": "conditional",
+        "for": "the first navigation of a task",
+        "example": "new_tab(\"https://example.com\")"
+      },
+      {
+        "what": "a daemon name",
+        "type": "the BU_NAME variable or an argument to start_remote_daemon",
+        "required": "conditional",
+        "for": "cloud browsers and named daemons",
+        "example": "BU_NAME=r7k2 browser-use mac-approve"
+      },
+      {
+        "what": "a Browser Use API key",
+        "type": "an environment variable piped to the CLI",
+        "required": "conditional",
+        "for": "cloud browsers",
+        "example": "printf '%s' \"$BROWSER_USE_API_KEY\" | browser-use auth login --api-key-stdin"
+      },
+      {
+        "what": "a CDP endpoint of a given browser",
+        "type": "BU_CDP_URL as an HTTP DevTools endpoint or BU_CDP_WS",
+        "required": "optional",
+        "for": "connecting to a browser other than local Chrome",
+        "example": "not declared"
+      },
+      {
+        "what": "a recording name and title",
+        "type": "arguments to start_recording",
+        "required": "conditional",
+        "for": "recording a task",
+        "example": "start_recording(name, title=...)"
+      }
+    ],
+    "when_input_is_missing": [
+      {
+        "case": "the daemon cannot connect",
+        "behaviour": "browser-use --doctor runs diagnostics and its output and the error message are followed"
+      },
+      {
+        "case": "Chrome is not running",
+        "behaviour": "the harness launches it automatically and retries"
+      },
+      {
+        "case": "Chrome runs without remote debugging enabled",
+        "behaviour": "the harness opens chrome://inspect/#remote-debugging"
+      },
+      {
+        "case": "a login wall",
+        "behaviour": "stop and ask, except available SSO is used when Chrome is already signed in, still stop for passwords, MFA, consent or ambiguous account choice"
+      },
+      {
+        "case": "mac-approve reports accessibility-required",
+        "behaviour": "ask the user once to grant Accessibility access, then call mac-approve once again"
+      },
+      {
+        "case": "BH_REQUIRE_EXISTING_DAEMON=1 and the named daemon is not healthy",
+        "behaviour": "the CLI call fails closed and never auto-starts or discovers another Chrome"
+      }
+    ],
+    "exclusions": [
+      "a basic fetch of public information that a plain HTTP request can read, such as a public page, an API or docs"
+    ],
+    "adoption": [
+      {
+        "registry": "skills.sh",
+        "installs": "99.5K",
+        "first_seen": "2026-01-22",
+        "counts": "the skill",
+        "read": "2026-11-11"
+      },
+      {
+        "registry": "GitHub",
+        "stars": 120671,
+        "forks": 13486,
+        "counts": "the browser-use/browser-use repository, which holds 6 skills",
+        "read": "2026-11-11"
+      }
+    ]
+  },
+  "what_it_needs": {
+    "compatibility": {
+      "harnesses": "openclaw, named in the frontmatter metadata with the required binary browser-use",
+      "models": "not declared",
+      "capabilities": "not declared",
+      "fits": {
+        "Agent Skills specification": "fits, name 11 characters, description 248 characters, body 210 lines and about 2,543 tokens, frontmatter fields the specification does not define, homepage",
+        "Codex": "does not fit, SKILL.md is 10,858 bytes, 2,858 over the 8,000 byte cut on the injected file",
+        "Claude Code": "fits, 232 lines, listing text 248 characters",
+        "ClawHub": "fits, folder 10,858 bytes"
+      }
+    },
+    "software_dependencies": [
+      {
+        "name": "browser-use, the Python package with the browser-use CLI",
+        "kind": "package",
+        "version": "not declared",
+        "for": "install"
+      },
+      {
+        "name": "uv",
+        "kind": "binary",
+        "version": "not declared",
+        "for": "install"
+      },
+      {
+        "name": "Chrome or Chromium",
+        "kind": "binary",
+        "version": "not declared",
+        "for": "run"
+      },
+      {
+        "name": "curl",
+        "kind": "binary",
+        "version": "not declared",
+        "for": "example"
+      }
+    ],
+    "credentials": [
+      {
+        "kind": "API key",
+        "name": "BROWSER_USE_API_KEY",
+        "used_for": "authenticating with Browser Use cloud",
+        "from": "environment variable",
+        "goes_to": "Browser Use cloud, host not named in the files"
+      },
+      {
+        "kind": "other",
+        "name": "the user's logged-in session and SSO in local Chrome",
+        "used_for": "working on sites where the user is signed in",
+        "from": "unknown",
+        "goes_to": "the websites the browser visits"
+      }
+    ],
+    "cost": {
+      "context_tokens": {
+        "discovery": 62,
+        "load": 2715,
+        "on_demand": 0,
+        "on_demand_files": "none"
+      },
+      "run_tokens": "not examined",
+      "services": [
+        {
+          "name": "Browser Use cloud browsers",
+          "needs": "API key",
+          "price": "not declared, remote daemons bill until they stop or time out",
+          "quota": "not declared",
+          "calls_per_use": "not declared"
+        }
+      ]
+    }
+  },
+  "what_it_touches": {
+    "side_effects": {
+      "install": "changes state",
+      "run": "changes state",
+      "changes": [
+        {
+          "what": "installs the browser-use package and CLI with uv",
+          "affects": "software environment",
+          "confirmation": "not declared",
+          "reversible": "not declared"
+        },
+        {
+          "what": "launches Chrome automatically when it is not running",
+          "affects": "system",
+          "confirmation": "no",
+          "reversible": "not declared"
+        },
+        {
+          "what": "opens tabs and adds a horse marker to page titles unless BH_TAB_MARKER=0",
+          "affects": "system",
+          "confirmation": "no",
+          "reversible": "not declared"
+        },
+        {
+          "what": "clicks, types and navigates on websites, in the user's session when Chrome is signed in",
+          "affects": "external service",
+          "confirmation": "not declared",
+          "reversible": "not declared"
+        },
+        {
+          "what": "starts cloud browsers that bill until stopped with stop_remote_daemon",
+          "affects": "external service",
+          "confirmation": "not declared",
+          "reversible": "yes"
+        },
+        {
+          "what": "writes task-specific helpers to agent_helpers.py",
+          "affects": "workspace",
+          "confirmation": "not declared",
+          "reversible": "not declared"
+        },
+        {
+          "what": "writes local background traces when recording is enabled",
+          "affects": "workspace",
+          "confirmation": "not declared",
+          "reversible": "not declared"
+        },
+        {
+          "what": "grants the launching app Accessibility access in macOS System Settings",
+          "affects": "system",
+          "confirmation": "yes",
+          "reversible": "not declared"
+        },
+        {
+          "what": "sends a feedback report to the Browser Use team",
+          "affects": "external service",
+          "confirmation": "not declared",
+          "reversible": "not declared"
+        }
+      ]
+    },
+    "network_access": [
+      {
+        "host": "the websites the task visits, formed at run time",
+        "purpose": "data source",
+        "when": "every browsing task",
+        "sends": [
+          "user content",
+          "query text",
+          "credential"
+        ],
+        "receives": "page content, accessibility tree and DOM data"
+      },
+      {
+        "host": "Browser Use cloud, host not named in the files",
+        "purpose": "other",
+        "when": "when a remote daemon runs a cloud browser",
+        "sends": [
+          "credential",
+          "user content"
+        ],
+        "receives": "a managed Chrome instance and its live-view URL"
+      },
+      {
+        "host": "Browser Use, through browser-use auth login, host not named in the files",
+        "purpose": "auth",
+        "when": "once, to authenticate for cloud browsers",
+        "sends": [
+          "credential"
+        ],
+        "receives": "not declared"
+      },
+      {
+        "host": "the Browser Use team, through browser-use feedback, host not named in the files",
+        "purpose": "other",
+        "when": "when browser-use itself fails",
+        "sends": [
+          "user content"
+        ],
+        "receives": "not declared"
+      },
+      {
+        "host": "the CDP endpoint in BU_CDP_URL or BU_CDP_WS, formed at run time",
+        "purpose": "other",
+        "when": "when connecting to a given browser",
+        "sends": [
+          "user content"
+        ],
+        "receives": "browser state and page content"
+      },
+      {
+        "host": "github.com, browser-use/browser-harness interaction-skills",
+        "purpose": "data source",
+        "when": "when stuck on a browser mechanic or making a video",
+        "sends": [
+          "none"
+        ],
+        "receives": "interaction skill documents"
+      },
+      {
+        "host": "package index for uv, not named in the files",
+        "purpose": "install",
+        "when": "once, when the browser-use package is installed",
+        "sends": [
+          "none"
+        ],
+        "receives": "the browser-use package"
+      }
+    ],
+    "tools_and_permissions": {
+      "allowed_tools": "none",
+      "tools": [
+        {
+          "tool": "browser-use with pre-imported helpers such as new_tab, page_info, click_at_xy, js, cdp and start_remote_daemon",
+          "kind": "program",
+          "for": "driving the browser over CDP",
+          "origin": "third party"
+        },
+        {
+          "tool": "browser-use --doctor, auth login, recordings, feedback and mac-approve",
+          "kind": "shell command",
+          "for": "diagnostics, cloud authentication, recordings, feedback and macOS approval",
+          "origin": "third party"
+        },
+        {
+          "tool": "uv",
+          "kind": "shell command",
+          "for": "installing the browser-use CLI",
+          "origin": "third party"
+        },
+        {
+          "tool": "Chrome or Chromium with remote debugging",
+          "kind": "program",
+          "for": "the browser that is controlled",
+          "origin": "third party"
+        },
+        {
+          "tool": "Browser Use cloud",
+          "kind": "external server",
+          "for": "hosted, isolated Chrome instances",
+          "origin": "third party"
+        },
+        {
+          "tool": "curl or the agent's fetch tool",
+          "kind": "shell command",
+          "for": "plain fetches of public pages, APIs and docs",
+          "origin": "third party"
+        },
+        {
+          "tool": "Accessibility access in macOS System Settings",
+          "kind": "permission",
+          "for": "approving remote debugging of local Chrome with mac-approve",
+          "origin": "built in"
+        },
+        {
+          "tool": "shell tool of the agent",
+          "kind": "agent tool",
+          "for": "running browser-use with heredocs",
+          "origin": "built in"
+        }
+      ]
+    },
+    "machine_access": {
+      "paths": [
+        {
+          "path": "$BH_AGENT_WORKSPACE/agent_helpers.py and agent-workspace/agent_helpers.py",
+          "operation": "write",
+          "scope": "workspace"
+        },
+        {
+          "path": "$BH_AGENT_WORKSPACE/domain-skills/<site>/",
+          "operation": "read",
+          "scope": "workspace"
+        },
+        {
+          "path": "the recording directory start_recording returns",
+          "operation": "write",
+          "scope": "unknown"
+        },
+        {
+          "path": "the logged-in session of local Chrome, through CDP",
+          "operation": "read",
+          "scope": "unknown"
+        }
+      ],
+      "settings": [
+        {
+          "name": "BU_NAME",
+          "access": "set",
+          "reason": "selects a named daemon, the same name as start_remote_daemon"
+        },
+        {
+          "name": "BU_CDP_URL",
+          "access": "read",
+          "reason": "HTTP DevTools endpoint the daemon resolves to WebSocket"
+        },
+        {
+          "name": "BU_CDP_WS",
+          "access": "read",
+          "reason": "WebSocket endpoint of a given browser"
+        },
+        {
+          "name": "BH_DOMAIN_SKILLS",
+          "access": "read",
+          "reason": "enables domain skills, off by default"
+        },
+        {
+          "name": "BH_AGENT_WORKSPACE",
+          "access": "read",
+          "reason": "location of agent_helpers.py and domain skills"
+        },
+        {
+          "name": "BH_TAB_MARKER",
+          "access": "read",
+          "reason": "0 leaves page titles unchanged"
+        },
+        {
+          "name": "BH_RECORD",
+          "access": "read",
+          "reason": "overrides the recording preference for one process"
+        },
+        {
+          "name": "BH_OPEN_LIVE_URL",
+          "access": "read",
+          "reason": "0 keeps the live-view URL of a Cloud daemon from being printed or opened"
+        },
+        {
+          "name": "BH_REQUIRE_EXISTING_DAEMON",
+          "access": "read",
+          "reason": "1 reuses an exact named daemon or fails closed"
+        },
+        {
+          "name": "recording preference",
+          "access": "set",
+          "reason": "browser-use recordings enable or disable turns local background traces on or off"
+        }
+      ]
+    }
+  },
+  "what_is_known": {
+    "checks": [
+      {
+        "id": "C1",
+        "tool": "Snyk, skills.sh audit, version not stated",
+        "date": "2026-11-11",
+        "scope": "unknown",
+        "result": "warn, risk level MEDIUM, 1 issue, W011 third-party content exposure, indirect prompt injection risk, scored low risk 0.10",
+        "report": "https://skills.sh/browser-use/browser-use/browser-use/security/snyk"
+      },
+      {
+        "id": "C2",
+        "tool": "Gen Agent Trust Hub, skills.sh audit, version not stated",
+        "date": "2026-11-11",
+        "scope": "SKILL.md and its frontmatter metadata, as cited in its analysis",
+        "result": "pass, risk level SAFE, six surfaces described, indirect prompt injection, dynamic execution, external downloads, command execution, credentials and privilege escalation",
+        "report": "https://skills.sh/browser-use/browser-use/browser-use/security/agent-trust-hub"
+      },
+      {
+        "id": "C3",
+        "tool": "Socket, skills.sh audit, version not stated",
+        "date": "2026-10-18",
+        "scope": "the skill package, hash 4cd26b2a9be009da88a8a902e6fdf8a832eabca5175979c22dae844505a3bd43",
+        "result": "pass, checks for malicious behaviour, credential exposure, obfuscated code and suspicious patterns",
+        "report": "https://skills.sh/browser-use/browser-use/browser-use/security/socket"
+      }
+    ],
+    "vulnerabilities": [
+      {
+        "finding": "Third-party content exposure, indirect prompt injection risk, W011",
+        "check": "C1",
+        "severity": "MEDIUM",
+        "location": "not stated",
+        "status": "open",
+        "fix": "not stated"
+      }
+    ],
+    "risks": [
+      {
+        "risk": "Instructions hidden in a web page reach the agent, since page_info, the accessibility tree and js output are handed over without delimiters or sanitisation.",
+        "source": "check C1, check C2",
+        "severity": "MEDIUM by C1, SAFE overall by C2",
+        "mitigation": "none in the files, C2 notes that no boundary markers or sanitisation are specified",
+        "taxonomy": "https://www.ibm.com/docs/en/watsonx/saas?topic=ai-risk-atlas"
+      },
+      {
+        "risk": "Python code written at run time executes through the browser-use heredoc interface with local command and file access.",
+        "source": "check C2",
+        "severity": "none",
+        "mitigation": "none stated",
+        "taxonomy": "not examined"
+      },
+      {
+        "risk": "On macOS the app launching browser-use, such as Terminal, iTerm or Codex, receives Accessibility access to approve remote debugging.",
+        "source": "check C2",
+        "severity": "none",
+        "mitigation": "the user is asked once before access is granted, in the instructions",
+        "taxonomy": "not examined"
+      },
+      {
+        "risk": "A cloud browser left running keeps billing until it stops or times out.",
+        "source": "author",
+        "severity": "none",
+        "mitigation": "ask before leaving cloud browsers running and stop them with stop_remote_daemon, in the instructions",
+        "taxonomy": "not examined"
+      },
+      {
+        "risk": "The interactive live-view URL of a Cloud daemon gives access to that browser when it is logged or serialized.",
+        "source": "author",
+        "severity": "none",
+        "mitigation": "BH_OPEN_LIVE_URL=0 keeps it from being printed or opened, and callers must avoid logging the returned field",
+        "taxonomy": "not examined"
+      },
+      {
+        "risk": "Secrets reach the Browser Use team when they are included in a browser-use feedback report.",
+        "source": "author",
+        "severity": "none",
+        "mitigation": "never include secrets, in the instructions",
+        "taxonomy": "not examined"
+      },
+      {
+        "risk": "Actions on websites happen under the user's identity, since available SSO is used automatically when Chrome is already signed in.",
+        "source": "model",
+        "severity": "none",
+        "mitigation": "stops for passwords, MFA, consent or ambiguous account choice, in the instructions",
+        "taxonomy": "not examined"
+      }
+    ],
+    "limitations": [
+      "Local Chrome is one shared browser, so parallel tasks fight over tabs and focus.",
+      "A timed-out scroll on a background tab means the page needs to be visible, and activating it visibly switches tabs.",
+      "Local Chrome control needs chrome://inspect/#remote-debugging enabled.",
+      "mac-approve works only for local Chrome, not for BU_CDP_URL, BU_CDP_WS or Browser Use Cloud.",
+      "CDP target order is not Chrome's visible tab-strip order, and omnibox popups are not real work tabs.",
+      "Fresh installs do not record, and work that was not recorded cannot be captured afterwards.",
+      "The accessibility tree holds thousands of nodes and has to be filtered before printing."
+    ],
+    "known_problems": [
+      {
+        "problem": "the daemon cannot connect",
+        "workaround": "run browser-use --doctor and follow its output and the error message"
+      },
+      {
+        "problem": "an Allow remote debugging? popup in local Chrome on macOS",
+        "workaround": "call mac-approve once with the same BU_NAME while the original command waits"
+      },
+      {
+        "problem": "mac-approve reports accessibility-required",
+        "workaround": "grant Accessibility access in System Settings, then call mac-approve once again"
+      },
+      {
+        "problem": "scroll times out on a background tab",
+        "workaround": "call activate_tab(current_tab()), retry the scroll once and re-read the position"
+      },
+      {
+        "problem": "the current tab is stale or internal",
+        "workaround": "call ensure_real_tab()"
+      },
+      {
+        "problem": "the accessibility tree lacks the element",
+        "workaround": "fall back to raw HTML via js(...)"
+      },
+      {
+        "problem": "captchas or blocking",
+        "workaround": "use a cloud browser with managed IPs and stealth settings"
+      },
+      {
+        "problem": "browser-use itself fails",
+        "workaround": "run browser-use feedback with what happened, without secrets"
+      }
+    ],
+    "evaluations": "none"
+  },
+  "who_stands_behind_it": {
+    "authorship": {
+      "author": "not declared",
+      "publisher": "the browser-use organisation on GitHub",
+      "signer": "none",
+      "contact": "browser-use feedback, which goes to the Browser Use team"
+    },
+    "license": {
+      "frontmatter": "not declared",
+      "license_file": "none",
+      "registry": "not declared",
+      "repository": "MIT, as GitHub detects it"
+    },
+    "maintenance": {
+      "last_change": "2026-11-10",
+      "registry_update": "not declared",
+      "deprecated": "not declared",
+      "first_seen": "2026-01-19",
+      "content_changes": 73,
+      "releases": "100 or more",
+      "last_release": "2026-11-11"
+    }
+  },
+  "which_files": {
+    "version": {
+      "hash": "sha256:380f763044e6bd72793cdde9ec7080d9deb0c6f51bef3abbcaad4d2a51a9e0fd",
+      "left_out": "none",
+      "author_version": "not declared",
+      "registry_version": "not declared",
+      "commit": "7fdd63c0"
+    },
+    "source": {
+      "kind": "repository",
+      "location": "GitHub browser-use/browser-use, path skills/browser-use",
+      "commit": "7fdd63c0",
+      "retrieved": "2026-11-11",
+      "also_listed_on": "skills.sh, https://skills.sh/browser-use/browser-use/browser-use",
+      "homepage": "https://browser-use.com",
+      "produced_by": "none"
+    },
+    "files": [
+      {
+        "path": "SKILL.md",
+        "bytes": 10858,
+        "sha256": "dcf3023dea7b8f7ddd2cf42a66848ee3aab57f00ff6bb61e4de9ebb54791928a",
+        "kind": "document",
+        "in_hash": true,
+        "executable": false
+      }
+    ],
+    "counts": {
+      "script": 0,
+      "document": 1,
+      "data": 0,
+      "binary": 0
+    },
+    "composition": "instructions only"
+  },
+  "about_this_card": {
+    "schema": "Skill Card v1.2",
+    "date": "2026-11-11",
+    "by": "Claude Opus 5.5, claude-opus-5-5, by hand from the skill files, the skills.sh listing and audits, and GitHub metadata, with the hash, file list, sizes, harness limits and repository figures computed by script",
+    "skill_run": false,
+    "scripts_analysed": false,
+    "security_check_run": false,
+    "external_service_contacted": false,
+    "registry_read": true,
+    "empty_values": 58
+  }
+}

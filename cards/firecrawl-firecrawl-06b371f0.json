@@ -1,0 +1,584 @@
+{
+  "schema": "Skill Card v1.2",
+  "skill": "firecrawl",
+  "version": "firecrawl/cli at 06b371f0",
+  "what_it_does": {
+    "name": "firecrawl",
+    "summary": "Instructions for doing live-web tasks through the Firecrawl CLI. It searches the web, scrapes static and JS-rendered pages, maps and crawls sites, interacts with pages through clicks, forms and login, downloads sites and sets monitors for changes, and returns clean markdown optimized for LLM context windows. Results are written to files in .firecrawl/ and read in bounded parts. Use it for ordinary web research and content gathering, web only, with local files going to firecrawl-parse.",
+    "tasks": [
+      "search the web and gather sources",
+      "scrape a page or a list of known URLs",
+      "map a site to find a subpage and crawl a site section",
+      "interact with a page through clicks, form fills, pagination or login",
+      "download a site to local files",
+      "watch pages for changes with a monitor",
+      "find US law or regulation with gov search"
+    ],
+    "author_description": "Any live-web task via the Firecrawl CLI — including ordinary web research: searching the web, reading or extracting pages, gathering sources, discovering site URLs, bulk extraction, downloading a site, change alerts, or pages needing clicks/login — web only; local files route to firecrawl-parse. For US legal or regulatory questions use gov; for papers use firecrawl-research-index; for library, API, error, or bug questions use firecrawl-developer-index.",
+    "outputs": [
+      {
+        "what": "search results, with page content when scraped",
+        "kind": "information",
+        "form": "JSON file",
+        "destination": ".firecrawl/search-{query}.json or .firecrawl/search-{query}-scraped.json"
+      },
+      {
+        "what": "page content",
+        "kind": "information",
+        "form": "markdown file, or JSON for several formats",
+        "destination": ".firecrawl/{site}-{path}.md, or the agent's context when the user asks for it"
+      },
+      {
+        "what": "a downloaded site",
+        "kind": "information",
+        "form": "local files",
+        "destination": "not declared"
+      },
+      {
+        "what": "auth state, concurrency limit, remaining credits and credit usage",
+        "kind": "information",
+        "form": "terminal text or JSON file",
+        "destination": "the terminal or .firecrawl/credits.json"
+      },
+      {
+        "what": "a monitor that runs recurring scrapes or crawls and alerts on changes",
+        "kind": "action",
+        "form": "a scheduled job at Firecrawl",
+        "destination": "the Firecrawl account, with alerts by webhook or email"
+      },
+      {
+        "what": "clicks, form submissions and multi-step navigation on a page",
+        "kind": "action",
+        "form": "browser actions",
+        "destination": "the website being interacted with"
+      },
+      {
+        "what": "feedback on a search or a job",
+        "kind": "action",
+        "form": "a feedback call",
+        "destination": "Firecrawl, through /v2/feedback for job feedback"
+      }
+    ],
+    "sample_output": ".firecrawl/search-react-hooks.json",
+    "inputs": [
+      {
+        "what": "a question or search query",
+        "type": "text in a command",
+        "required": "conditional",
+        "for": "search, gov and research tasks",
+        "example": "firecrawl search \"react hooks\" -o .firecrawl/search-react-hooks.json --json"
+      },
+      {
+        "what": "a URL",
+        "type": "a quoted URL in a command",
+        "required": "conditional",
+        "for": "scraping, mapping, crawling and interacting with a known page or site",
+        "example": "firecrawl scrape \"<url>\" -o .firecrawl/page.md"
+      },
+      {
+        "what": "an output file",
+        "type": "the -o flag",
+        "required": "optional",
+        "for": "every command that returns results",
+        "example": "-o .firecrawl/page.md"
+      },
+      {
+        "what": "options for a provider capability",
+        "type": "a JSON string",
+        "required": "conditional",
+        "for": "running a structured-data tool found by search",
+        "example": "scrape <provider/capability> --options '<JSON>'"
+      },
+      {
+        "what": "a jurisdiction and date for a legal question",
+        "type": "text in a command",
+        "required": "conditional",
+        "for": "US legal or regulatory search",
+        "example": "firecrawl gov \"<question, jurisdiction, and date>\" --limit 10"
+      },
+      {
+        "what": "a Firecrawl API key",
+        "type": "a command argument",
+        "required": "optional",
+        "for": "authentication when browser login fails",
+        "example": "firecrawl login --api-key \"<key>\""
+      }
+    ],
+    "when_input_is_missing": [
+      {
+        "case": "a legal question names no jurisdiction",
+        "behaviour": "the agent asks for the jurisdiction before identifying the governing rule"
+      },
+      {
+        "case": "no credentials are set",
+        "behaviour": "search, scrape and interact run on the keyless free tier, and crawl, map, download, agent, monitor, credit-usage and feedback prompt an interactive login"
+      },
+      {
+        "case": "authentication fails",
+        "behaviour": "the agent asks the user to log in with the browser or enter an API key"
+      },
+      {
+        "case": "an Unauthorized: Invalid token or insufficient-credits error",
+        "behaviour": "the agent checks firecrawl --status once, reports the blocking reason and stops"
+      }
+    ],
+    "exclusions": [
+      "not for local files, which route to firecrawl-parse",
+      "not for research papers, which go to firecrawl-research-index",
+      "not for library, API, error or bug questions, which go to firecrawl-developer-index",
+      "not for tasks needing capabilities Firecrawl lacks",
+      "not for integrating Firecrawl into an app, which goes to the firecrawl-build skills"
+    ],
+    "adoption": [
+      {
+        "registry": "skills.sh",
+        "installs": "104.3K",
+        "first_seen": "2026-01-21",
+        "counts": "the skill",
+        "read": "2026-11-11"
+      },
+      {
+        "registry": "GitHub",
+        "stars": 683,
+        "forks": 122,
+        "counts": "the firecrawl/cli repository, which holds 13 skills",
+        "read": "2026-11-11"
+      }
+    ]
+  },
+  "what_it_needs": {
+    "compatibility": {
+      "harnesses": "not declared",
+      "models": "not declared",
+      "capabilities": "tool calling",
+      "fits": {
+        "Agent Skills specification": "fits, name 9 characters, description 456 characters, body 154 lines and about 2,873 tokens",
+        "Codex": "does not fit, SKILL.md is 12,060 bytes, 4,060 over the 8,000 byte cut on the injected file",
+        "Claude Code": "fits, 162 lines, listing text 456 characters",
+        "ClawHub": "fits, folder 16,344 bytes"
+      }
+    },
+    "software_dependencies": [
+      {
+        "name": "firecrawl-cli",
+        "kind": "package",
+        "version": "latest",
+        "for": "run"
+      },
+      {
+        "name": "npm and npx",
+        "kind": "runtime",
+        "version": "not declared",
+        "for": "install"
+      },
+      {
+        "name": "jq",
+        "kind": "binary",
+        "version": "not declared",
+        "for": "example"
+      }
+    ],
+    "credentials": [
+      {
+        "kind": "API key",
+        "name": "a key from firecrawl.dev",
+        "used_for": "authenticating the CLI when browser login fails",
+        "from": "command argument",
+        "goes_to": "Firecrawl, host not named in the files"
+      },
+      {
+        "kind": "token",
+        "name": "credentials from firecrawl login --browser",
+        "used_for": "authenticating the CLI through browser OAuth",
+        "from": "unknown",
+        "goes_to": "Firecrawl, host not named in the files"
+      }
+    ],
+    "cost": {
+      "context_tokens": {
+        "discovery": 115,
+        "load": 3015,
+        "on_demand": 1071,
+        "on_demand_files": [
+          "rules/install.md",
+          "rules/security.md"
+        ]
+      },
+      "run_tokens": "not examined",
+      "services": [
+        {
+          "name": "Firecrawl",
+          "needs": "account",
+          "price": "not declared",
+          "quota": "API credits and a concurrency limit, a rate-limited keyless free tier, and feedback refunds of 1 credit up to 10 per website and 100 per team each UTC day",
+          "calls_per_use": "not declared"
+        }
+      ]
+    }
+  },
+  "what_it_touches": {
+    "side_effects": {
+      "install": "changes state",
+      "run": "changes state",
+      "changes": [
+        {
+          "what": "installs firecrawl-cli globally with npm or npx",
+          "affects": "software environment",
+          "confirmation": "not declared",
+          "reversible": "not declared"
+        },
+        {
+          "what": "installs core and workflow skills globally across all detected coding editors",
+          "affects": "user home",
+          "confirmation": "not declared",
+          "reversible": "not declared"
+        },
+        {
+          "what": "stores login credentials through the CLI",
+          "affects": "user home",
+          "confirmation": "not declared",
+          "reversible": "not declared"
+        },
+        {
+          "what": "writes result files to .firecrawl/ and adds .firecrawl/ to .gitignore",
+          "affects": "workspace",
+          "confirmation": "not declared",
+          "reversible": "not declared"
+        },
+        {
+          "what": "clicks, fills and submits forms on websites through interact",
+          "affects": "external service",
+          "confirmation": "not declared",
+          "reversible": "not declared"
+        },
+        {
+          "what": "creates monitors that schedule recurring scrapes or crawls",
+          "affects": "external service",
+          "confirmation": "not declared",
+          "reversible": "not declared"
+        },
+        {
+          "what": "uses API credits and sends feedback to Firecrawl",
+          "affects": "external service",
+          "confirmation": "not declared",
+          "reversible": "not declared"
+        }
+      ]
+    },
+    "network_access": [
+      {
+        "host": "the Firecrawl API, host not named in the files",
+        "purpose": "data source",
+        "when": "every search, scrape, map, crawl, interact, agent, monitor and download command",
+        "sends": [
+          "credential",
+          "query text",
+          "user content"
+        ],
+        "receives": "search results, page content as markdown or JSON, job and credit status"
+      },
+      {
+        "host": "the Firecrawl feedback endpoint /v2/feedback, host not named in the files",
+        "purpose": "other",
+        "when": "after search results are used and after search, scrape, parse or map jobs, unless FIRECRAWL_NO_ENDPOINT_FEEDBACK is set",
+        "sends": [
+          "credential",
+          "user content"
+        ],
+        "receives": "a credit refund for the first feedback per search"
+      },
+      {
+        "host": "the npm registry, not named in the files",
+        "purpose": "install",
+        "when": "when firecrawl-cli is installed or updated",
+        "sends": [
+          "none"
+        ],
+        "receives": "the firecrawl-cli package"
+      },
+      {
+        "host": "Firecrawl login in the browser, host not named in the files",
+        "purpose": "auth",
+        "when": "on firecrawl login --browser or init --browser",
+        "sends": [
+          "credential"
+        ],
+        "receives": "credentials stored by the CLI"
+      },
+      {
+        "host": "firecrawl.dev",
+        "purpose": "other",
+        "when": "once, to verify the install",
+        "sends": [
+          "none"
+        ],
+        "receives": "the page, saved to .firecrawl/install-check.md"
+      }
+    ],
+    "tools_and_permissions": {
+      "allowed_tools": "Bash(firecrawl *), Bash(npx firecrawl-cli *)",
+      "tools": [
+        {
+          "tool": "firecrawl",
+          "kind": "program",
+          "for": "search, scrape, map, crawl, interact, monitor, download, login, status, feedback and credit usage",
+          "origin": "third party"
+        },
+        {
+          "tool": "npx firecrawl-cli and npm install -g firecrawl-cli",
+          "kind": "shell command",
+          "for": "installing, updating and setting up the CLI and skills",
+          "origin": "third party"
+        },
+        {
+          "tool": "grep, head, wc and jq",
+          "kind": "shell command",
+          "for": "reading output files in bounded parts and working with JSON output",
+          "origin": "third party"
+        },
+        {
+          "tool": "Bash",
+          "kind": "agent tool",
+          "for": "running firecrawl and npx firecrawl-cli commands",
+          "origin": "built in"
+        }
+      ]
+    },
+    "machine_access": {
+      "paths": [
+        {
+          "path": ".firecrawl/",
+          "operation": "write",
+          "scope": "workspace"
+        },
+        {
+          "path": ".firecrawl/",
+          "operation": "read",
+          "scope": "workspace"
+        },
+        {
+          "path": ".gitignore",
+          "operation": "write",
+          "scope": "workspace"
+        },
+        {
+          "path": "the npm global install location",
+          "operation": "write",
+          "scope": "unknown"
+        },
+        {
+          "path": "skill folders of all detected coding editors",
+          "operation": "write",
+          "scope": "unknown"
+        },
+        {
+          "path": "credentials stored by the CLI",
+          "operation": "write",
+          "scope": "unknown"
+        }
+      ],
+      "settings": [
+        {
+          "name": "FIRECRAWL_NO_ENDPOINT_FEEDBACK",
+          "access": "read",
+          "reason": "set to 1, the CLI skips every endpoint feedback call"
+        },
+        {
+          "name": "PATH",
+          "access": "read",
+          "reason": "the npm global bin must be in it for firecrawl to be found"
+        }
+      ]
+    }
+  },
+  "what_is_known": {
+    "checks": [
+      {
+        "id": "C1",
+        "tool": "Snyk, skills.sh audit, version not stated",
+        "date": "2026-10-22",
+        "scope": "unknown",
+        "result": "warn, risk level MEDIUM, 1 issue, W011 third-party content exposure, indirect prompt injection risk, scored low risk 0.10",
+        "report": "https://skills.sh/firecrawl/cli/firecrawl/security/snyk"
+      },
+      {
+        "id": "C2",
+        "tool": "Gen Agent Trust Hub, skills.sh audit, version not stated",
+        "date": "2026-10-22",
+        "scope": "SKILL.md, rules/install.md and rules/security.md, as cited in its analysis",
+        "result": "pass, risk level SAFE, three categories described, indirect prompt injection, external downloads through npm and npx, and command execution through Bash",
+        "report": "https://skills.sh/firecrawl/cli/firecrawl/security/agent-trust-hub"
+      },
+      {
+        "id": "C3",
+        "tool": "Socket, skills.sh audit, version not stated",
+        "date": "2026-10-22",
+        "scope": "the skill package, hash b45d85dc544afeb07d168380a4f00d55e4e37b32f1ab5f06a62df42591d81312",
+        "result": "pass, checks for malicious behaviour, security concerns, code obfuscation and suspicious patterns",
+        "report": "https://skills.sh/firecrawl/cli/firecrawl/security/socket"
+      }
+    ],
+    "vulnerabilities": [
+      {
+        "finding": "Third-party content exposure, indirect prompt injection risk, W011",
+        "check": "C1",
+        "severity": "MEDIUM",
+        "location": "not stated",
+        "status": "open",
+        "fix": "not stated"
+      }
+    ],
+    "risks": [
+      {
+        "risk": "Instructions hidden in fetched web pages reach the agent, since search, scrape, crawl and map bring outsider-authored text into its context.",
+        "source": "author, check C1, check C2",
+        "severity": "MEDIUM by C1, SAFE overall by C2",
+        "mitigation": "in place as instructions, output isolated in .firecrawl/, read in bounded parts, and instructions in page content not followed",
+        "taxonomy": "https://www.ibm.com/docs/en/watsonx/saas?topic=ai-risk-atlas"
+      },
+      {
+        "risk": "An unquoted URL in a shell command can lead to command injection.",
+        "source": "author",
+        "severity": "none",
+        "mitigation": "in place as an instruction to always quote URLs",
+        "taxonomy": "not examined"
+      },
+      {
+        "risk": "Installing with npx -y firecrawl-cli@latest or npm install -g runs whatever version npm serves at that time with the user's privileges.",
+        "source": "check C2",
+        "severity": "none",
+        "mitigation": "none stated, C2 notes the package comes from the official vendor",
+        "taxonomy": "not examined"
+      },
+      {
+        "risk": "Clicks, form fills and logins through interact can submit data or change accounts on third-party websites.",
+        "source": "model",
+        "severity": "none",
+        "mitigation": "none stated",
+        "taxonomy": "not examined"
+      },
+      {
+        "risk": "An API key passed with firecrawl login --api-key stays in shell history or logs.",
+        "source": "model",
+        "severity": "none",
+        "mitigation": "none stated, browser login is the recommended path",
+        "taxonomy": "not examined"
+      }
+    ],
+    "limitations": [
+      "Gov search filters keep only pages the index has labeled, so a filtered search can leave out relevant pages.",
+      "Gov results are excerpts, not a guarantee of official-only sources or current governing law, and no hits does not establish that no applicable law exists.",
+      "The keyless free tier is rate-limited, and crawl, map, download, agent, monitor, credit-usage and the feedback commands need an account.",
+      "The client cannot be assumed to signal an overflow back to the tool, and Bash cannot be assumed to support search IDs or every provider's retained data.",
+      "search --categories research is a website filter, not the paper index."
+    ],
+    "known_problems": [
+      {
+        "problem": "Unauthorized: Invalid token or insufficient-credits error",
+        "workaround": "verify config once with firecrawl --status, report the blocking reason and stop, since retrying yields the same error"
+      },
+      {
+        "problem": "authentication fails",
+        "workaround": "log in with firecrawl login --browser or firecrawl login --api-key"
+      },
+      {
+        "problem": "firecrawl is not found after installation",
+        "workaround": "put the npm global bin in PATH, try npx firecrawl-cli@latest --version, or reinstall"
+      },
+      {
+        "problem": "the CLI is missing, stale or only partially configured",
+        "workaround": "re-run npx -y firecrawl-cli@latest init -y --browser"
+      },
+      {
+        "problem": "a client context or output error",
+        "workaround": "keep the request or scrape ID and inspect saved output or use scrape firecrawl/bash before repeating the request"
+      }
+    ],
+    "evaluations": "none"
+  },
+  "who_stands_behind_it": {
+    "authorship": {
+      "author": "not declared",
+      "publisher": "the firecrawl organisation on GitHub",
+      "signer": "none",
+      "contact": "not declared"
+    },
+    "license": {
+      "frontmatter": "not declared",
+      "license_file": "none",
+      "registry": "not declared",
+      "repository": "none"
+    },
+    "maintenance": {
+      "last_change": "2026-10-22",
+      "registry_update": "not declared",
+      "deprecated": "not declared",
+      "first_seen": "2026-08-18",
+      "content_changes": 17,
+      "releases": 98,
+      "last_release": "2026-11-06"
+    }
+  },
+  "which_files": {
+    "version": {
+      "hash": "sha256:6792d1a7a58a75a56aaeafb879f221294663e0f2a432b4e6c0a67ed27c800dd8",
+      "left_out": "none",
+      "author_version": "not declared",
+      "registry_version": "not declared",
+      "commit": "06b371f0"
+    },
+    "source": {
+      "kind": "repository",
+      "location": "GitHub firecrawl/cli, path skills/firecrawl",
+      "commit": "06b371f0",
+      "retrieved": "2026-11-11",
+      "also_listed_on": "skills.sh, https://skills.sh/firecrawl/cli/firecrawl",
+      "homepage": "not declared",
+      "produced_by": "none"
+    },
+    "files": [
+      {
+        "path": "SKILL.md",
+        "bytes": 12060,
+        "sha256": "bb8af1c77b34a14e6d1d43587d3611af5f6b0c2cd89e0da997be1c53dfc58ef8",
+        "kind": "document",
+        "in_hash": true,
+        "executable": false
+      },
+      {
+        "path": "rules/install.md",
+        "bytes": 2889,
+        "sha256": "30b9ce217ce10bc58f1374a0673fc586e5137d6d693bf9d0502945919945d612",
+        "kind": "document",
+        "in_hash": true,
+        "executable": false
+      },
+      {
+        "path": "rules/security.md",
+        "bytes": 1395,
+        "sha256": "ca9bf923a60147f5c4852ad04de37c5deb46e53e954da5ccf4982531a59d0ccb",
+        "kind": "document",
+        "in_hash": true,
+        "executable": false
+      }
+    ],
+    "counts": {
+      "script": 0,
+      "document": 3,
+      "data": 0,
+      "binary": 0
+    },
+    "composition": "instructions only"
+  },
+  "about_this_card": {
+    "schema": "Skill Card v1.2",
+    "date": "2026-11-11",
+    "by": "Claude Opus 5.5, claude-opus-5-5, by hand from the skill files, the skills.sh listing and audits, and GitHub metadata, with the hash, file list, sizes, harness limits and repository figures computed by script",
+    "skill_run": false,
+    "scripts_analysed": false,
+    "security_check_run": false,
+    "external_service_contacted": false,
+    "registry_read": true,
+    "empty_values": 52
+  }
+}

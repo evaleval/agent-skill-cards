@@ -1,0 +1,384 @@
+{
+  "schema": "Skill Card v1.2",
+  "skill": "find-skills",
+  "version": "vercel-labs/skills at e781cb4d",
+  "what_it_does": {
+    "name": "find-skills",
+    "summary": "Instructions only, one SKILL.md, for discovering and installing skills from the open agent skills ecosystem with the Skills CLI, npx skills. The agent checks the skills.sh leaderboard, searches with npx skills find, verifies install count, source reputation and GitHub stars, and presents matching skills with their install count, install command and a skills.sh link. If the user wants to proceed, it installs the skill with npx skills add, and when nothing is found it offers to help directly or to create a new skill. Use it when the user asks how to do a task, asks for a skill for something, or wants to extend the agent's capabilities.",
+    "tasks": [
+      "check the skills.sh leaderboard for a well-known skill",
+      "search for skills with npx skills find",
+      "verify install count, source reputation and GitHub stars",
+      "present options with install count, install command and skills.sh link",
+      "install a chosen skill with npx skills add",
+      "update installed skills with npx skills update",
+      "suggest creating a skill with npx skills init when none is found"
+    ],
+    "author_description": "Helps users discover and install agent skills when they ask questions like \"how do I do X\", \"find a skill for X\", \"is there a skill that can...\", or express interest in extending capabilities. This skill should be used when the user is looking for functionality that might exist as an installable skill.",
+    "outputs": [
+      {
+        "what": "skill options with name, purpose, install count, source, install command and a link to learn more",
+        "kind": "recommendation",
+        "form": "chat message",
+        "destination": "the user"
+      },
+      {
+        "what": "a skill installed globally at user level",
+        "kind": "action",
+        "form": "installed skill",
+        "destination": "the user-level skill location of the agent"
+      },
+      {
+        "what": "a notice that no matching skill was found, with an offer to help directly",
+        "kind": "information",
+        "form": "chat message",
+        "destination": "the user"
+      }
+    ],
+    "sample_output": "I found a skill that might help! The \"react-best-practices\" skill provides React and Next.js performance optimization guidelines from Vercel Engineering. (185K installs)",
+    "inputs": [
+      {
+        "what": "the user's need, the domain and the specific task",
+        "type": "a question in natural language",
+        "required": "required",
+        "for": "every task",
+        "example": "how do I make my React app faster?"
+      },
+      {
+        "what": "search keywords",
+        "type": "a query argument to the find command",
+        "required": "optional",
+        "for": "searching with the CLI",
+        "example": "npx skills find react performance"
+      },
+      {
+        "what": "a GitHub owner to scope the search",
+        "type": "a flagged argument",
+        "required": "optional",
+        "for": "searching with the CLI",
+        "example": "npx skills find [query] [--owner <owner>]"
+      },
+      {
+        "what": "the skill to install",
+        "type": "a package identifier in the form owner/repo@skill",
+        "required": "conditional",
+        "for": "installing a skill",
+        "example": "npx skills add vercel-labs/agent-skills@react-best-practices"
+      }
+    ],
+    "when_input_is_missing": [
+      {
+        "case": "the leaderboard does not cover the user's need",
+        "behaviour": "the agent runs npx skills find"
+      },
+      {
+        "case": "a search term returns nothing",
+        "behaviour": "the agent tries alternative terms, for instance deployment or ci-cd for deploy"
+      },
+      {
+        "case": "no relevant skill exists",
+        "behaviour": "the agent says so, offers to help with the task directly, and suggests creating a skill with npx skills init"
+      }
+    ],
+    "exclusions": "not declared",
+    "adoption": [
+      {
+        "registry": "skills.sh",
+        "installs": "4.3M",
+        "first_seen": "2026-01-26",
+        "counts": "the skill",
+        "read": "2026-11-11"
+      },
+      {
+        "registry": "GitHub",
+        "stars": 38928,
+        "forks": 3400,
+        "counts": "the vercel-labs/skills repository, which holds 3 skills",
+        "read": "2026-11-11"
+      }
+    ]
+  },
+  "what_it_needs": {
+    "compatibility": {
+      "harnesses": "not declared",
+      "models": "not declared",
+      "capabilities": "not declared",
+      "fits": {
+        "Agent Skills specification": "fits, name 11 characters, description 303 characters, body 137 lines and about 1,282 tokens",
+        "Codex": "fits, SKILL.md is 5,472 bytes, under the 8,000 byte cut",
+        "Claude Code": "fits, 141 lines, listing text 303 characters",
+        "ClawHub": "fits, folder 5,472 bytes"
+      }
+    },
+    "software_dependencies": [
+      {
+        "name": "skills, the Skills CLI",
+        "kind": "package",
+        "version": "not declared",
+        "for": "run"
+      },
+      {
+        "name": "npx",
+        "kind": "binary",
+        "version": "not declared",
+        "for": "run"
+      }
+    ],
+    "credentials": "none",
+    "cost": {
+      "context_tokens": {
+        "discovery": 76,
+        "load": 1368,
+        "on_demand": 0,
+        "on_demand_files": "none"
+      },
+      "run_tokens": "not examined",
+      "services": "none"
+    }
+  },
+  "what_it_touches": {
+    "side_effects": {
+      "install": "read only",
+      "run": "changes state",
+      "changes": [
+        {
+          "what": "installs a skill globally at user level with npx skills add -g -y, skipping the CLI's confirmation prompts",
+          "affects": "user home",
+          "confirmation": "yes",
+          "reversible": "not declared"
+        },
+        {
+          "what": "updates all installed skills with npx skills update",
+          "affects": "user home",
+          "confirmation": "not declared",
+          "reversible": "not declared"
+        },
+        {
+          "what": "fetches and runs the skills package through npx",
+          "affects": "software environment",
+          "confirmation": "not declared",
+          "reversible": "not declared"
+        }
+      ]
+    },
+    "network_access": [
+      {
+        "host": "skills.sh",
+        "purpose": "data source",
+        "when": "when the leaderboard is checked before a search, and for links to learn more",
+        "sends": [
+          "none"
+        ],
+        "receives": "the leaderboard of skills ranked by installs"
+      },
+      {
+        "host": "the search backend of the Skills CLI, not named in the files",
+        "purpose": "data source",
+        "when": "when npx skills find runs",
+        "sends": [
+          "query text"
+        ],
+        "receives": "matching skills"
+      },
+      {
+        "host": "GitHub or other sources, github.com not named as a host",
+        "purpose": "install",
+        "when": "when a skill is installed or updated, and when repository stars are checked",
+        "sends": [
+          "none"
+        ],
+        "receives": "the skill files and repository star counts"
+      },
+      {
+        "host": "the npm registry, not named in the files",
+        "purpose": "install",
+        "when": "when npx fetches the skills package",
+        "sends": [
+          "none"
+        ],
+        "receives": "the skills package"
+      }
+    ],
+    "tools_and_permissions": {
+      "allowed_tools": "none",
+      "tools": [
+        {
+          "tool": "npx skills find, npx skills add, npx skills update",
+          "kind": "shell command",
+          "for": "searching, installing and updating skills",
+          "origin": "third party"
+        },
+        {
+          "tool": "npx skills init",
+          "kind": "shell command",
+          "for": "creating a new skill, suggested to the user when nothing is found",
+          "origin": "third party"
+        },
+        {
+          "tool": "shell tool of the agent",
+          "kind": "agent tool",
+          "for": "running the npx skills commands",
+          "origin": "built in"
+        },
+        {
+          "tool": "web access of the agent",
+          "kind": "agent tool",
+          "for": "checking the skills.sh leaderboard and GitHub stars",
+          "origin": "built in"
+        }
+      ]
+    },
+    "machine_access": {
+      "paths": [
+        {
+          "path": "the user-level location where skills are installed globally, not named in the files",
+          "operation": "write",
+          "scope": "user home"
+        }
+      ],
+      "settings": "none"
+    }
+  },
+  "what_is_known": {
+    "checks": [
+      {
+        "id": "C1",
+        "tool": "Snyk, skills.sh audit, version not stated",
+        "date": "2026-09-15",
+        "scope": "unknown",
+        "result": "warn, risk level MEDIUM, 1 issue, W011 third-party content exposure, indirect prompt injection risk, scored low risk 0.10",
+        "report": "https://skills.sh/vercel-labs/skills/find-skills/security/snyk"
+      },
+      {
+        "id": "C2",
+        "tool": "Gen Agent Trust Hub, skills.sh audit, version not stated",
+        "date": "2026-09-15",
+        "scope": "the skill's instructions, as cited in its analysis",
+        "result": "pass, risk level SAFE, three surfaces described, command execution with npx skills and the -y flag, external downloads, and indirect prompt injection from ecosystem metadata",
+        "report": "https://skills.sh/vercel-labs/skills/find-skills/security/agent-trust-hub"
+      },
+      {
+        "id": "C3",
+        "tool": "Socket, skills.sh audit, version not stated",
+        "date": "2026-09-15",
+        "scope": "the skill package, hash b146008599c31057cef1c145774cea5d5afb30e8f43fa802e47a4b461419aaaf",
+        "result": "pass, checks for malicious behaviour, security concerns, code obfuscation and suspicious patterns",
+        "report": "https://skills.sh/vercel-labs/skills/find-skills/security/socket"
+      }
+    ],
+    "vulnerabilities": [
+      {
+        "finding": "Third-party content exposure, indirect prompt injection risk, W011",
+        "check": "C1",
+        "severity": "MEDIUM",
+        "location": "not stated",
+        "status": "open",
+        "fix": "not stated"
+      }
+    ],
+    "risks": [
+      {
+        "risk": "Instructions embedded in skill descriptions or registry metadata from the public ecosystem reach the agent when it reads search results.",
+        "source": "check C1, check C2",
+        "severity": "MEDIUM by C1, SAFE overall by C2",
+        "mitigation": "partly in place, the files have the agent verify installs, source and stars before recommending, which C2 credits",
+        "taxonomy": "https://www.ibm.com/docs/en/watsonx/saas?topic=ai-risk-atlas"
+      },
+      {
+        "risk": "A harmful or low-quality skill from the open ecosystem is installed at user level, since -y skips the CLI's confirmation prompts.",
+        "source": "check C2",
+        "severity": "SAFE overall by C2",
+        "mitigation": "in place in the files, quality checks before recommending and installing only if the user wants to proceed",
+        "taxonomy": "not examined"
+      },
+      {
+        "risk": "A changed upstream skill replaces the version already installed when npx skills update updates all installed skills at once.",
+        "source": "model",
+        "severity": "none",
+        "mitigation": "none stated",
+        "taxonomy": "not examined"
+      }
+    ],
+    "limitations": "not declared",
+    "known_problems": [
+      {
+        "problem": "a search term finds nothing",
+        "workaround": "try alternative terms, for instance deployment or ci-cd instead of deploy"
+      },
+      {
+        "problem": "no relevant skill exists",
+        "workaround": "help with the task directly, or create a skill with npx skills init"
+      }
+    ],
+    "evaluations": "none"
+  },
+  "who_stands_behind_it": {
+    "authorship": {
+      "author": "not declared",
+      "publisher": "the vercel-labs organisation on GitHub",
+      "signer": "none",
+      "contact": "not declared"
+    },
+    "license": {
+      "frontmatter": "not declared",
+      "license_file": "none",
+      "registry": "not declared",
+      "repository": "MIT, as GitHub detects it"
+    },
+    "maintenance": {
+      "last_change": "2026-07-10",
+      "registry_update": "not declared",
+      "deprecated": "not declared",
+      "first_seen": "2026-01-26",
+      "content_changes": 3,
+      "releases": 55,
+      "last_release": "2026-11-10"
+    }
+  },
+  "which_files": {
+    "version": {
+      "hash": "sha256:4f4ed5e34b9a9bb47098110ea2c7f0cb66334b2017bad9cbfdcb073a807b30c9",
+      "left_out": "none",
+      "author_version": "not declared",
+      "registry_version": "not declared",
+      "commit": "e781cb4d"
+    },
+    "source": {
+      "kind": "repository",
+      "location": "GitHub vercel-labs/skills, path skills/find-skills",
+      "commit": "e781cb4d",
+      "retrieved": "2026-11-11",
+      "also_listed_on": "skills.sh, https://skills.sh/vercel-labs/skills/find-skills",
+      "homepage": "not declared",
+      "produced_by": "none"
+    },
+    "files": [
+      {
+        "path": "SKILL.md",
+        "bytes": 5472,
+        "sha256": "c00eeea0e13e74fe4a9d84ba0a8542205a1b736d65f13134fe1a6647eb14976f",
+        "kind": "document",
+        "in_hash": true,
+        "executable": false
+      }
+    ],
+    "counts": {
+      "script": 0,
+      "document": 1,
+      "data": 0,
+      "binary": 0
+    },
+    "composition": "instructions only"
+  },
+  "about_this_card": {
+    "schema": "Skill Card v1.2",
+    "date": "2026-11-11",
+    "by": "Claude Opus 5.5, claude-opus-5-5, by hand from the skill files, the skills.sh listing and audits, and GitHub metadata, with the hash, file list, sizes, harness limits and repository figures computed by script",
+    "skill_run": false,
+    "scripts_analysed": false,
+    "security_check_run": false,
+    "external_service_contacted": false,
+    "registry_read": true,
+    "empty_values": 39
+  }
+}

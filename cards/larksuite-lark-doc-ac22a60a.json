@@ -1,0 +1,719 @@
+{
+  "schema": "Skill Card v1.2",
+  "skill": "lark-doc",
+  "version": "larksuite/cli at ac22a60a",
+  "what_it_does": {
+    "name": "lark-doc",
+    "summary": "Instructions for the lark-cli docs and mindnotes commands, for working with Feishu and Lark cloud documents of type Docx and Wiki. It reads whole documents or parts by outline, section, range or keyword, creates documents from XML or Markdown through an authoring workflow, edits them block by block, lists or reverts history versions, handles images, attachments, covers and whiteboards, and edits existing mindnotes. Results come back as JSON from lark-cli, as changed online documents or as files saved locally. Use it when the user gives a document URL or token, including doubao.com /docx/ and /wiki/ links.",
+    "tasks": [
+      "read and summarise Docx and Wiki documents, whole or in part",
+      "create documents from XML or Markdown through a step-by-step authoring workflow",
+      "edit documents by text replacement or block insert, replace, move and delete",
+      "list and revert document history versions",
+      "insert, preview and download images, attachments, covers and whiteboard thumbnails",
+      "create whiteboards from Mermaid or SVG inside a document",
+      "read nodes of existing mindnotes and create or update nodes"
+    ],
+    "author_description": "飞书云文档（Docx / Wiki）内容操作：读取、创建、编辑文档，插入或下载图片附件，以及操作思维笔记。用户提供文档 URL/token（包括 doubao.com 的 /docx/、/wiki/）时使用；按 URL 路径/token 而非域名路由；`/page/<token>` 是妙搭应用，非飞书云文档。文档内嵌资源按读取参考中的统一规则分流。独立评论操作走 lark-drive；随正文读取评论使用 docs +fetch。表格或 Base 内部数据操作不在本 skill。",
+    "outputs": [
+      {
+        "what": "document content with reference_map, visible unresolved comments and tips",
+        "kind": "information",
+        "form": "JSON from lark-cli, content in XML, Markdown or im-markdown",
+        "destination": "the agent's context"
+      },
+      {
+        "what": "new or changed online documents, with document_id, url, revision_id and new_blocks",
+        "kind": "action",
+        "form": "Feishu cloud document",
+        "destination": "the user's Feishu or Lark space"
+      },
+      {
+        "what": "reverted history versions, document covers and mindnote nodes",
+        "kind": "action",
+        "form": "change to an online document or mindnote",
+        "destination": "the user's Feishu or Lark space"
+      },
+      {
+        "what": "downloaded or previewed media, covers, whiteboard thumbnails and previews",
+        "kind": "information",
+        "form": "image or file",
+        "destination": "a local path given with --output, for instance ./asset.png or ./preview.png"
+      },
+      {
+        "what": "authoring workspace with .presentation-decision.json and the draft XML",
+        "kind": "information",
+        "form": "local files",
+        "destination": "draft_<8位十六进制字符>_folder/draft.xml under the returned data.cwd, kept after delivery"
+      },
+      {
+        "what": "draft profile with word count, block count and diagnostics",
+        "kind": "information",
+        "form": "JSON from docs +script parse",
+        "destination": "the agent's context"
+      },
+      {
+        "what": "a direct link to a block",
+        "kind": "information",
+        "form": "URL text",
+        "destination": "a message to the user"
+      }
+    ],
+    "sample_output": "\"url\": \"https://xxx.feishu.cn/docx/docx_token\"",
+    "inputs": [
+      {
+        "what": "a document URL or token",
+        "type": "a /docx/ or /wiki/ URL, a token or a #share selection link",
+        "required": "required",
+        "for": "every document task",
+        "example": "lark-cli docs +fetch --doc Z1Fj...tnAc --scope outline --max-depth 3"
+      },
+      {
+        "what": "document content",
+        "type": "XML or Markdown, inline, from an @ file or from stdin",
+        "required": "conditional",
+        "for": "creating or updating a document",
+        "example": "lark-cli docs +create --doc-format markdown --content \"@./draft.md\""
+      },
+      {
+        "what": "a Presentation Decision",
+        "type": "a JSON object with audience, reader_task, presentation_mode and visual_plan",
+        "required": "conditional",
+        "for": "authoring a document from scratch",
+        "example": "lark-cli docs +script --command init-draft --presentation-decision '<上方完整 JSON>' --format json"
+      },
+      {
+        "what": "a local image or file, a clipboard image or an HTTPS image URL",
+        "type": "a path, the --from-clipboard flag or a URL",
+        "required": "conditional",
+        "for": "inserting media or updating a cover",
+        "example": "lark-cli docs +media-insert --doc doxcnXXX --file ./image.png"
+      },
+      {
+        "what": "a resource token and an output path",
+        "type": "file_token or whiteboard_id and a local path",
+        "required": "conditional",
+        "for": "previewing or downloading media and whiteboard thumbnails",
+        "example": "lark-cli docs +media-download --token \"Z1Fjxxxxxxxx\" --output ./asset"
+      },
+      {
+        "what": "a target version",
+        "type": "a history_version_id, a revision_id or a point in time",
+        "required": "conditional",
+        "for": "reverting a document",
+        "example": "lark-cli docs +history-revert --doc \"<docx_url_or_token>\" --history-version-id 42"
+      },
+      {
+        "what": "a mindnote token and a node request body",
+        "type": "a Mindnote token and JSON with nodes",
+        "required": "conditional",
+        "for": "reading or editing an existing mindnote",
+        "example": "lark-cli mindnotes nodes list --mindnote-id \"<mindnote_token>\""
+      },
+      {
+        "what": "the identity to act as",
+        "type": "the --as flag, user or bot",
+        "required": "optional",
+        "for": "every command, --as user recommended for documents",
+        "example": "--as user"
+      }
+    ],
+    "when_input_is_missing": [
+      {
+        "case": "the clipboard holds no image",
+        "behaviour": "the user is told and asked for a local file path, then the same insert command is retried with --file"
+      },
+      {
+        "case": "several history versions share the given revision_id and cannot be told apart",
+        "behaviour": "the user is asked to confirm which one to revert to"
+      },
+      {
+        "case": "no block_id is available for a requested direct link",
+        "behaviour": "no link is guessed"
+      },
+      {
+        "case": "the user is not authenticated or a token, identity or scope error occurs",
+        "behaviour": "lark-shared is read, the problem fixed and the command retried"
+      },
+      {
+        "case": "the target version cannot be read",
+        "behaviour": "stop and report"
+      },
+      {
+        "case": "a cover download on a document without a cover",
+        "behaviour": "the command fails with document has no cover and creates no file"
+      }
+    ],
+    "exclusions": [
+      "not for Drive file-level operations such as finding, importing, exporting, uploading, downloading or permissions, which go to lark-drive",
+      "not for standalone comment operations, which go to lark-drive",
+      "not for data inside sheets or Base",
+      "not for /page/<token> links, which are 妙搭 apps and not Feishu documents",
+      "not for only viewing or downloading existing whiteboards, which go to lark-whiteboard"
+    ],
+    "adoption": [
+      {
+        "registry": "skills.sh",
+        "installs": "492.1K",
+        "first_seen": "2026-03-28",
+        "counts": "the skill",
+        "read": "2026-11-11"
+      },
+      {
+        "registry": "GitHub",
+        "stars": 18056,
+        "forks": 1377,
+        "counts": "the larksuite/cli repository, which holds 34 skills",
+        "read": "2026-11-11"
+      }
+    ]
+  },
+  "what_it_needs": {
+    "compatibility": {
+      "harnesses": "not declared",
+      "models": "not declared",
+      "capabilities": "not declared",
+      "fits": {
+        "Agent Skills specification": "fits, name 8 characters, description 241 characters, body 40 lines and about 892 tokens",
+        "Codex": "fits, SKILL.md is 4,247 bytes, under the 8,000 byte cut",
+        "Claude Code": "fits, 49 lines, listing text 241 characters",
+        "ClawHub": "fits, folder 86,830 bytes"
+      }
+    },
+    "software_dependencies": [
+      {
+        "name": "lark-cli",
+        "kind": "binary",
+        "version": "not declared",
+        "for": "run"
+      },
+      {
+        "name": "xclip, wl-paste or xsel, on Linux for --from-clipboard",
+        "kind": "binary",
+        "version": "not declared",
+        "for": "run"
+      },
+      {
+        "name": "osascript, on macOS for --from-clipboard",
+        "kind": "binary",
+        "version": "not declared",
+        "for": "run"
+      },
+      {
+        "name": "PowerShell with System.Windows.Forms, on Windows for --from-clipboard",
+        "kind": "runtime",
+        "version": "not declared",
+        "for": "run"
+      }
+    ],
+    "credentials": [
+      {
+        "kind": "token",
+        "name": "the lark-cli user or bot identity, set up through lark-shared",
+        "used_for": "acting on documents as user or bot, with scopes such as docx:document:readonly",
+        "from": "unknown",
+        "goes_to": "the Feishu or Lark OpenAPI, host not named in the files"
+      }
+    ],
+    "cost": {
+      "context_tokens": {
+        "discovery": 126,
+        "load": 1062,
+        "on_demand": 20648,
+        "on_demand_files": [
+          "references/lark-doc-create-workflow.md",
+          "references/lark-doc-create.md",
+          "references/lark-doc-fetch.md",
+          "references/lark-doc-history.md",
+          "references/lark-doc-md.md",
+          "references/lark-doc-media-download.md",
+          "references/lark-doc-media-insert.md",
+          "references/lark-doc-media-preview.md",
+          "references/lark-doc-mindnote.md",
+          "references/lark-doc-resource-cover.md",
+          "references/lark-doc-script.md",
+          "references/lark-doc-update.md",
+          "references/lark-doc-whiteboard.md",
+          "references/lark-doc-xml-extended-blocks.md",
+          "references/lark-doc-xml.md"
+        ]
+      },
+      "run_tokens": "not examined",
+      "services": [
+        {
+          "name": "Feishu or Lark OpenAPI through lark-cli",
+          "needs": "account",
+          "price": "not declared",
+          "quota": "rate limited, no figure stated",
+          "calls_per_use": "not declared"
+        }
+      ]
+    }
+  },
+  "what_it_touches": {
+    "side_effects": {
+      "install": "read only",
+      "run": "changes state",
+      "changes": [
+        {
+          "what": "creates new cloud documents, as bot also granting full_access to the current CLI user",
+          "affects": "external service",
+          "confirmation": "not declared",
+          "reversible": "not declared"
+        },
+        {
+          "what": "replaces text and inserts, copies, replaces, moves and deletes blocks in a document",
+          "affects": "external service",
+          "confirmation": "not declared",
+          "reversible": "not declared"
+        },
+        {
+          "what": "overwrites a whole document, losing images, comments and unsupported resources",
+          "affects": "external service",
+          "confirmation": "yes",
+          "reversible": "no"
+        },
+        {
+          "what": "inserts images or files at the end of a document",
+          "affects": "external service",
+          "confirmation": "yes",
+          "reversible": "not declared"
+        },
+        {
+          "what": "updates or deletes the document cover",
+          "affects": "external service",
+          "confirmation": "not declared",
+          "reversible": "not declared"
+        },
+        {
+          "what": "reverts a document to a history version",
+          "affects": "external service",
+          "confirmation": "not declared",
+          "reversible": "not declared"
+        },
+        {
+          "what": "creates or updates mindnote nodes",
+          "affects": "external service",
+          "confirmation": "yes",
+          "reversible": "not declared"
+        },
+        {
+          "what": "writes downloaded media, covers, previews, draft workspaces and content files",
+          "affects": "workspace",
+          "confirmation": "not declared",
+          "reversible": "not declared"
+        }
+      ]
+    },
+    "network_access": [
+      {
+        "host": "Feishu or Lark OpenAPI, not named in the files, document URLs on feishu.cn and doubao.com",
+        "purpose": "data source",
+        "when": "every docs and mindnotes command, reads and writes",
+        "sends": [
+          "credential",
+          "user content",
+          "file content",
+          "query text"
+        ],
+        "receives": "document content, comments, tokens, block IDs, history entries and media"
+      },
+      {
+        "host": "public HTTPS image hosts, formed at run time from a URL the agent passes",
+        "purpose": "data source",
+        "when": "when an image is given by <img href> or a cover by --url",
+        "sends": [
+          "none"
+        ],
+        "receives": "the image"
+      }
+    ],
+    "tools_and_permissions": {
+      "allowed_tools": "none",
+      "tools": [
+        {
+          "tool": "lark-cli docs +fetch, +create, +update, +script, +history-*, +media-*, +resource-*",
+          "kind": "program",
+          "for": "reading, creating, editing and reverting documents and handling media and covers",
+          "origin": "third party"
+        },
+        {
+          "tool": "lark-cli mindnotes nodes list and create, drive +inspect",
+          "kind": "program",
+          "for": "reading and editing mindnote nodes and unwrapping Wiki URLs",
+          "origin": "third party"
+        },
+        {
+          "tool": "lark-cli whiteboard +export and whiteboard +update",
+          "kind": "program",
+          "for": "exporting whiteboard previews and writing to existing whiteboards",
+          "origin": "third party"
+        },
+        {
+          "tool": "osascript, PowerShell, xclip, wl-paste, xsel",
+          "kind": "program",
+          "for": "reading an image from the clipboard",
+          "origin": "third party"
+        },
+        {
+          "tool": "lark-shared and lark-whiteboard skills",
+          "kind": "other",
+          "for": "authentication, identity and scope handling, complex and existing whiteboards",
+          "origin": "third party"
+        },
+        {
+          "tool": "SubAgent",
+          "kind": "agent tool",
+          "for": "complex SVG diagrams and updates of existing whiteboards",
+          "origin": "built in"
+        },
+        {
+          "tool": "shell and file tools of the agent",
+          "kind": "agent tool",
+          "for": "running lark-cli and writing the draft XML and content files",
+          "origin": "built in"
+        }
+      ]
+    },
+    "machine_access": {
+      "paths": [
+        {
+          "path": "local files given as @./relative path in the CWD or @absolute path",
+          "operation": "read",
+          "scope": "workspace"
+        },
+        {
+          "path": "draft_<8位十六进制字符>_folder with .presentation-decision.json and draft.xml",
+          "operation": "write",
+          "scope": "workspace"
+        },
+        {
+          "path": "output paths given with --output for media, covers and whiteboard previews",
+          "operation": "write",
+          "scope": "unknown"
+        },
+        {
+          "path": "content files such as ./_content.md under the CWD, cleaned up after use",
+          "operation": "delete",
+          "scope": "workspace"
+        },
+        {
+          "path": "doc-fetch-resources HTML files of html5-block entries",
+          "operation": "read",
+          "scope": "workspace"
+        }
+      ],
+      "settings": "none"
+    }
+  },
+  "what_is_known": {
+    "checks": [
+      {
+        "id": "C1",
+        "tool": "Snyk, skills.sh audit, version not stated",
+        "date": "2026-10-28",
+        "scope": "unknown",
+        "result": "warn, risk level MEDIUM, 1 issue, W011 third-party content exposure, indirect prompt injection risk through docs +fetch, scored medium risk 0.30",
+        "report": "https://skills.sh/larksuite/cli/lark-doc/security/snyk"
+      },
+      {
+        "id": "C2",
+        "tool": "Gen Agent Trust Hub, skills.sh audit, version not stated",
+        "date": "2026-10-28",
+        "scope": "the fetch, resource-cover, create, update, media-download, xml and script references, as cited in its analysis",
+        "result": "pass, risk level SAFE, URL validation against data exfiltration and SSRF, indirect prompt injection surface and clipboard commands described",
+        "report": "https://skills.sh/larksuite/cli/lark-doc/security/agent-trust-hub"
+      },
+      {
+        "id": "C3",
+        "tool": "Socket, skills.sh audit, version not stated",
+        "date": "2026-10-28",
+        "scope": "the skill package, hash 2841086b18cdafade549dc40b338969819cf0c234e72fc0e8252905389dcb0cf",
+        "result": "pass, checks for malicious behaviour, credential exposure, obfuscated code and suspicious patterns",
+        "report": "https://skills.sh/larksuite/cli/lark-doc/security/socket"
+      }
+    ],
+    "vulnerabilities": [
+      {
+        "finding": "Third-party content exposure, indirect prompt injection risk, W011",
+        "check": "C1",
+        "severity": "MEDIUM",
+        "location": "not stated",
+        "status": "open",
+        "fix": "not stated"
+      }
+    ],
+    "risks": [
+      {
+        "risk": "Instructions hidden in a Lark document or its comments reach the agent when docs +fetch reads it, while the agent can create, edit and download.",
+        "source": "check C1, check C2",
+        "severity": "MEDIUM by C1, SAFE overall by C2",
+        "mitigation": "structured XML or Markdown output and XML escaping as C2 describes, no separation of untrusted text in the files",
+        "taxonomy": "https://www.ibm.com/docs/en/watsonx/saas?topic=ai-risk-atlas"
+      },
+      {
+        "risk": "An image URL in a document or a cover --url could make the CLI request internal hosts or leak data.",
+        "source": "check C2",
+        "severity": "none",
+        "mitigation": "in place in the files, HTTPS only, private, loopback, link-local and multicast addresses refused, redirects rechecked",
+        "taxonomy": "not examined"
+      },
+      {
+        "risk": "overwrite clears and rewrites the whole document and loses images, comments and unsupported resources.",
+        "source": "author",
+        "severity": "none",
+        "mitigation": "use only when the user asks for a full rebuild, confirm first when comments must be kept, stated in the files",
+        "taxonomy": "not examined"
+      },
+      {
+        "risk": "Facts, images or diagram content the agent searched for or made up end up in a shared document, since the authoring workflow requires filling gaps and the SVG guide asks to expand sparse descriptions.",
+        "source": "model",
+        "severity": "none",
+        "mitigation": "Step 7 asks to state sources and open gaps at delivery, partly in place",
+        "taxonomy": "not examined"
+      },
+      {
+        "risk": "An image on the clipboard that the user did not mean to share is uploaded to a document when --from-clipboard is used, the recommended source.",
+        "source": "model",
+        "severity": "none",
+        "mitigation": "the insert is a write that needs the user's intent confirmed first, stated in the files",
+        "taxonomy": "not examined"
+      }
+    ],
+    "limitations": [
+      "The mindnote path only reads existing mindnotes and creates or updates their nodes, it cannot create a new mindnote.",
+      "docs +script does not accept Markdown input, and parse is not an XML schema validator, so a passed check does not guarantee the server accepts the draft.",
+      "docs +media-insert inserts only at the end of a document and does not extract the document from /wiki/ URLs.",
+      "--from-clipboard needs xclip, wl-paste or xsel on Linux and does not read TIFF or other rare formats.",
+      "Comments returned by docs +fetch are not guaranteed to be complete.",
+      "str_replace does not replace resources, and block_replace and block_delete do not work across containers or on reversed ranges.",
+      "An html5-block is limited to 500KB of HTML, and an image by URL to 20MiB.",
+      "Whiteboards do not support pattern, clipPath, mask or non-shadow filter in SVG.",
+      "@file in Markdown content accepts only relative paths under the current working directory."
+    ],
+    "known_problems": [
+      {
+        "problem": "clipboard contains no image data",
+        "workaround": "tell the user and retry the same command with --file and a path they give"
+      },
+      {
+        "problem": "permission_denied or HTTP 403 on a media download",
+        "workaround": "preview with docs +media-preview instead"
+      },
+      {
+        "problem": "rate limit error",
+        "workaround": "stop and retry later with exponential backoff"
+      },
+      {
+        "problem": "authentication, token, identity or scope error",
+        "workaround": "read lark-shared, fix and retry"
+      },
+      {
+        "problem": "3410003 resource not found when a wiki token is passed to mindnotes",
+        "workaround": "unwrap the Wiki URL with drive +inspect first"
+      },
+      {
+        "problem": "warnings or partial resource failures after creating a document",
+        "workaround": "fix the created document in place with docs +update, do not create a new one"
+      },
+      {
+        "problem": "parse returns assessment.status failed",
+        "workaround": "fix locally by data.diagnostics and parse again"
+      },
+      {
+        "problem": "history revert ends in partial_failed or failed",
+        "workaround": "check failed_block_tokens and report"
+      }
+    ],
+    "evaluations": "none"
+  },
+  "who_stands_behind_it": {
+    "authorship": {
+      "author": "not declared",
+      "publisher": "the larksuite organisation on GitHub",
+      "signer": "none",
+      "contact": "not declared"
+    },
+    "license": {
+      "frontmatter": "not declared",
+      "license_file": "none",
+      "registry": "not declared",
+      "repository": "MIT, as GitHub detects it"
+    },
+    "maintenance": {
+      "last_change": "2026-10-28",
+      "registry_update": "not declared",
+      "deprecated": "not declared",
+      "first_seen": "2026-03-28",
+      "content_changes": 83,
+      "releases": "100 or more",
+      "last_release": "2026-11-10"
+    }
+  },
+  "which_files": {
+    "version": {
+      "hash": "sha256:58244d8aa7599ffd41548179e0d26a0ca8a6580aafcbc8524a2cc9e13830d340",
+      "left_out": "none",
+      "author_version": "not declared",
+      "registry_version": "not declared",
+      "commit": "ac22a60a"
+    },
+    "source": {
+      "kind": "repository",
+      "location": "GitHub larksuite/cli, path skills/lark-doc",
+      "commit": "ac22a60a",
+      "retrieved": "2026-11-11",
+      "also_listed_on": "skills.sh, https://skills.sh/larksuite/cli/lark-doc",
+      "homepage": "not declared",
+      "produced_by": "none"
+    },
+    "files": [
+      {
+        "path": "SKILL.md",
+        "bytes": 4247,
+        "sha256": "0f1aea17fc21aaeb1cc17270d6de7de97780c3a9f53f98f668ce318f91f1a1f7",
+        "kind": "document",
+        "in_hash": true,
+        "executable": false
+      },
+      {
+        "path": "references/lark-doc-create-workflow.md",
+        "bytes": 7789,
+        "sha256": "ce07b477f625c604a110d48581de1a3f2960afd3b653c65daa388d5af4de6f44",
+        "kind": "document",
+        "in_hash": true,
+        "executable": false
+      },
+      {
+        "path": "references/lark-doc-create.md",
+        "bytes": 3313,
+        "sha256": "4add00b26e81207515ba4e3319e690a6143f604dea72444d97d49931191107bb",
+        "kind": "document",
+        "in_hash": true,
+        "executable": false
+      },
+      {
+        "path": "references/lark-doc-fetch.md",
+        "bytes": 7947,
+        "sha256": "0200e8231902b7c532bcec036ab83fb5b6f928f689ed16c0c906217613c92df6",
+        "kind": "document",
+        "in_hash": true,
+        "executable": false
+      },
+      {
+        "path": "references/lark-doc-history.md",
+        "bytes": 5497,
+        "sha256": "a67b4beaacef43626088f92de297fb37021cd1daf829763bbbcb419714854850",
+        "kind": "document",
+        "in_hash": true,
+        "executable": false
+      },
+      {
+        "path": "references/lark-doc-md.md",
+        "bytes": 5934,
+        "sha256": "74d062a4ac6d436141f4a90f87cbecd45d9f6d8b0d34f3e04077653175dc2e36",
+        "kind": "document",
+        "in_hash": true,
+        "executable": false
+      },
+      {
+        "path": "references/lark-doc-media-download.md",
+        "bytes": 2231,
+        "sha256": "246ef6cfdbd607683792f806e843189170ecbd94e5cfc8acd02cbe43030d5c33",
+        "kind": "document",
+        "in_hash": true,
+        "executable": false
+      },
+      {
+        "path": "references/lark-doc-media-insert.md",
+        "bytes": 6930,
+        "sha256": "715c0ffefbca373c2554f3e60ca907b0a28166469f9eecd124418faac9c1ddae",
+        "kind": "document",
+        "in_hash": true,
+        "executable": false
+      },
+      {
+        "path": "references/lark-doc-media-preview.md",
+        "bytes": 1646,
+        "sha256": "68eff43a4a1f1fcba852a80332b521ba2ce5041f051fba2d6ec25c246886e919",
+        "kind": "document",
+        "in_hash": true,
+        "executable": false
+      },
+      {
+        "path": "references/lark-doc-mindnote.md",
+        "bytes": 5546,
+        "sha256": "a239f58aa9d832623d79943a8f8268783da3c07bce1816060e2f01b0d1278e92",
+        "kind": "document",
+        "in_hash": true,
+        "executable": false
+      },
+      {
+        "path": "references/lark-doc-resource-cover.md",
+        "bytes": 4184,
+        "sha256": "3d453cc82978d7a4f8d8fad08e80783c209cf7ff7b1bbf3cb56c23f51aa4e457",
+        "kind": "document",
+        "in_hash": true,
+        "executable": false
+      },
+      {
+        "path": "references/lark-doc-script.md",
+        "bytes": 5261,
+        "sha256": "a7aef73a60efadbc5c13d1ff14f28c782f1cc690af4a8909369daa6e3962a0d5",
+        "kind": "document",
+        "in_hash": true,
+        "executable": false
+      },
+      {
+        "path": "references/lark-doc-update.md",
+        "bytes": 7468,
+        "sha256": "1325ceac3355401486cf46a7462cf083b4dada00e7c07e03c1084cea2c7f7c6d",
+        "kind": "document",
+        "in_hash": true,
+        "executable": false
+      },
+      {
+        "path": "references/lark-doc-whiteboard.md",
+        "bytes": 8926,
+        "sha256": "86dd68d27a50914c10af97abc040934ddee38521fb555a1d019ad9b4bb0286ff",
+        "kind": "document",
+        "in_hash": true,
+        "executable": false
+      },
+      {
+        "path": "references/lark-doc-xml-extended-blocks.md",
+        "bytes": 4444,
+        "sha256": "893faaf0a757cd43b9b2031b695982191e56c6469af1a47e1e90b5c1fd342110",
+        "kind": "document",
+        "in_hash": true,
+        "executable": false
+      },
+      {
+        "path": "references/lark-doc-xml.md",
+        "bytes": 5467,
+        "sha256": "111e58ffcd10f0d333bb02c2c9b97c8c3cec4f20b5fbd0cf5c30132880ced4a5",
+        "kind": "document",
+        "in_hash": true,
+        "executable": false
+      }
+    ],
+    "counts": {
+      "script": 0,
+      "document": 16,
+      "data": 0,
+      "binary": 0
+    },
+    "composition": "instructions only"
+  },
+  "about_this_card": {
+    "schema": "Skill Card v1.2",
+    "date": "2026-11-11",
+    "by": "Claude Opus 5.5, claude-opus-5-5, by hand from the skill files, the skills.sh listing and audits, and GitHub metadata, with the hash, file list, sizes, harness limits and repository figures computed by script",
+    "skill_run": false,
+    "scripts_analysed": false,
+    "security_check_run": false,
+    "external_service_contacted": false,
+    "registry_read": true,
+    "empty_values": 50
+  }
+}

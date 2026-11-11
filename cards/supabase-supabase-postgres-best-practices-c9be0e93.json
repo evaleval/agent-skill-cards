@@ -1,0 +1,758 @@
+{
+  "schema": "Skill Card v1.2",
+  "skill": "supabase-postgres-best-practices",
+  "version": "supabase/agent-skills at c9be0e93",
+  "what_it_does": {
+    "name": "supabase-postgres-best-practices",
+    "summary": "A Postgres performance and design guide maintained by Supabase, made of one instruction file and 31 rule files in eight categories ranked by impact, from query performance and connection management to advanced features. Each rule explains why it matters and shows incorrect and correct SQL, with EXPLAIN output or metrics where useful and Supabase notes where they apply. The agent reads the rule files that fit the task and writes or reviews SQL, schemas, indexes, RLS policies and connection settings by them. Use it when writing SQL or designing schemas, optimizing queries, reviewing database performance, configuring connection pooling or working with Row-Level Security.",
+    "tasks": [
+      "add and choose indexes for WHERE, JOIN, JSONB and full-text queries",
+      "configure connection pooling, limits and idle timeouts",
+      "enable and optimize Row-Level Security and least privilege grants",
+      "choose data types, primary keys, partitioning and safe migration constraints",
+      "reduce lock contention, deadlocks and N+1 queries",
+      "diagnose slow queries with EXPLAIN ANALYZE, pg_stat_statements and VACUUM statistics",
+      "for Postgres running anywhere, with Supabase-specific notes"
+    ],
+    "author_description": "Postgres best practices maintained by Supabase, for Postgres running anywhere. Load this skill BEFORE writing or changing anything that lives in a Postgres database: creating or altering tables and columns (including choosing column types), schema design, migrations and declarative schema files, RLS policies and the tests that verify them, indexes, triggers, database functions, queues and scheduled jobs (pg_cron, pgmq), vector/semantic search (pgvector), and restoring dumps (pg_restore) or importing data. Also load it when diagnosing slow queries, high CPU, timeouts, EXPLAIN plans, connection exhaustion, locking, bloat, or rows visible to the wrong user or tenant. This is not just a performance guide — schema, migration, security, and SQL authoring tasks need these rules too, even for a one-column change or a single query.",
+    "outputs": [
+      {
+        "what": "SQL for tables, indexes, constraints, RLS policies, roles and queries written by the rules",
+        "kind": "information",
+        "form": "SQL text",
+        "destination": "the agent's answer or the migration and query files the agent writes"
+      },
+      {
+        "what": "advice on which indexes, pool settings, data types and query rewrites to apply",
+        "kind": "recommendation",
+        "form": "text with incorrect and correct SQL",
+        "destination": "the agent's answer to the user"
+      },
+      {
+        "what": "changes to a database when the SQL is run, such as new indexes, policies, roles and server settings",
+        "kind": "action",
+        "form": "database objects and settings",
+        "destination": "the Postgres database"
+      },
+      {
+        "what": "diagnostic results from EXPLAIN ANALYZE, pg_stat_statements and pg_stat_activity",
+        "kind": "information",
+        "form": "query plans and result rows",
+        "destination": "the agent's context"
+      }
+    ],
+    "sample_output": "Index Scan using orders_customer_id_idx (cost=0.42..8.44 rows=100 width=85)",
+    "inputs": [
+      {
+        "what": "a SQL query or schema to write or review",
+        "type": "SQL text",
+        "required": "required",
+        "for": "every task",
+        "example": "select * from orders where customer_id = 123;"
+      },
+      {
+        "what": "a slow query to diagnose",
+        "type": "SQL text run under EXPLAIN",
+        "required": "conditional",
+        "for": "diagnosing slow queries",
+        "example": "explain (analyze, buffers, format text) select * from orders where customer_id = 123 and status = 'pending';"
+      },
+      {
+        "what": "the available RAM and CPU cores of the database server",
+        "type": "numbers",
+        "required": "conditional",
+        "for": "setting connection limits and pool size",
+        "example": "Example for 4 cores: pool_size = 10"
+      }
+    ],
+    "when_input_is_missing": "not declared",
+    "exclusions": "not declared",
+    "adoption": [
+      {
+        "registry": "skills.sh",
+        "installs": "481.3K",
+        "first_seen": "2026-01-21",
+        "counts": "the skill",
+        "read": "2026-11-11"
+      },
+      {
+        "registry": "GitHub",
+        "stars": 3040,
+        "forks": 267,
+        "counts": "the supabase/agent-skills repository, which holds 2 skills",
+        "read": "2026-11-11"
+      }
+    ]
+  },
+  "what_it_needs": {
+    "compatibility": {
+      "harnesses": "not declared",
+      "models": "not declared",
+      "capabilities": "not declared",
+      "fits": {
+        "Agent Skills specification": "fits, name 32 characters, description 834 characters, body 53 lines and about 442 tokens",
+        "Codex": "fits, SKILL.md is 3,231 bytes, under the 8,000 byte cut",
+        "Claude Code": "fits, 64 lines, listing text 834 characters",
+        "ClawHub": "fits, folder 62,007 bytes"
+      }
+    },
+    "software_dependencies": [
+      {
+        "name": "Postgres",
+        "kind": "runtime",
+        "version": "not declared",
+        "for": "example"
+      },
+      {
+        "name": "pg_stat_statements extension",
+        "kind": "package",
+        "version": "not declared",
+        "for": "example"
+      },
+      {
+        "name": "pg_uuidv7 extension",
+        "kind": "package",
+        "version": "not declared",
+        "for": "example"
+      },
+      {
+        "name": "PgBouncer",
+        "kind": "binary",
+        "version": "not declared",
+        "for": "example"
+      },
+      {
+        "name": "pnpm",
+        "kind": "binary",
+        "version": "not declared",
+        "for": "example"
+      }
+    ],
+    "credentials": [
+      {
+        "kind": "password",
+        "name": "the password of the app_user login role",
+        "used_for": "creating a login role that inherits limited privileges",
+        "from": "command argument",
+        "goes_to": "the Postgres server the SQL runs on, host not named"
+      }
+    ],
+    "cost": {
+      "context_tokens": {
+        "discovery": 209,
+        "load": 808,
+        "on_demand": 11990,
+        "on_demand_files": [
+          "references/_sections.md",
+          "references/advanced-full-text-search.md",
+          "references/advanced-jsonb-indexing.md",
+          "references/conn-idle-timeout.md",
+          "references/conn-limits.md",
+          "references/conn-pooling.md",
+          "references/conn-prepared-statements.md",
+          "references/data-batch-inserts.md",
+          "references/data-n-plus-one.md",
+          "references/data-pagination.md",
+          "references/data-upsert.md",
+          "references/lock-advisory.md",
+          "references/lock-deadlock-prevention.md",
+          "references/lock-short-transactions.md",
+          "references/lock-skip-locked.md",
+          "references/monitor-explain-analyze.md",
+          "references/monitor-pg-stat-statements.md",
+          "references/monitor-vacuum-analyze.md",
+          "references/query-composite-indexes.md",
+          "references/query-covering-indexes.md",
+          "references/query-index-types.md",
+          "references/query-missing-indexes.md",
+          "references/query-partial-indexes.md",
+          "references/schema-constraints.md",
+          "references/schema-data-types.md",
+          "references/schema-foreign-key-indexes.md",
+          "references/schema-lowercase-identifiers.md",
+          "references/schema-partitioning.md",
+          "references/schema-primary-keys.md",
+          "references/security-privileges.md",
+          "references/security-rls-basics.md",
+          "references/security-rls-performance.md"
+        ]
+      },
+      "run_tokens": "not examined",
+      "services": "none"
+    }
+  },
+  "what_it_touches": {
+    "side_effects": {
+      "install": "read only",
+      "run": "changes state",
+      "changes": [
+        {
+          "what": "creates or alters tables, indexes, constraints, partitions, RLS policies and functions",
+          "affects": "external service",
+          "confirmation": "not declared",
+          "reversible": "not declared"
+        },
+        {
+          "what": "changes server settings with alter system and pg_reload_conf",
+          "affects": "external service",
+          "confirmation": "not declared",
+          "reversible": "not declared"
+        },
+        {
+          "what": "creates roles and grants or revokes privileges",
+          "affects": "external service",
+          "confirmation": "not declared",
+          "reversible": "not declared"
+        },
+        {
+          "what": "drops old partitions with drop table events_2023_01",
+          "affects": "external service",
+          "confirmation": "not declared",
+          "reversible": "not declared"
+        },
+        {
+          "what": "creates extensions and resets statistics with pg_stat_statements_reset",
+          "affects": "external service",
+          "confirmation": "not declared",
+          "reversible": "not declared"
+        },
+        {
+          "what": "sets pooler timeouts in pgbouncer.ini",
+          "affects": "system",
+          "confirmation": "not declared",
+          "reversible": "not declared"
+        }
+      ]
+    },
+    "network_access": [
+      {
+        "host": "the Postgres database or pooler the agent works with, not named in the files",
+        "purpose": "data source",
+        "when": "when the SQL examples or diagnostic queries are run against a database",
+        "sends": [
+          "query text"
+        ],
+        "receives": "query results, plans, statistics and errors"
+      }
+    ],
+    "tools_and_permissions": {
+      "allowed_tools": "none",
+      "tools": [
+        {
+          "tool": "SQL and PL/pgSQL statements run in Postgres",
+          "kind": "program",
+          "for": "schema changes, indexes, RLS policies, grants, settings and diagnostics",
+          "origin": "third party"
+        },
+        {
+          "tool": "PgBouncer",
+          "kind": "program",
+          "for": "connection pooling between the application and the database",
+          "origin": "third party"
+        },
+        {
+          "tool": "pnpm test",
+          "kind": "shell command",
+          "for": "checking a new reference file before submitting it",
+          "origin": "third party"
+        },
+        {
+          "tool": "file and database tools of the agent",
+          "kind": "agent tool",
+          "for": "reading the rule files and running the SQL",
+          "origin": "built in"
+        }
+      ]
+    },
+    "machine_access": {
+      "paths": [
+        {
+          "path": "references/ rule files in the skill folder",
+          "operation": "read",
+          "scope": "skill folder"
+        },
+        {
+          "path": "/path/to/data.csv loaded with copy",
+          "operation": "read",
+          "scope": "unknown"
+        },
+        {
+          "path": "pgbouncer.ini",
+          "operation": "write",
+          "scope": "unknown"
+        }
+      ],
+      "settings": [
+        {
+          "name": "idle_in_transaction_session_timeout and idle_session_timeout",
+          "access": "set",
+          "reason": "to reclaim idle connections"
+        },
+        {
+          "name": "max_connections and work_mem",
+          "access": "set",
+          "reason": "to keep connection memory within the available RAM"
+        },
+        {
+          "name": "statement_timeout",
+          "access": "set",
+          "reason": "to abort runaway queries"
+        },
+        {
+          "name": "log_lock_waits and deadlock_timeout",
+          "access": "set",
+          "reason": "to log deadlocks"
+        },
+        {
+          "name": "app.current_user_id",
+          "access": "set",
+          "reason": "user context for RLS policies"
+        },
+        {
+          "name": "search_path",
+          "access": "set",
+          "reason": "fixed to empty inside SECURITY DEFINER functions"
+        },
+        {
+          "name": "autovacuum_vacuum_scale_factor and autovacuum_analyze_scale_factor",
+          "access": "set",
+          "reason": "to vacuum and analyze high-churn tables more often"
+        },
+        {
+          "name": "server_idle_timeout and client_idle_timeout in pgbouncer.ini",
+          "access": "set",
+          "reason": "idle timeouts at the pooler level"
+        }
+      ]
+    }
+  },
+  "what_is_known": {
+    "checks": [
+      {
+        "id": "C1",
+        "tool": "Snyk, skills.sh audit, version not stated",
+        "date": "2026-09-15",
+        "scope": "unknown",
+        "result": "pass, risk level LOW, no issues detected",
+        "report": "https://skills.sh/supabase/agent-skills/supabase-postgres-best-practices/security/snyk"
+      },
+      {
+        "id": "C2",
+        "tool": "Gen Agent Trust Hub, skills.sh audit, version not stated",
+        "date": "2026-09-15",
+        "scope": "the skill's guidance on privileges, RLS, SECURITY DEFINER, migrations and connection limits, as cited in its analysis",
+        "result": "pass, risk level SAFE, describes least privilege, RLS and SECURITY DEFINER guidance, idempotent migrations and resource limits, no issue listed",
+        "report": "https://skills.sh/supabase/agent-skills/supabase-postgres-best-practices/security/agent-trust-hub"
+      },
+      {
+        "id": "C3",
+        "tool": "Socket, skills.sh audit, version not stated",
+        "date": "2026-09-15",
+        "scope": "the skill package, hash 382ac24032a5e7a18215bef0aef6d65fe88054ad467474bae329956422dcf80f",
+        "result": "pass, checks for malicious behaviour, security concerns, code obfuscation and suspicious patterns",
+        "report": "https://skills.sh/supabase/agent-skills/supabase-postgres-best-practices/security/socket"
+      }
+    ],
+    "vulnerabilities": "none",
+    "risks": [
+      {
+        "risk": "A SECURITY DEFINER function exposes other users' rows when it lacks an identity check, since it runs with the creator's privileges and bypasses RLS.",
+        "source": "author",
+        "severity": "none",
+        "mitigation": "explicit auth.uid() check, a non-exposed schema and revoked EXECUTE, shown in the files",
+        "taxonomy": "not examined"
+      },
+      {
+        "risk": "SQL examples run unchanged against a live database change server-wide settings or remove data, as with alter system set max_connections = 100 or drop table events_2023_01.",
+        "source": "model",
+        "severity": "none",
+        "mitigation": "none stated",
+        "taxonomy": "not examined"
+      },
+      {
+        "risk": "A login role created from the least privilege example keeps the example's placeholder password when the statement is copied unchanged.",
+        "source": "model",
+        "severity": "none",
+        "mitigation": "none stated",
+        "taxonomy": "not examined"
+      }
+    ],
+    "limitations": [
+      "UUIDv7 primary keys require the pg_uuidv7 extension.",
+      "Named prepared statements fail in transaction-mode pooling, and session mode is needed for prepared statements and temp tables.",
+      "No dependency carries a version."
+    ],
+    "known_problems": [
+      {
+        "problem": "ERROR: prepared statement \"get_user\" does not exist under transaction-mode pooling",
+        "workaround": "use unnamed prepared statements, deallocate after use, or use session mode pooling"
+      },
+      {
+        "problem": "ADD CONSTRAINT IF NOT EXISTS causes a syntax error in migrations",
+        "workaround": "use a DO block that checks pg_constraint before adding the constraint"
+      },
+      {
+        "problem": "ERROR: relation \"users\" does not exist with quoted mixed-case identifiers",
+        "workaround": "use lowercase snake_case, or create views as a compatibility layer"
+      },
+      {
+        "problem": "deadlocks when transactions lock rows in different orders",
+        "workaround": "lock rows in a consistent order first, or update in a single statement"
+      },
+      {
+        "problem": "duplicate key error from check-then-insert",
+        "workaround": "use insert ... on conflict"
+      }
+    ],
+    "evaluations": "none"
+  },
+  "who_stands_behind_it": {
+    "authorship": {
+      "author": "supabase, organization Supabase, from the frontmatter metadata",
+      "publisher": "the supabase organisation on GitHub",
+      "signer": "none",
+      "contact": "not declared"
+    },
+    "license": {
+      "frontmatter": "MIT",
+      "license_file": "none",
+      "registry": "not declared",
+      "repository": "MIT, as GitHub detects it"
+    },
+    "maintenance": {
+      "last_change": "2026-07-30",
+      "registry_update": "not declared",
+      "deprecated": "not declared",
+      "first_seen": "2026-01-26",
+      "content_changes": 16,
+      "releases": 9,
+      "last_release": "2026-09-28"
+    }
+  },
+  "which_files": {
+    "version": {
+      "hash": "sha256:7ee0f93df8316c4e9ac54691261ab2c17d8ae8220924938f9a8d530c4199c66f",
+      "left_out": "none",
+      "author_version": "1.1.1",
+      "registry_version": "not declared",
+      "commit": "c9be0e93"
+    },
+    "source": {
+      "kind": "repository",
+      "location": "GitHub supabase/agent-skills, path skills/supabase-postgres-best-practices",
+      "commit": "c9be0e93",
+      "retrieved": "2026-11-11",
+      "also_listed_on": "skills.sh, https://skills.sh/supabase/agent-skills/supabase-postgres-best-practices",
+      "homepage": "not declared",
+      "produced_by": "none"
+    },
+    "files": [
+      {
+        "path": "CHANGELOG.md",
+        "bytes": 5684,
+        "sha256": "751ad110037c85d400018c9894716a04fa46357ff55c22b1169b280752e19e88",
+        "kind": "document",
+        "in_hash": true,
+        "executable": false
+      },
+      {
+        "path": "SKILL.md",
+        "bytes": 3231,
+        "sha256": "ad65e776f45e761bafc609d3f506c77c1032225aa65e0c4c02f241b8071e5855",
+        "kind": "document",
+        "in_hash": true,
+        "executable": false
+      },
+      {
+        "path": "references/_contributing.md",
+        "bytes": 4113,
+        "sha256": "191e039e7d94764e6073410b513b559f9a594e0fdf0252a30c2a2986df2ab3bc",
+        "kind": "document",
+        "in_hash": true,
+        "executable": false
+      },
+      {
+        "path": "references/_sections.md",
+        "bytes": 1682,
+        "sha256": "c9e992612b422c7122de0b7542ebc2450db283edaab08cfe86c6d657fcccccd5",
+        "kind": "document",
+        "in_hash": true,
+        "executable": false
+      },
+      {
+        "path": "references/_template.md",
+        "bytes": 1040,
+        "sha256": "6299954250f212caabe339d752c3e5313a8e07d1a182a4e4b425baee91df1bd2",
+        "kind": "document",
+        "in_hash": true,
+        "executable": false
+      },
+      {
+        "path": "references/advanced-full-text-search.md",
+        "bytes": 1468,
+        "sha256": "40c2606bbb4c4dce31308f201b24cc7f58c7df05b1d9c6856fe2b888d3b7cf28",
+        "kind": "document",
+        "in_hash": true,
+        "executable": false
+      },
+      {
+        "path": "references/advanced-jsonb-indexing.md",
+        "bytes": 1444,
+        "sha256": "24cacf6a8bc35901dd566d24502ce8e57f810a5c196b897e61d52726e521d106",
+        "kind": "document",
+        "in_hash": true,
+        "executable": false
+      },
+      {
+        "path": "references/conn-idle-timeout.md",
+        "bytes": 1282,
+        "sha256": "630588902c00fcec59a5988cc5d042f76dcf2c923a535abfd8c47dca205eaed5",
+        "kind": "document",
+        "in_hash": true,
+        "executable": false
+      },
+      {
+        "path": "references/conn-limits.md",
+        "bytes": 1325,
+        "sha256": "11b2a67a7c7679cbbc5d807bbb17e69c98484a581d0c8b929c03408f412b81b2",
+        "kind": "document",
+        "in_hash": true,
+        "executable": false
+      },
+      {
+        "path": "references/conn-pooling.md",
+        "bytes": 1382,
+        "sha256": "88cf086bf98ba865d2e9d0579974e1366b14157619d6a93e7da77be91084e4a5",
+        "kind": "document",
+        "in_hash": true,
+        "executable": false
+      },
+      {
+        "path": "references/conn-prepared-statements.md",
+        "bytes": 1529,
+        "sha256": "174e9332fe3dda5c99b2b00159fb1915ae36c00bab3a7882c14e73e4344e946e",
+        "kind": "document",
+        "in_hash": true,
+        "executable": false
+      },
+      {
+        "path": "references/data-batch-inserts.md",
+        "bytes": 1287,
+        "sha256": "531933b82d6a622d0fae29e0ea80be6fe5d78655adf2804c271ea84a1930de37",
+        "kind": "document",
+        "in_hash": true,
+        "executable": false
+      },
+      {
+        "path": "references/data-n-plus-one.md",
+        "bytes": 1361,
+        "sha256": "21a44905e5b16a42741892ec34bb1bfef124d049b140a76934a9acd0f46f5fc2",
+        "kind": "document",
+        "in_hash": true,
+        "executable": false
+      },
+      {
+        "path": "references/data-pagination.md",
+        "bytes": 1358,
+        "sha256": "73c9fa10a3d439bedea0e11b640bd25bf30dd50f0d9006cf85baf7c3151543fa",
+        "kind": "document",
+        "in_hash": true,
+        "executable": false
+      },
+      {
+        "path": "references/data-upsert.md",
+        "bytes": 1390,
+        "sha256": "2612af83b20a2701dde30ef1f8d7efd26b7e9eef84717226b8f038a2d2150ff7",
+        "kind": "document",
+        "in_hash": true,
+        "executable": false
+      },
+      {
+        "path": "references/lock-advisory.md",
+        "bytes": 1531,
+        "sha256": "c88d259dbf81c3771438f59a165f7eab8acd09999dd370bdf807521c73f35aab",
+        "kind": "document",
+        "in_hash": true,
+        "executable": false
+      },
+      {
+        "path": "references/lock-deadlock-prevention.md",
+        "bytes": 1855,
+        "sha256": "09aee46f51d7178c8e55fe056cd5a94a64ba2c122fe418e6900cd99f297b2347",
+        "kind": "document",
+        "in_hash": true,
+        "executable": false
+      },
+      {
+        "path": "references/lock-short-transactions.md",
+        "bytes": 1350,
+        "sha256": "5aa7f61095916986d39644b446cdbcd2bacca7ef698a3bb50b3f82dd60207602",
+        "kind": "document",
+        "in_hash": true,
+        "executable": false
+      },
+      {
+        "path": "references/lock-skip-locked.md",
+        "bytes": 1353,
+        "sha256": "6c45077f430f29cd9cd8f448c94d578e827e7bd023fcdaf717a756acb116fa4b",
+        "kind": "document",
+        "in_hash": true,
+        "executable": false
+      },
+      {
+        "path": "references/monitor-explain-analyze.md",
+        "bytes": 1441,
+        "sha256": "4cb67ffbf8e57f2e5b380b0beb4242528b513723ce314a2c2ffcf083bd4203d7",
+        "kind": "document",
+        "in_hash": true,
+        "executable": false
+      },
+      {
+        "path": "references/monitor-pg-stat-statements.md",
+        "bytes": 1418,
+        "sha256": "89dca99d4e894fcbdcac136be7ad9fbc03d1342904f065c1b198dc9cf495f098",
+        "kind": "document",
+        "in_hash": true,
+        "executable": false
+      },
+      {
+        "path": "references/monitor-vacuum-analyze.md",
+        "bytes": 1506,
+        "sha256": "2892272011710eb49b3f185ec12f15ce9ce4c365792c672f6e2a9c90da426a1a",
+        "kind": "document",
+        "in_hash": true,
+        "executable": false
+      },
+      {
+        "path": "references/query-composite-indexes.md",
+        "bytes": 1454,
+        "sha256": "73e42424e671f0266e74fdb220db3196790f69fb43e2b19c7b9483eb4971b554",
+        "kind": "document",
+        "in_hash": true,
+        "executable": false
+      },
+      {
+        "path": "references/query-covering-indexes.md",
+        "bytes": 1287,
+        "sha256": "daf2a7f0477fb7357b62b5fb5b185b1995a77a186347e45cb780e25e7a7589b6",
+        "kind": "document",
+        "in_hash": true,
+        "executable": false
+      },
+      {
+        "path": "references/query-index-types.md",
+        "bytes": 1521,
+        "sha256": "472a74f22c2df203bd0154999b3a5a0187cca2ab3d9a3978e305bb7c32f1a282",
+        "kind": "document",
+        "in_hash": true,
+        "executable": false
+      },
+      {
+        "path": "references/query-missing-indexes.md",
+        "bytes": 1218,
+        "sha256": "91ad8b0ff4365704b4830a7f077c6f140f7140fd5d3ce5cd0b92b160cf9e25f1",
+        "kind": "document",
+        "in_hash": true,
+        "executable": false
+      },
+      {
+        "path": "references/query-partial-indexes.md",
+        "bytes": 1347,
+        "sha256": "6448982bc8558c6555284958edc331b29239c6a0130e6b4501dd6d4da607a6dd",
+        "kind": "document",
+        "in_hash": true,
+        "executable": false
+      },
+      {
+        "path": "references/schema-constraints.md",
+        "bytes": 1880,
+        "sha256": "90e8efda3e9e81095e642911ad4aae2809d160f29414338fa997253238f510f8",
+        "kind": "document",
+        "in_hash": true,
+        "executable": false
+      },
+      {
+        "path": "references/schema-data-types.md",
+        "bytes": 1453,
+        "sha256": "e01b58c14c7f3f65d8ead580b9a4fcf70b83baaab0f9a5f83c569c9fd113e8c8",
+        "kind": "document",
+        "in_hash": true,
+        "executable": false
+      },
+      {
+        "path": "references/schema-foreign-key-indexes.md",
+        "bytes": 1679,
+        "sha256": "7587713d12a65a212365459b3d39e4717d8a79e4073b10bd62f1054d8192c0dd",
+        "kind": "document",
+        "in_hash": true,
+        "executable": false
+      },
+      {
+        "path": "references/schema-lowercase-identifiers.md",
+        "bytes": 1728,
+        "sha256": "4bc80f70865f2390872591f326c8a6be6456a0aeb5a7e5a2475d7cd9d43059ab",
+        "kind": "document",
+        "in_hash": true,
+        "executable": false
+      },
+      {
+        "path": "references/schema-partitioning.md",
+        "bytes": 1548,
+        "sha256": "541e13fbeaf4bb1485c9059d4c9417dbdb766cf16f4237cd63a04ada7ec45b90",
+        "kind": "document",
+        "in_hash": true,
+        "executable": false
+      },
+      {
+        "path": "references/schema-primary-keys.md",
+        "bytes": 1821,
+        "sha256": "3c8beabef82066f9a0838b926da0885117fd2d9a263aaf84cb5ca9e5f0d400e9",
+        "kind": "document",
+        "in_hash": true,
+        "executable": false
+      },
+      {
+        "path": "references/security-privileges.md",
+        "bytes": 1566,
+        "sha256": "095909274a4fb43df785d7144cf674eeb40284d2d45628f14af4108737b93663",
+        "kind": "document",
+        "in_hash": true,
+        "executable": false
+      },
+      {
+        "path": "references/security-rls-basics.md",
+        "bytes": 1372,
+        "sha256": "e04dd1a3a382aafdaaa73fe9f7976352acdde6e90c2a2470d281b94d4f44b096",
+        "kind": "document",
+        "in_hash": true,
+        "executable": false
+      },
+      {
+        "path": "references/security-rls-performance.md",
+        "bytes": 2103,
+        "sha256": "2e1faeca7d5746e246b1c78f9492fe2a9cfa41c4d7fa1e23c402d58fa18ea014",
+        "kind": "document",
+        "in_hash": true,
+        "executable": false
+      }
+    ],
+    "counts": {
+      "script": 0,
+      "document": 36,
+      "data": 0,
+      "binary": 0
+    },
+    "composition": "instructions only"
+  },
+  "about_this_card": {
+    "schema": "Skill Card v1.2",
+    "date": "2026-11-11",
+    "by": "Claude Opus 5.5, claude-opus-5-5, by hand from the skill files, the skills.sh listing and audits, and GitHub metadata, with the hash, file list, sizes, harness limits and repository figures computed by script",
+    "skill_run": false,
+    "scripts_analysed": false,
+    "security_check_run": false,
+    "external_service_contacted": false,
+    "registry_read": true,
+    "empty_values": 46
+  }
+}

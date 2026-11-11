@@ -1,0 +1,512 @@
+{
+  "schema": "Skill Card v1.2",
+  "skill": "deploy-to-vercel",
+  "version": "vercel-labs/agent-skills at 1a2c79d4",
+  "what_it_does": {
+    "name": "deploy-to-vercel",
+    "summary": "Instructions for deploying a project to Vercel from an agent, with the Vercel CLI and git. The agent checks for a git remote, a .vercel link and a logged-in CLI, then deploys by git push, by vercel deploy, or without an account through a temporary deployment with a claim URL. Deployments are previews unless the user explicitly asks for production, and the deployment URL is always shown to the user. Use it when the user asks to deploy an app, push it live or create a preview deployment.",
+    "tasks": [
+      "deploy a project to Vercel as a preview, or to production on request",
+      "detect the git remote, the .vercel link and the CLI login",
+      "select a team and link the project to Vercel",
+      "deploy by git push after the user approves",
+      "deploy without an account through vercel deploy --temporary",
+      "report the deployment URL and build status",
+      "works in Claude Code, claude.ai and Codex sandboxes"
+    ],
+    "author_description": "Deploy applications and websites to Vercel. Use when the user requests deployment actions like \"deploy my app\", \"deploy and give me the link\", \"push this live\", or \"create a preview deployment\".",
+    "outputs": [
+      {
+        "what": "a deployment on Vercel, preview by default, production when the user asks",
+        "kind": "action",
+        "form": "a Vercel deployment",
+        "destination": "Vercel"
+      },
+      {
+        "what": "a temporary deployment that needs no account",
+        "kind": "action",
+        "form": "a temporary production URL with a claim URL and an expiry",
+        "destination": "Vercel, until it expires unless claimed"
+      },
+      {
+        "what": "a linked Vercel project with automatic deployments on future git pushes",
+        "kind": "action",
+        "form": "a Vercel project and .vercel/project.json or .vercel/repo.json",
+        "destination": "Vercel and the project directory"
+      },
+      {
+        "what": "a commit of the project pushed to the git remote",
+        "kind": "action",
+        "form": "a git commit with the message deploy: <description of changes>",
+        "destination": "the git remote"
+      },
+      {
+        "what": "the deployment URL, build status, claim URL and expiry",
+        "kind": "information",
+        "form": "a message to the user",
+        "destination": "the conversation"
+      }
+    ],
+    "sample_output": "Your deployment is ready at [url]. It expires in [time] unless you claim it at [claimUrl]. Don't share the claim link.",
+    "inputs": [
+      {
+        "what": "the project to deploy",
+        "type": "a directory path",
+        "required": "optional",
+        "for": "every deploy",
+        "example": "vercel deploy [path] -y --no-wait"
+      },
+      {
+        "what": "the team to deploy to",
+        "type": "a team slug chosen from a list",
+        "required": "conditional",
+        "for": "accounts with several teams and an unlinked project",
+        "example": "vercel deploy [path] -y --no-wait --scope <team-slug>"
+      },
+      {
+        "what": "approval to commit and push",
+        "type": "an answer from the user",
+        "required": "conditional",
+        "for": "a linked project with a git remote",
+        "example": "This project is connected to Vercel via git. I can commit and push to trigger a deployment. Want me to proceed?"
+      },
+      {
+        "what": "an explicit request for production",
+        "type": "the user's request",
+        "required": "conditional",
+        "for": "production deploys",
+        "example": "vercel deploy [path] --prod -y --no-wait"
+      },
+      {
+        "what": "a Vercel login",
+        "type": "authentication in the user's browser",
+        "required": "conditional",
+        "for": "a CLI that is not authenticated, outside the no-auth fallback",
+        "example": "vercel login"
+      }
+    ],
+    "when_input_is_missing": [
+      {
+        "case": "the user does not ask for production",
+        "behaviour": "the project is deployed as a preview"
+      },
+      {
+        "case": "the user has only one team or a personal account",
+        "behaviour": "the team prompt is skipped and that account is used"
+      },
+      {
+        "case": "the project is already linked",
+        "behaviour": "the orgId in the .vercel files determines the team, with no question"
+      },
+      {
+        "case": "the CLI has no credentials and vercel login is not possible",
+        "behaviour": "the no-auth fallback deploys with npx vercel@latest deploy [path] --temporary -y"
+      },
+      {
+        "case": "the CLI is not authenticated after a git push",
+        "behaviour": "the user is told to check the Vercel dashboard or the commit status checks for the preview URL"
+      }
+    ],
+    "exclusions": "not declared",
+    "adoption": [
+      {
+        "registry": "skills.sh",
+        "installs": "189.0K",
+        "first_seen": "2026-03-06",
+        "counts": "the skill",
+        "read": "2026-11-11"
+      },
+      {
+        "registry": "GitHub",
+        "stars": 33874,
+        "forks": 2960,
+        "counts": "the vercel-labs/agent-skills repository, which holds 9 skills",
+        "read": "2026-11-11"
+      }
+    ]
+  },
+  "what_it_needs": {
+    "compatibility": {
+      "harnesses": "Claude Code, claude.ai and Codex, named in the agent-specific notes",
+      "models": "not declared",
+      "capabilities": "not declared",
+      "fits": {
+        "Agent Skills specification": "fits, name 16 characters, description 194 characters, body 223 lines and about 2,359 tokens",
+        "Codex": "does not fit, SKILL.md is 9,721 bytes, 1,721 over the 8,000 byte cut on the injected file",
+        "Claude Code": "fits, 230 lines, listing text 194 characters",
+        "ClawHub": "fits, folder 9,721 bytes"
+      }
+    },
+    "software_dependencies": [
+      {
+        "name": "vercel, the Vercel CLI",
+        "kind": "package",
+        "version": "not declared, latest when run with npx vercel@latest",
+        "for": "run"
+      },
+      {
+        "name": "git",
+        "kind": "binary",
+        "version": "not declared",
+        "for": "run"
+      },
+      {
+        "name": "npm and npx",
+        "kind": "binary",
+        "version": "not declared",
+        "for": "install"
+      }
+    ],
+    "credentials": [
+      {
+        "kind": "other",
+        "name": "the Vercel CLI login from vercel login",
+        "used_for": "linking, deploying and listing teams and deployments",
+        "from": "prompt to the user",
+        "goes_to": "Vercel"
+      }
+    ],
+    "cost": {
+      "context_tokens": {
+        "discovery": 49,
+        "load": 2430,
+        "on_demand": 0,
+        "on_demand_files": "none"
+      },
+      "run_tokens": "not examined",
+      "services": [
+        {
+          "name": "Vercel",
+          "needs": "account",
+          "price": "not declared",
+          "quota": "not declared",
+          "calls_per_use": "not declared"
+        }
+      ]
+    }
+  },
+  "what_it_touches": {
+    "side_effects": {
+      "install": "changes state",
+      "run": "changes state",
+      "changes": [
+        {
+          "what": "installs the Vercel CLI globally with npm install -g vercel",
+          "affects": "software environment",
+          "confirmation": "not declared",
+          "reversible": "not declared"
+        },
+        {
+          "what": "links the project, creating a Vercel project and .vercel/project.json or .vercel/repo.json",
+          "affects": "external service",
+          "confirmation": "no",
+          "reversible": "not declared"
+        },
+        {
+          "what": "stages all changes with git add . and commits them",
+          "affects": "workspace",
+          "confirmation": "yes",
+          "reversible": "not declared"
+        },
+        {
+          "what": "pushes to the git remote, which triggers a Vercel deployment",
+          "affects": "external service",
+          "confirmation": "yes",
+          "reversible": "not declared"
+        },
+        {
+          "what": "deploys the project with vercel deploy, as a preview or with --prod",
+          "affects": "external service",
+          "confirmation": "not declared",
+          "reversible": "not declared"
+        },
+        {
+          "what": "deploys to a temporary production URL with vercel deploy --temporary",
+          "affects": "external service",
+          "confirmation": "not declared",
+          "reversible": "not declared"
+        }
+      ]
+    },
+    "network_access": [
+      {
+        "host": "vercel.com, named as *.vercel.com in the files",
+        "purpose": "publish",
+        "when": "every login, link, deploy and status check",
+        "sends": [
+          "file content",
+          "credential"
+        ],
+        "receives": "deployment URL, build status, team list, claim URL and expiry"
+      },
+      {
+        "host": "registry.npmjs.org",
+        "purpose": "install",
+        "when": "when the CLI is installed with npm or run with npx vercel@latest",
+        "sends": [
+          "none"
+        ],
+        "receives": "the vercel package"
+      },
+      {
+        "host": "the git remote, not named in the files",
+        "purpose": "publish",
+        "when": "when a linked project with a git remote is deployed by git push",
+        "sends": [
+          "file content"
+        ],
+        "receives": "not declared"
+      }
+    ],
+    "tools_and_permissions": {
+      "allowed_tools": "none",
+      "tools": [
+        {
+          "tool": "vercel whoami, teams list, link, deploy, inspect, ls and login",
+          "kind": "shell command",
+          "for": "checking login, choosing a team, linking, deploying and reading status",
+          "origin": "third party"
+        },
+        {
+          "tool": "git remote get-url, git add, git commit, git push",
+          "kind": "shell command",
+          "for": "detecting the remote and deploying by git push",
+          "origin": "third party"
+        },
+        {
+          "tool": "npm install -g vercel and npx vercel@latest",
+          "kind": "shell command",
+          "for": "installing or running the Vercel CLI",
+          "origin": "third party"
+        },
+        {
+          "tool": "cat and sleep",
+          "kind": "shell command",
+          "for": "reading the .vercel files and waiting before listing deployments",
+          "origin": "third party"
+        },
+        {
+          "tool": "sandbox_permissions=require_escalated",
+          "kind": "permission",
+          "for": "escalated network access for the deploy command in Codex when the sandbox blocks it",
+          "origin": "built in"
+        },
+        {
+          "tool": "shell tool of the agent",
+          "kind": "agent tool",
+          "for": "running the CLI and git commands, full shell access in Claude Code",
+          "origin": "built in"
+        }
+      ]
+    },
+    "machine_access": {
+      "paths": [
+        {
+          "path": ".vercel/project.json and .vercel/repo.json",
+          "operation": "read",
+          "scope": "workspace"
+        },
+        {
+          "path": ".vercel/project.json or .vercel/repo.json, created by vercel link",
+          "operation": "write",
+          "scope": "workspace"
+        },
+        {
+          "path": "the project directory, [path], uploaded or committed",
+          "operation": "read",
+          "scope": "workspace"
+        },
+        {
+          "path": "the git repository of the project, through git add . and git commit",
+          "operation": "write",
+          "scope": "workspace"
+        },
+        {
+          "path": "the global npm install location, through npm install -g vercel",
+          "operation": "write",
+          "scope": "unknown"
+        }
+      ],
+      "settings": [
+        {
+          "name": "orgId in .vercel/project.json or .vercel/repo.json",
+          "access": "read",
+          "reason": "determines the team of a linked project"
+        },
+        {
+          "name": "sandbox_permissions=require_escalated",
+          "access": "set",
+          "reason": "only when sandboxing blocks the deploy network call in Codex"
+        },
+        {
+          "name": "allowed domains at https://claude.ai/settings/capabilities",
+          "access": "set",
+          "reason": "the user adds *.vercel.com and registry.npmjs.org after a network egress error on claude.ai"
+        }
+      ]
+    }
+  },
+  "what_is_known": {
+    "checks": [
+      {
+        "id": "C1",
+        "tool": "Snyk, skills.sh audit, version not stated",
+        "date": "2026-10-28",
+        "scope": "deploy.sh and deploy-codex.sh, as named in its analysis, scripts that are not among the files of this version",
+        "result": "warn, risk level MEDIUM, 1 issue, W012 unverifiable external dependency, runtime URL that controls agent, scored medium risk 0.30",
+        "report": "https://skills.sh/vercel-labs/agent-skills/deploy-to-vercel/security/snyk"
+      },
+      {
+        "id": "C2",
+        "tool": "Gen Agent Trust Hub, skills.sh audit, version not stated",
+        "date": "2026-10-28",
+        "scope": "the instructions and the deployment scripts, as described in its analysis, scripts that are not among the files of this version",
+        "result": "pass, risk level SAFE, flags EXTERNAL_DOWNLOADS and COMMAND_EXECUTION, describes official Vercel domains, exclusion of .env and .git from the upload, npm install of the CLI and approval before git push",
+        "report": "https://skills.sh/vercel-labs/agent-skills/deploy-to-vercel/security/agent-trust-hub"
+      },
+      {
+        "id": "C3",
+        "tool": "Socket, skills.sh audit, version not stated",
+        "date": "2026-10-28",
+        "scope": "the skill package, hash 9b883827e904cd6c93a98457f1ea5aaae1dfdb30ae704bddf5e9e70c9d10de36",
+        "result": "pass, checks for malicious behaviour, security concerns, code obfuscation and suspicious patterns",
+        "report": "https://skills.sh/vercel-labs/agent-skills/deploy-to-vercel/security/socket"
+      }
+    ],
+    "vulnerabilities": [
+      {
+        "finding": "Unverifiable external dependency detected, runtime URL that controls agent, W012",
+        "check": "C1",
+        "severity": "MEDIUM, scored 0.30",
+        "location": "deploy.sh and deploy-codex.sh, which are not among the files at 1a2c79d4",
+        "status": "open",
+        "fix": "not stated"
+      }
+    ],
+    "risks": [
+      {
+        "risk": "In the package C1 examined, which held deploy.sh and deploy-codex.sh, those scripts post project code to claude-skills-deploy.vercel.com and codex-deploy-skills.vercel.sh and take instructions or URLs back at run time, an external dependency the agent cannot verify.",
+        "source": "check C1",
+        "severity": "MEDIUM by C1",
+        "mitigation": "none stated, the scripts C1 names are not among the files at 1a2c79d4",
+        "taxonomy": "not examined"
+      },
+      {
+        "risk": "Anyone who gets the claim link of a temporary deployment can claim that deployment.",
+        "source": "author",
+        "severity": "none",
+        "mitigation": "the user is told not to share the claim link, in place in the message",
+        "taxonomy": "not examined"
+      },
+      {
+        "risk": "git add . stages every change in the project, so files with secrets that are not ignored can be committed and pushed to the remote and deployed.",
+        "source": "model",
+        "severity": "none",
+        "mitigation": "the user is asked before pushing, in place, no files are excluded",
+        "taxonomy": "not examined"
+      },
+      {
+        "risk": "The no-auth fallback deploys the project to a temporary production URL without a confirmation step, so project files become reachable on the web.",
+        "source": "model",
+        "severity": "none",
+        "mitigation": "none stated",
+        "taxonomy": "not examined"
+      }
+    ],
+    "limitations": [
+      "Temporary deployments don't work in CI or in a directory already linked to a Vercel project.",
+      "A temporary deployment expires unless it is claimed.",
+      "vercel login is not possible in non-interactive environments.",
+      "Without an authenticated CLI, the preview URL of a git push deploy has to be found in the Vercel dashboard or the commit status checks.",
+      "vercel link without --repo matches by directory name and often fails when the local folder and the Vercel project are named differently."
+    ],
+    "known_problems": [
+      {
+        "problem": "deployment fails due to network restrictions on claude.ai",
+        "workaround": "add *.vercel.com and registry.npmjs.org to the allowed domains at https://claude.ai/settings/capabilities and deploy again"
+      },
+      {
+        "problem": "deployment fails due to network issues in Codex or a sandboxed environment",
+        "workaround": "rerun the deploy command with sandbox_permissions=require_escalated"
+      },
+      {
+        "problem": "vercel login or vercel deploy fails with authentication errors",
+        "workaround": "use the no-auth fallback, vercel deploy --temporary -y"
+      },
+      {
+        "problem": "state detection in an unlinked directory prompts or links as a side effect",
+        "workaround": "use only vercel whoami there, not vercel project inspect, vercel ls or vercel link"
+      }
+    ],
+    "evaluations": "none"
+  },
+  "who_stands_behind_it": {
+    "authorship": {
+      "author": "vercel, from the frontmatter metadata",
+      "publisher": "the vercel-labs organisation on GitHub",
+      "signer": "none",
+      "contact": "not declared"
+    },
+    "license": {
+      "frontmatter": "not declared",
+      "license_file": "none",
+      "registry": "not declared",
+      "repository": "none"
+    },
+    "maintenance": {
+      "last_change": "2026-10-27",
+      "registry_update": "not declared",
+      "deprecated": "not declared",
+      "first_seen": "2026-03-06",
+      "content_changes": 3,
+      "releases": 5,
+      "last_release": "2026-10-27"
+    }
+  },
+  "which_files": {
+    "version": {
+      "hash": "sha256:cbf9be989f413417d26315a017b88a20e32dd9abe3d9f0038ae17498ef222828",
+      "left_out": "none",
+      "author_version": "4.0.0",
+      "registry_version": "not declared",
+      "commit": "1a2c79d4"
+    },
+    "source": {
+      "kind": "repository",
+      "location": "GitHub vercel-labs/agent-skills, path skills/deploy-to-vercel",
+      "commit": "1a2c79d4",
+      "retrieved": "2026-11-11",
+      "also_listed_on": "skills.sh, https://skills.sh/vercel-labs/agent-skills/deploy-to-vercel",
+      "homepage": "not declared",
+      "produced_by": "none"
+    },
+    "files": [
+      {
+        "path": "SKILL.md",
+        "bytes": 9721,
+        "sha256": "418ca2a60d35c551e6cb645f4e82c1b704a8335486ffe74b1b3d0617a17504e5",
+        "kind": "document",
+        "in_hash": true,
+        "executable": false
+      }
+    ],
+    "counts": {
+      "script": 0,
+      "document": 1,
+      "data": 0,
+      "binary": 0
+    },
+    "composition": "instructions only"
+  },
+  "about_this_card": {
+    "schema": "Skill Card v1.2",
+    "date": "2026-11-11",
+    "by": "Claude Opus 5.5, claude-opus-5-5, by hand from the skill files, the skills.sh listing and audits, and GitHub metadata, with the hash, file list, sizes, harness limits and repository figures computed by script",
+    "skill_run": false,
+    "scripts_analysed": false,
+    "security_check_run": false,
+    "external_service_contacted": false,
+    "registry_read": true,
+    "empty_values": 43
+  }
+}

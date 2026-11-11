@@ -1,0 +1,827 @@
+{
+  "schema": "Skill Card v1.2",
+  "skill": "shadcn",
+  "version": "shadcn-ui/ui at dd41d19e",
+  "what_it_does": {
+    "name": "shadcn",
+    "summary": "Instructions, rule files and one Node script for working with shadcn/ui projects through the shadcn CLI. At load the project context is injected by running npx shadcn@latest info --json, and the agent then searches registries, adds, updates and composes components, applies presets and builds registries, following rules on styling, forms, composition, icons and chat UI. A DESIGN.md workflow scaffolds a new app, maps a brand spec onto the theme and builds a design system page, checked with showcase-coverage.mjs. Use it in any project with a components.json file or when working with shadcn/ui, registries or presets.",
+    "tasks": [
+      "search registries and add or update components with the CLI",
+      "compose UI from existing components following the critical rules",
+      "build chat and assistant UIs from the chat primitives",
+      "initialize projects and apply or switch presets",
+      "author and build custom registries",
+      "turn a DESIGN.md or brand spec into a themed app and design system page"
+    ],
+    "author_description": "Manages shadcn components and projects — adding, searching, fixing, debugging, styling, and composing UI, including chat interfaces. Provides project context, component docs, and usage examples. Applies when working with shadcn/ui, component registries, presets, --preset codes, or any project with a components.json file. Also triggers for \"shadcn init\", \"create an app with --preset\", \"switch to --preset\", and for building a design system or applying a DESIGN.md or brand spec to shadcn/ui.",
+    "outputs": [
+      {
+        "what": "component, block and hook source files added or updated in the project",
+        "kind": "action",
+        "form": "TSX and TS files",
+        "destination": "the resolvedPaths of components.json, such as the ui directory"
+      },
+      {
+        "what": "React code written by the agent that composes the components",
+        "kind": "information",
+        "form": "TSX files",
+        "destination": "files in the user's project"
+      },
+      {
+        "what": "theme changes, CSS variables, radius, shadows, fonts and type utilities",
+        "kind": "action",
+        "form": "CSS edits",
+        "destination": "the tailwindCssFile, typically globals.css"
+      },
+      {
+        "what": "a new app scaffolded from a template and preset, with a design system page",
+        "kind": "action",
+        "form": "project folder",
+        "destination": "a new folder named after the app, sections in src/showcase or app/design-system"
+      },
+      {
+        "what": "built registry item JSON files",
+        "kind": "information",
+        "form": "JSON files",
+        "destination": "./public/r by default"
+      },
+      {
+        "what": "project info, documentation URLs, search results, dry-run diffs and coverage results",
+        "kind": "information",
+        "form": "terminal text or JSON",
+        "destination": "the agent's context"
+      },
+      {
+        "what": "a report after a design system build with app path, dev URL, mappings, low contrast pairs and deviations",
+        "kind": "information",
+        "form": "message to the user",
+        "destination": "the conversation"
+      }
+    ],
+    "sample_output": "button docs https://ui.shadcn.com/docs/components/radix/button",
+    "inputs": [
+      {
+        "what": "a project with a components.json file",
+        "type": "a project folder",
+        "required": "conditional",
+        "for": "every task on an existing project, apply and project info",
+        "example": "npx shadcn@latest info --json"
+      },
+      {
+        "what": "the components, blocks or registry items to add",
+        "type": "names, registry-prefixed names, GitHub item addresses, URLs or local paths",
+        "required": "conditional",
+        "for": "adding or updating components",
+        "example": "npx shadcn@latest add @magicui/shimmer-button"
+      },
+      {
+        "what": "the registry to take a block or component from",
+        "type": "a registry namespace or owner/repo",
+        "required": "conditional",
+        "for": "adding a block or component the user names without a registry",
+        "example": "npx shadcn@latest search @tailark -q \"stats\""
+      },
+      {
+        "what": "a preset",
+        "type": "a preset code, style name or URL",
+        "required": "optional",
+        "for": "init, apply and switching presets",
+        "example": "npx shadcn@latest apply a2r6bw --only theme,font"
+      },
+      {
+        "what": "a DESIGN.md or brand spec",
+        "type": "a path, URL or pasted content",
+        "required": "conditional",
+        "for": "building a design system",
+        "example": "Use the DESIGN.md in this folder"
+      },
+      {
+        "what": "a template and an app name",
+        "type": "CLI flags",
+        "required": "optional",
+        "for": "creating a new project",
+        "example": "npx shadcn@latest init --name my-app --preset a2r6bw --template vite"
+      }
+    ],
+    "when_input_is_missing": [
+      {
+        "case": "the user asks for a block or component without naming a registry",
+        "behaviour": "the agent asks which registry to use and never defaults to one"
+      },
+      {
+        "case": "the user switches presets",
+        "behaviour": "the agent asks first whether to overwrite, partially apply, merge or skip"
+      },
+      {
+        "case": "no preset code is given for a design system",
+        "behaviour": "the agent picks the style closest to the DESIGN.md geometry and states the reason in one line"
+      },
+      {
+        "case": "the DESIGN.md path cannot be read",
+        "behaviour": "the agent asks the user to copy it into the working directory and does not guess its contents"
+      },
+      {
+        "case": "init gets neither --preset nor --base",
+        "behaviour": "the CLI stops at an interactive library prompt, even with -y"
+      },
+      {
+        "case": "apply gets no preset",
+        "behaviour": "the CLI offers to open the custom preset builder on ui.shadcn.com/create"
+      },
+      {
+        "case": "the project has no components.json",
+        "behaviour": "apply does not work and the MCP tool get_project_registries errors"
+      }
+    ],
+    "exclusions": "not declared",
+    "adoption": [
+      {
+        "registry": "skills.sh",
+        "installs": "144.0K",
+        "first_seen": "2026-03-06",
+        "counts": "the skill",
+        "read": "2026-11-11"
+      },
+      {
+        "registry": "GitHub",
+        "stars": 127891,
+        "forks": 11339,
+        "counts": "the shadcn-ui/ui repository, which holds 2 skills",
+        "read": "2026-11-11"
+      }
+    ]
+  },
+  "what_it_needs": {
+    "compatibility": {
+      "harnesses": "not declared",
+      "models": "not declared",
+      "capabilities": "not declared",
+      "fits": {
+        "Agent Skills specification": "fits, name 6 characters, description 493 characters, body 290 lines and about 5,237 tokens, over the recommended 5,000 tokens, frontmatter fields the specification does not define, user-invocable",
+        "Codex": "does not fit, SKILL.md is 21,606 bytes, 13,606 over the 8,000 byte cut on the injected file",
+        "Claude Code": "fits, 296 lines, listing text 493 characters",
+        "ClawHub": "fits, folder 158,662 bytes"
+      }
+    },
+    "software_dependencies": [
+      {
+        "name": "shadcn CLI, shadcn@latest",
+        "kind": "package",
+        "version": "latest",
+        "for": "run"
+      },
+      {
+        "name": "npx, pnpm dlx or bunx, the project's package runner",
+        "kind": "binary",
+        "version": "not declared",
+        "for": "run"
+      },
+      {
+        "name": "Node.js, node for showcase-coverage.mjs",
+        "kind": "runtime",
+        "version": "not declared",
+        "for": "run"
+      },
+      {
+        "name": "Tailwind CSS, v3 or v4",
+        "kind": "package",
+        "version": "v3 or v4",
+        "for": "run"
+      },
+      {
+        "name": "TypeScript, tsc",
+        "kind": "package",
+        "version": "not declared",
+        "for": "example"
+      },
+      {
+        "name": "@fontsource-variable fonts, such as @fontsource-variable/inter",
+        "kind": "package",
+        "version": "not declared",
+        "for": "example"
+      },
+      {
+        "name": "next-themes",
+        "kind": "package",
+        "version": "not declared",
+        "for": "example"
+      },
+      {
+        "name": "sonner",
+        "kind": "package",
+        "version": "not declared",
+        "for": "example"
+      },
+      {
+        "name": "git, for git ls-remote on GitHub registry refs",
+        "kind": "binary",
+        "version": "not declared",
+        "for": "run"
+      }
+    ],
+    "credentials": [
+      {
+        "kind": "token",
+        "name": "MY_TOKEN in the Authorization header of a private registry",
+        "used_for": "authenticating to a private registry configured in components.json",
+        "from": "environment variable",
+        "goes_to": "the private registry host, https://private.com in the example"
+      }
+    ],
+    "cost": {
+      "context_tokens": {
+        "discovery": 124,
+        "load": 5402,
+        "on_demand": 27695,
+        "on_demand_files": [
+          "rules/styling.md",
+          "rules/forms.md",
+          "rules/composition.md",
+          "rules/base-vs-radix.md",
+          "rules/icons.md",
+          "rules/chat.md",
+          "cli.md",
+          "registry.md",
+          "customization.md",
+          "design-system.md",
+          "design-system-page.md"
+        ]
+      },
+      "run_tokens": "not examined",
+      "services": "none"
+    }
+  },
+  "what_it_touches": {
+    "side_effects": {
+      "install": "read only",
+      "run": "changes state",
+      "changes": [
+        {
+          "what": "adds component source files and their npm dependencies to the project",
+          "affects": "workspace",
+          "confirmation": "not declared",
+          "reversible": "not declared"
+        },
+        {
+          "what": "overwrites existing component files with --overwrite",
+          "affects": "workspace",
+          "confirmation": "yes",
+          "reversible": "not declared"
+        },
+        {
+          "what": "apply overwrites preset-driven config, fonts, CSS variables and detected UI components",
+          "affects": "workspace",
+          "confirmation": "yes",
+          "reversible": "not declared"
+        },
+        {
+          "what": "init creates a new project or rewrites components.json and CSS with --force",
+          "affects": "workspace",
+          "confirmation": "not declared",
+          "reversible": "not declared"
+        },
+        {
+          "what": "edits the global CSS file and the cva variants of installed components",
+          "affects": "workspace",
+          "confirmation": "not declared",
+          "reversible": "not declared"
+        },
+        {
+          "what": "installs Fontsource fonts and other packages with the project's package manager",
+          "affects": "software environment",
+          "confirmation": "not declared",
+          "reversible": "not declared"
+        },
+        {
+          "what": "shadcn mcp init writes MCP config for the editor",
+          "affects": "workspace",
+          "confirmation": "not declared",
+          "reversible": "not declared"
+        },
+        {
+          "what": "build writes registry JSON files to ./public/r",
+          "affects": "workspace",
+          "confirmation": "not declared",
+          "reversible": "not declared"
+        }
+      ]
+    },
+    "network_access": [
+      {
+        "host": "the npm registry, not named in the files",
+        "purpose": "install",
+        "when": "each run of npx shadcn@latest, including at load, and package installs",
+        "sends": [
+          "none"
+        ],
+        "receives": "the shadcn CLI and component dependencies"
+      },
+      {
+        "host": "ui.shadcn.com",
+        "purpose": "data source",
+        "when": "fetching component docs, the official registry, presets and the community registry index",
+        "sends": [
+          "query text"
+        ],
+        "receives": "documentation pages, registry items and preset data"
+      },
+      {
+        "host": "raw.githubusercontent.com",
+        "purpose": "data source",
+        "when": "fetching component examples and public GitHub registry files",
+        "sends": [
+          "none"
+        ],
+        "receives": "example source and registry.json files"
+      },
+      {
+        "host": "github.com",
+        "purpose": "data source",
+        "when": "resolving GitHub registry refs with git ls-remote",
+        "sends": [
+          "none"
+        ],
+        "receives": "commit SHAs"
+      },
+      {
+        "host": "third-party registries configured in components.json, such as https://acme.com/r/{name}.json",
+        "purpose": "data source",
+        "when": "searching, viewing or adding items from a namespaced registry",
+        "sends": [
+          "query text",
+          "credential"
+        ],
+        "receives": "registry item payloads with source files"
+      }
+    ],
+    "tools_and_permissions": {
+      "allowed_tools": "Bash(npx shadcn@latest *), Bash(pnpm dlx shadcn@latest *), Bash(bunx --bun shadcn@latest *)",
+      "tools": [
+        {
+          "tool": "npx shadcn@latest, pnpm dlx shadcn@latest or bunx --bun shadcn@latest",
+          "kind": "shell command",
+          "for": "info, search, docs, view, add, init, apply, preset and build",
+          "origin": "third party"
+        },
+        {
+          "tool": "node with scripts/showcase-coverage.mjs",
+          "kind": "program",
+          "for": "listing components no showcase file imports",
+          "origin": "skill"
+        },
+        {
+          "tool": "npx tsc --noEmit",
+          "kind": "shell command",
+          "for": "typechecking the app",
+          "origin": "third party"
+        },
+        {
+          "tool": "npm install, pnpm add",
+          "kind": "shell command",
+          "for": "installing fonts and other non-shadcn dependencies",
+          "origin": "third party"
+        },
+        {
+          "tool": "ls and grep",
+          "kind": "shell command",
+          "for": "counting component files and finding classes to edit",
+          "origin": "third party"
+        },
+        {
+          "tool": "shadcn mcp, the shadcn MCP server",
+          "kind": "external server",
+          "for": "searching, viewing and installing registry items",
+          "origin": "third party"
+        },
+        {
+          "tool": "the agent's fetch and file tools",
+          "kind": "agent tool",
+          "for": "fetching documentation URLs and reading and editing project files",
+          "origin": "built in"
+        },
+        {
+          "tool": "a browser with the dev server",
+          "kind": "program",
+          "for": "verifying console errors, overflow, dark mode and screenshots",
+          "origin": "third party"
+        }
+      ]
+    },
+    "machine_access": {
+      "paths": [
+        {
+          "path": "components.json",
+          "operation": "read",
+          "scope": "workspace"
+        },
+        {
+          "path": "the resolvedPaths.ui directory and other component paths",
+          "operation": "write",
+          "scope": "workspace"
+        },
+        {
+          "path": "the tailwindCssFile, typically globals.css",
+          "operation": "write",
+          "scope": "workspace"
+        },
+        {
+          "path": "tailwind.config.js for Tailwind v3",
+          "operation": "write",
+          "scope": "workspace"
+        },
+        {
+          "path": "DESIGN.md, copied into the new app root",
+          "operation": "read",
+          "scope": "unknown"
+        },
+        {
+          "path": "a new app folder named by the agent",
+          "operation": "write",
+          "scope": "workspace"
+        },
+        {
+          "path": "assets/showcase/ and scripts/showcase-coverage.mjs",
+          "operation": "read",
+          "scope": "skill folder"
+        },
+        {
+          "path": ".mcp.json, .cursor/mcp.json, .vscode/mcp.json, opencode.json",
+          "operation": "write",
+          "scope": "workspace"
+        },
+        {
+          "path": "~/.codex/config.toml, edited by hand",
+          "operation": "write",
+          "scope": "user home"
+        },
+        {
+          "path": "./public/r",
+          "operation": "write",
+          "scope": "workspace"
+        }
+      ],
+      "settings": [
+        {
+          "name": "${VAR} references in registry config, resolved from environment variables",
+          "access": "read",
+          "reason": "filling registry headers such as Authorization"
+        },
+        {
+          "name": "registries in components.json",
+          "access": "set",
+          "reason": "configuring namespaced and authenticated registries"
+        },
+        {
+          "name": "packageManager",
+          "access": "read",
+          "reason": "choosing the package runner and install command"
+        }
+      ]
+    }
+  },
+  "what_is_known": {
+    "checks": [
+      {
+        "id": "C1",
+        "tool": "Snyk, skills.sh audit, version not stated",
+        "date": "2026-10-15",
+        "scope": "unknown",
+        "result": "pass, risk level LOW, no issues detected",
+        "report": "https://skills.sh/shadcn-ui/ui/shadcn/security/snyk"
+      },
+      {
+        "id": "C2",
+        "tool": "Gen Agent Trust Hub, skills.sh audit, version not stated",
+        "date": "2026-10-15",
+        "scope": "SKILL.md and showcase-coverage.mjs, as cited in its analysis",
+        "result": "pass, risk level SAFE, four surfaces described, dynamic context injection, remote code execution through registry installs, indirect prompt injection and command execution",
+        "report": "https://skills.sh/shadcn-ui/ui/shadcn/security/agent-trust-hub"
+      },
+      {
+        "id": "C3",
+        "tool": "Socket, skills.sh audit, version not stated",
+        "date": "2026-10-15",
+        "scope": "the skill package, hash deccb8cad659fc94eca907b46c4b003dc13967a92eece6525c09ba54cbacbcf4",
+        "result": "warn, 1 alert, Anomaly LOW in SKILL.md, load-time pre-execution, mutable @latest package execution and third-party registry installs, medium supply-chain risk",
+        "report": "https://skills.sh/shadcn-ui/ui/shadcn/security/socket"
+      }
+    ],
+    "vulnerabilities": [
+      {
+        "finding": "Anomaly, suspicious, load-time pre-execution, mutable @latest package execution and third-party registry installs",
+        "check": "C3",
+        "severity": "LOW, severity 58 percent, confidence 89 percent",
+        "location": "SKILL.md",
+        "status": "open",
+        "fix": "not stated"
+      }
+    ],
+    "risks": [
+      {
+        "risk": "Code from third-party registries or GitHub repositories enters the project when the agent adds items from them, widening the supply chain.",
+        "source": "check C2, check C3",
+        "severity": "SAFE overall by C2, LOW by C3",
+        "mitigation": "in place in the instructions, preview with --dry-run, --diff and --view and review added files",
+        "taxonomy": "not examined"
+      },
+      {
+        "risk": "A changed or compromised shadcn package runs on the machine, since npx shadcn@latest is executed at load and on every command without a pinned version.",
+        "source": "check C3",
+        "severity": "LOW by C3",
+        "mitigation": "none stated",
+        "taxonomy": "not examined"
+      },
+      {
+        "risk": "Instructions hidden in fetched documentation pages or registry item payloads reach the agent, since their content is read into its context.",
+        "source": "check C2",
+        "severity": "SAFE overall by C2",
+        "mitigation": "C2 notes that documentation comes from vendor domains and external files are to be verified",
+        "taxonomy": "https://www.ibm.com/docs/en/watsonx/saas?topic=ai-risk-atlas"
+      },
+      {
+        "risk": "Local changes to components are lost when apply or add --overwrite replaces the component files.",
+        "source": "model",
+        "severity": "none",
+        "mitigation": "in place in the instructions, ask the user first and never use --overwrite without explicit approval",
+        "taxonomy": "not examined"
+      },
+      {
+        "risk": "A registry token resolved from an environment variable is sent to whatever URL a registry entry in components.json names.",
+        "source": "model",
+        "severity": "none",
+        "mitigation": "none stated",
+        "taxonomy": "not examined"
+      }
+    ],
+    "limitations": [
+      "GitHub registry addresses support public github.com repositories only, private repos and GitHub Enterprise are not supported.",
+      "apply only works in an existing project with a components.json file.",
+      "apply --only supports theme and font, icon is not supported because icon changes may require a full component reinstall.",
+      "init with neither --preset nor --base stops at an interactive library prompt, even with -y.",
+      "Laravel does not support monorepo scaffolding.",
+      "Preset codes do not encode the base, so a scratch directory needs --base passed explicitly.",
+      "macOS privacy can block reading a DESIGN.md in ~/Downloads or ~/Desktop for some hosts.",
+      "Brand fonts are usually licensed, so named substitutes are installed instead."
+    ],
+    "known_problems": [
+      {
+        "problem": "inline Command scrolls its first item into view on mount and jumps the page",
+        "workaround": "control it with value and onValueChange, initial value none"
+      },
+      {
+        "problem": "the default Sidebar is fixed and escapes the preview frame",
+        "workaround": "use SidebarProvider with min-h-0 and Sidebar collapsible none"
+      },
+      {
+        "problem": "base Select shows the raw value in SelectValue",
+        "workaround": "pass items to Select"
+      },
+      {
+        "problem": "Resizable with react-resizable-panels v4 dropped direction and numeric sizes",
+        "workaround": "use orientation horizontal and defaultSize as a percentage"
+      },
+      {
+        "problem": "hardcoded import paths in third-party registry components",
+        "workaround": "rewrite imports to the ui alias from npx shadcn@latest info"
+      },
+      {
+        "problem": "root tsc --noEmit checks nothing in Vite apps",
+        "workaround": "run npx tsc -p tsconfig.app.json --noEmit"
+      },
+      {
+        "problem": "cn() drops unknown text-* classes next to color classes",
+        "workaround": "use type-* utilities instead of --text-* theme keys"
+      }
+    ],
+    "evaluations": "none"
+  },
+  "who_stands_behind_it": {
+    "authorship": {
+      "author": "not declared",
+      "publisher": "the shadcn-ui organisation on GitHub",
+      "signer": "none",
+      "contact": "not declared"
+    },
+    "license": {
+      "frontmatter": "not declared",
+      "license_file": "none",
+      "registry": "not declared",
+      "repository": "MIT, as GitHub detects it"
+    },
+    "maintenance": {
+      "last_change": "2026-10-14",
+      "registry_update": "not declared",
+      "deprecated": "not declared",
+      "first_seen": "2026-02-26",
+      "content_changes": 30,
+      "releases": "100 or more",
+      "last_release": "2026-10-27"
+    }
+  },
+  "which_files": {
+    "version": {
+      "hash": "sha256:06eeefe70d645a50c9516b8b66ae7f7ac6c14e6b25b556618a2d2fcac3e98d3c",
+      "left_out": "none",
+      "author_version": "not declared",
+      "registry_version": "not declared",
+      "commit": "dd41d19e"
+    },
+    "source": {
+      "kind": "repository",
+      "location": "GitHub shadcn-ui/ui, path skills/shadcn",
+      "commit": "dd41d19e",
+      "retrieved": "2026-11-11",
+      "also_listed_on": "skills.sh, https://skills.sh/shadcn-ui/ui/shadcn",
+      "homepage": "not declared",
+      "produced_by": "none"
+    },
+    "files": [
+      {
+        "path": "SKILL.md",
+        "bytes": 21606,
+        "sha256": "93951e5e83f616a3e046491c00d770bd54c0a64164706cd1191822a233d27592",
+        "kind": "document",
+        "in_hash": true,
+        "executable": false
+      },
+      {
+        "path": "agents/openai.yml",
+        "bytes": 238,
+        "sha256": "35db91b1eef58b2abe01da9b88577de5a44e233b740cd93d692ddeeadd2afe4d",
+        "kind": "data",
+        "in_hash": true,
+        "executable": false
+      },
+      {
+        "path": "assets/shadcn-small.png",
+        "bytes": 1049,
+        "sha256": "0ecc62d682727f68fc4937eed19960c706714fa084d44f63028d611ae02bf3d7",
+        "kind": "binary",
+        "in_hash": true,
+        "executable": false
+      },
+      {
+        "path": "assets/shadcn.png",
+        "bytes": 3852,
+        "sha256": "7d60ad6fec4d89a0d44ba5a3c9283d2fea0047af5467f9227040e20d927d39b7",
+        "kind": "binary",
+        "in_hash": true,
+        "executable": false
+      },
+      {
+        "path": "assets/showcase/color-pair.tsx",
+        "bytes": 3448,
+        "sha256": "6028f0b677912216822fdaf76ae6b8863c429916ed4a9626b73f4de4506f8ee4",
+        "kind": "script",
+        "in_hash": true,
+        "executable": false
+      },
+      {
+        "path": "assets/showcase/preview-states.css",
+        "bytes": 425,
+        "sha256": "8d9e3cec24dd01b11c5ba12196d0376a131797d9ad247ea624e66eb8bbf61b0e",
+        "kind": "data",
+        "in_hash": true,
+        "executable": false
+      },
+      {
+        "path": "assets/showcase/state-matrix.tsx",
+        "bytes": 1682,
+        "sha256": "07794119fe05ff735358b3f8ca30a8297617ab64dfb3901dce4d89fe5f443458",
+        "kind": "script",
+        "in_hash": true,
+        "executable": false
+      },
+      {
+        "path": "cli.md",
+        "bytes": 17304,
+        "sha256": "a381e35bf36fe7bb851952c13707e01e82434fd7a4a4e53f6df26c6370838904",
+        "kind": "document",
+        "in_hash": true,
+        "executable": false
+      },
+      {
+        "path": "customization.md",
+        "bytes": 6279,
+        "sha256": "a19e81c78843df255e85755e52659268d793845add845b34ad8091f62bff3af9",
+        "kind": "document",
+        "in_hash": true,
+        "executable": false
+      },
+      {
+        "path": "design-system-page.md",
+        "bytes": 15790,
+        "sha256": "c541d661af159548744be3e27f79e7da710ab83f9afd448a4346f7ff1531d328",
+        "kind": "document",
+        "in_hash": true,
+        "executable": false
+      },
+      {
+        "path": "design-system.md",
+        "bytes": 21621,
+        "sha256": "9ed11e93e7e80e34c8795d5ba82e5420ca905e8e9949fef79cbe9239184fd06b",
+        "kind": "document",
+        "in_hash": true,
+        "executable": false
+      },
+      {
+        "path": "evals/evals.json",
+        "bytes": 10626,
+        "sha256": "e82c747326a5c21e37a1c962274d36b1bfebb3e6602ee368b98e2dba5db18369",
+        "kind": "data",
+        "in_hash": true,
+        "executable": false
+      },
+      {
+        "path": "mcp.md",
+        "bytes": 3510,
+        "sha256": "8d696b4e45b7d0e337367248513bd9acebe8f3bcfd7b748c775e5a337c8f38c8",
+        "kind": "document",
+        "in_hash": true,
+        "executable": false
+      },
+      {
+        "path": "registry.md",
+        "bytes": 8817,
+        "sha256": "4f239be36bd2b58e17047db1ca80ab7da00e15a8b73242e5e4d50d113c4caa05",
+        "kind": "document",
+        "in_hash": true,
+        "executable": false
+      },
+      {
+        "path": "rules/base-vs-radix.md",
+        "bytes": 6954,
+        "sha256": "2b2deb47d004285220c1fc6b38bb2edc2d0ccbcdafd031b0b189d5d8ed0d1ba8",
+        "kind": "document",
+        "in_hash": true,
+        "executable": false
+      },
+      {
+        "path": "rules/chat.md",
+        "bytes": 17626,
+        "sha256": "4b4610d487ddc9751f3cfe0c554a06560ac723fcc2460abad77a1d3c7c9a4b95",
+        "kind": "document",
+        "in_hash": true,
+        "executable": false
+      },
+      {
+        "path": "rules/composition.md",
+        "bytes": 4892,
+        "sha256": "f282df828d83a91132a846ddb62eea149a7c7c94822e9ca88cfddf85af01aa41",
+        "kind": "document",
+        "in_hash": true,
+        "executable": false
+      },
+      {
+        "path": "rules/forms.md",
+        "bytes": 4857,
+        "sha256": "29593e14381e34626f8e0e9c15c59f3394b92a0623af6a6ec94585400123853c",
+        "kind": "document",
+        "in_hash": true,
+        "executable": false
+      },
+      {
+        "path": "rules/icons.md",
+        "bytes": 1958,
+        "sha256": "d4a58266648872d9ee07d0c2368843a1cb88b8253b7f528dd7bda9d68b6c2535",
+        "kind": "document",
+        "in_hash": true,
+        "executable": false
+      },
+      {
+        "path": "rules/styling.md",
+        "bytes": 4675,
+        "sha256": "f88fbd72dff862805b786dc7d7e4c74c83030fc278c5b97c993e4e665001798c",
+        "kind": "document",
+        "in_hash": true,
+        "executable": false
+      },
+      {
+        "path": "scripts/showcase-coverage.mjs",
+        "bytes": 1453,
+        "sha256": "fb593e0806414d23b51354a46881f0b2873afc226bda0926a22f83cbd60af2fa",
+        "kind": "script",
+        "in_hash": true,
+        "executable": false
+      }
+    ],
+    "counts": {
+      "script": 3,
+      "document": 13,
+      "data": 3,
+      "binary": 2
+    },
+    "composition": "instructions with scripts"
+  },
+  "about_this_card": {
+    "schema": "Skill Card v1.2",
+    "date": "2026-11-11",
+    "by": "Claude Opus 5.5, claude-opus-5-5, by hand from the skill files, the skills.sh listing and audits, and GitHub metadata, with the hash, file list, sizes, harness limits and repository figures computed by script",
+    "skill_run": false,
+    "scripts_analysed": false,
+    "security_check_run": false,
+    "external_service_contacted": false,
+    "registry_read": true,
+    "empty_values": 52
+  }
+}

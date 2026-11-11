@@ -1,0 +1,477 @@
+{
+  "schema": "Skill Card v1.2",
+  "skill": "systematic-debugging",
+  "version": "obra/superpowers at 22f0b463",
+  "what_it_does": {
+    "name": "systematic-debugging",
+    "summary": "Instructions for a four-phase debugging process, root cause investigation, pattern analysis, hypothesis and testing, and implementation, with no fix proposed before the root cause is found. Three reference documents cover backward tracing through the call stack, validation at every layer and condition-based waiting in flaky tests, with a TypeScript example and a bash script that finds which test creates unwanted files. The result is a confirmed root cause, a failing test and a single fix, or a discussion of the architecture after three failed fixes. Use it for any bug, test failure or unexpected behaviour, before proposing fixes.",
+    "tasks": [
+      "investigate the root cause of a bug before any fix",
+      "add diagnostic instrumentation at component boundaries",
+      "trace bad values backward through the call stack",
+      "test one hypothesis at a time with the smallest change",
+      "write a failing test, then a single fix at the source",
+      "replace arbitrary timeouts in flaky tests with condition polling",
+      "find the test that creates unwanted files or state"
+    ],
+    "author_description": "Use when encountering any bug, test failure, or unexpected behavior, before proposing fixes",
+    "outputs": [
+      {
+        "what": "a stated hypothesis and the identified root cause",
+        "kind": "information",
+        "form": "text, I think X is the root cause because Y",
+        "destination": "the conversation"
+      },
+      {
+        "what": "a failing test case and a single fix at the source, with validation added at each layer",
+        "kind": "information",
+        "form": "code and test files",
+        "destination": "the user's codebase"
+      },
+      {
+        "what": "diagnostic log lines and stack traces from added instrumentation",
+        "kind": "information",
+        "form": "terminal text",
+        "destination": "the terminal or test output"
+      },
+      {
+        "what": "the result of the polluter search, the test file that created the file or directory",
+        "kind": "information",
+        "form": "terminal text",
+        "destination": "the terminal the agent runs find-polluter.sh in"
+      },
+      {
+        "what": "after three or more failed fixes, the question whether the architecture is sound",
+        "kind": "recommendation",
+        "form": "a discussion with the human partner",
+        "destination": "the conversation"
+      }
+    ],
+    "sample_output": "FOUND POLLUTER!",
+    "inputs": [
+      {
+        "what": "the bug, test failure or unexpected behaviour with its error messages and stack traces",
+        "type": "error output and a description of the issue",
+        "required": "required",
+        "for": "every task",
+        "example": "Error: git init failed in ~/project/packages/core"
+      },
+      {
+        "what": "the file or directory whose creation marks pollution",
+        "type": "a positional script argument",
+        "required": "conditional",
+        "for": "finding the polluting test with find-polluter.sh",
+        "example": "'.git'"
+      },
+      {
+        "what": "a pattern for the test files to run",
+        "type": "a positional script argument",
+        "required": "conditional",
+        "for": "finding the polluting test with find-polluter.sh",
+        "example": "./find-polluter.sh <file_or_dir_to_check> <test_pattern>"
+      }
+    ],
+    "when_input_is_missing": [
+      {
+        "case": "find-polluter.sh is called without exactly two arguments",
+        "behaviour": "it prints its usage line and an example, and exits"
+      },
+      {
+        "case": "the issue cannot be reproduced reliably",
+        "behaviour": "gather more data, don't guess"
+      },
+      {
+        "case": "the cause is not understood",
+        "behaviour": "say I don't understand X, ask for help and research more"
+      }
+    ],
+    "exclusions": [
+      "condition-based waiting is not for testing actual timing behavior, such as debounce or throttle intervals"
+    ],
+    "adoption": [
+      {
+        "registry": "skills.sh",
+        "installs": "328.4K",
+        "first_seen": "2026-01-19",
+        "counts": "the skill",
+        "read": "2026-11-11"
+      },
+      {
+        "registry": "GitHub",
+        "stars": 315991,
+        "forks": 28109,
+        "counts": "the obra/superpowers repository, which holds 15 skills",
+        "read": "2026-11-11"
+      }
+    ]
+  },
+  "what_it_needs": {
+    "compatibility": {
+      "harnesses": "not declared",
+      "models": "not declared",
+      "capabilities": "not declared",
+      "fits": {
+        "Agent Skills specification": "fits, name 20 characters, description 91 characters, body 279 lines and about 2,347 tokens",
+        "Codex": "does not fit, SKILL.md is 9,530 bytes, 1,530 over the 8,000 byte cut on the injected file",
+        "Claude Code": "fits, 283 lines, listing text 91 characters",
+        "ClawHub": "fits, folder 29,057 bytes"
+      }
+    },
+    "software_dependencies": [
+      {
+        "name": "bash",
+        "kind": "runtime",
+        "version": "not declared",
+        "for": "run"
+      },
+      {
+        "name": "npm",
+        "kind": "binary",
+        "version": "not declared",
+        "for": "run"
+      },
+      {
+        "name": "TypeScript",
+        "kind": "runtime",
+        "version": "not declared",
+        "for": "example"
+      },
+      {
+        "name": "git",
+        "kind": "binary",
+        "version": "not declared",
+        "for": "example"
+      },
+      {
+        "name": "security and codesign",
+        "kind": "binary",
+        "version": "not declared",
+        "for": "example"
+      }
+    ],
+    "credentials": [
+      {
+        "kind": "other",
+        "name": "IDENTITY",
+        "used_for": "the signing identity checked and passed to codesign in the multi-layer diagnostic example",
+        "from": "environment variable",
+        "goes_to": "stays on the machine"
+      }
+    ],
+    "cost": {
+      "context_tokens": {
+        "discovery": 23,
+        "load": 2383,
+        "on_demand": 4386,
+        "on_demand_files": [
+          "root-cause-tracing.md",
+          "defense-in-depth.md",
+          "condition-based-waiting.md",
+          "condition-based-waiting-example.ts"
+        ]
+      },
+      "run_tokens": "not examined",
+      "services": "none"
+    }
+  },
+  "what_it_touches": {
+    "side_effects": {
+      "install": "read only",
+      "run": "changes state",
+      "changes": [
+        {
+          "what": "adds diagnostic logging, failing tests, fixes and validation to the user's code",
+          "affects": "workspace",
+          "confirmation": "not declared",
+          "reversible": "not declared"
+        },
+        {
+          "what": "runs npm test on each matching test file, which can create files or state",
+          "affects": "workspace",
+          "confirmation": "not declared",
+          "reversible": "not declared"
+        }
+      ]
+    },
+    "network_access": "none",
+    "tools_and_permissions": {
+      "allowed_tools": "none",
+      "tools": [
+        {
+          "tool": "find-polluter.sh",
+          "kind": "program",
+          "for": "running tests one by one to find which test creates unwanted files or state",
+          "origin": "skill"
+        },
+        {
+          "tool": "npm test",
+          "kind": "shell command",
+          "for": "running tests and capturing debug output",
+          "origin": "third party"
+        },
+        {
+          "tool": "git diff",
+          "kind": "shell command",
+          "for": "checking recent changes",
+          "origin": "third party"
+        },
+        {
+          "tool": "security list-keychains, security find-identity, codesign",
+          "kind": "shell command",
+          "for": "checking keychain and signing state in the multi-layer example",
+          "origin": "third party"
+        },
+        {
+          "tool": "superpowers:test-driven-development and superpowers:verification-before-completion",
+          "kind": "other",
+          "for": "writing the failing test and verifying the fix before claiming success",
+          "origin": "third party"
+        },
+        {
+          "tool": "shell and file tools of the agent",
+          "kind": "agent tool",
+          "for": "running commands, reading code and editing files",
+          "origin": "built in"
+        }
+      ]
+    },
+    "machine_access": {
+      "paths": [
+        {
+          "path": "the project's source and test files",
+          "operation": "read",
+          "scope": "workspace"
+        },
+        {
+          "path": "source and test files changed by instrumentation, tests and fixes",
+          "operation": "write",
+          "scope": "workspace"
+        },
+        {
+          "path": "test files matching the pattern under the current directory, and the pollution file or directory checked",
+          "operation": "read",
+          "scope": "workspace"
+        },
+        {
+          "path": "the skill folder, find-polluter.sh and the reference documents",
+          "operation": "read",
+          "scope": "skill folder"
+        }
+      ],
+      "settings": [
+        {
+          "name": "NODE_ENV",
+          "access": "read",
+          "reason": "logged in debug instrumentation and used to refuse git init outside the temp directory during tests"
+        }
+      ]
+    }
+  },
+  "what_is_known": {
+    "checks": [
+      {
+        "id": "C1",
+        "tool": "Snyk, skills.sh audit, version not stated",
+        "date": "2026-11-04",
+        "scope": "unknown",
+        "result": "pass, risk level LOW, no issues detected",
+        "report": "https://skills.sh/obra/superpowers/systematic-debugging/security/snyk"
+      },
+      {
+        "id": "C2",
+        "tool": "Gen Agent Trust Hub, skills.sh audit, version not stated",
+        "date": "2026-11-04",
+        "scope": "find-polluter.sh, as cited in its analysis",
+        "result": "warn, risk level MEDIUM, COMMAND_EXECUTION and INDIRECT_PROMPT_INJECTION, find-polluter.sh runs npm test on discovered files and uses TEST_PATTERN in find without sanitization",
+        "report": "https://skills.sh/obra/superpowers/systematic-debugging/security/agent-trust-hub"
+      },
+      {
+        "id": "C3",
+        "tool": "Socket, skills.sh audit, version not stated",
+        "date": "2026-11-05",
+        "scope": "the skill package, hash 60e7465ae62f622e075f5b204d5f4acb20e8ff7d51e9cb59d3edf3e7e16de221",
+        "result": "pass, checks for malicious behaviour, credential exposure, obfuscated code and suspicious patterns",
+        "report": "https://skills.sh/obra/superpowers/systematic-debugging/security/socket"
+      }
+    ],
+    "vulnerabilities": [
+      {
+        "finding": "COMMAND_EXECUTION, find-polluter.sh executes npm test on files discovered on the local file system",
+        "check": "C2",
+        "severity": "MEDIUM",
+        "location": "find-polluter.sh",
+        "status": "open",
+        "fix": "not stated"
+      },
+      {
+        "finding": "INDIRECT_PROMPT_INJECTION, TEST_PATTERN is interpolated into the find command without sanitization",
+        "check": "C2",
+        "severity": "MEDIUM",
+        "location": "find-polluter.sh, the TEST_PATTERN argument",
+        "status": "open",
+        "fix": "not stated"
+      }
+    ],
+    "risks": [
+      {
+        "risk": "Running find-polluter.sh executes every matching test file through npm test, so code in those tests runs with the user's privileges.",
+        "source": "check C2",
+        "severity": "MEDIUM by C2",
+        "mitigation": "none stated",
+        "taxonomy": "not examined"
+      },
+      {
+        "risk": "A test pattern taken from untrusted input and passed to find-polluter.sh could change which files find selects and runs, since TEST_PATTERN is not validated.",
+        "source": "check C2",
+        "severity": "MEDIUM by C2",
+        "mitigation": "none stated, C2 notes that sanitization and boundary markers are absent",
+        "taxonomy": "not examined"
+      },
+      {
+        "risk": "Diagnostic output can expose signing identities and environment details in shared CI logs, since the multi-layer example runs security find-identity -v and logs environment state.",
+        "source": "model",
+        "severity": "none",
+        "mitigation": "partly in place, the example prints SET or UNSET for IDENTITY instead of its value",
+        "taxonomy": "not examined"
+      }
+    ],
+    "limitations": [
+      "Some issues are truly environmental, timing-dependent or external, and then the process ends in handling, monitoring and logging instead of a root-cause fix.",
+      "When tracing backward reaches a dead end, the fix is made at the symptom point.",
+      "find-polluter.sh skips a test file when the pollution already exists before that test runs.",
+      "find-polluter.sh runs each test with npm test and discards the test output."
+    ],
+    "known_problems": [
+      {
+        "problem": "three or more fixes have failed",
+        "workaround": "stop, question the architecture and discuss with the human partner before more fixes"
+      },
+      {
+        "problem": "the issue is not reproducible",
+        "workaround": "gather more data, don't guess"
+      },
+      {
+        "problem": "logger output does not show in tests",
+        "workaround": "use console.error() for debug output in tests"
+      },
+      {
+        "problem": "flaky tests with arbitrary delays",
+        "workaround": "wait for the actual condition with a polling function and a timeout"
+      },
+      {
+        "problem": "unwanted files appear during tests and the test is unknown",
+        "workaround": "run find-polluter.sh to bisect the test files"
+      }
+    ],
+    "evaluations": "none"
+  },
+  "who_stands_behind_it": {
+    "authorship": {
+      "author": "not declared",
+      "publisher": "the obra account on GitHub",
+      "signer": "none",
+      "contact": "not declared"
+    },
+    "license": {
+      "frontmatter": "not declared",
+      "license_file": "none",
+      "registry": "not declared",
+      "repository": "MIT, as GitHub detects it"
+    },
+    "maintenance": {
+      "last_change": "2026-11-03",
+      "registry_update": "not declared",
+      "deprecated": "not declared",
+      "first_seen": "2025-10-16",
+      "content_changes": 14,
+      "releases": 17,
+      "last_release": "2026-11-03"
+    }
+  },
+  "which_files": {
+    "version": {
+      "hash": "sha256:f376836c637d9bc2aab31f4536a3fb0c628c3ab96494cb9d28c89a45057ca489",
+      "left_out": "none",
+      "author_version": "not declared",
+      "registry_version": "not declared",
+      "commit": "22f0b463"
+    },
+    "source": {
+      "kind": "repository",
+      "location": "GitHub obra/superpowers, path skills/systematic-debugging",
+      "commit": "22f0b463",
+      "retrieved": "2026-11-11",
+      "also_listed_on": "skills.sh, https://skills.sh/obra/superpowers/systematic-debugging",
+      "homepage": "not declared",
+      "produced_by": "none"
+    },
+    "files": [
+      {
+        "path": "SKILL.md",
+        "bytes": 9530,
+        "sha256": "51c6435d98c83c42c96ba7c35725a0b2c376cd487fb1a4e6bd0ddbe7e33ef202",
+        "kind": "document",
+        "in_hash": true,
+        "executable": false
+      },
+      {
+        "path": "condition-based-waiting-example.ts",
+        "bytes": 5054,
+        "sha256": "40ae5ebe497fdf310200e43fe986552546d0a22837c0d39e855db1cfd33eb88e",
+        "kind": "script",
+        "in_hash": true,
+        "executable": false
+      },
+      {
+        "path": "condition-based-waiting.md",
+        "bytes": 3516,
+        "sha256": "e89fec8400d6cd50f43407cec9fab50976ba4d55d0ec2eb51c0bd68036b54c26",
+        "kind": "document",
+        "in_hash": true,
+        "executable": false
+      },
+      {
+        "path": "defense-in-depth.md",
+        "bytes": 3650,
+        "sha256": "1e175fb86fc357e58c6aebf5441e481e1b7868b4380c0456b63a17eefbd18ba7",
+        "kind": "document",
+        "in_hash": true,
+        "executable": false
+      },
+      {
+        "path": "find-polluter.sh",
+        "bytes": 1986,
+        "sha256": "dd7b8f13c4cc2a24b33ff87b18da9248f3e1c80a085c3316224f69ff0fa5c43c",
+        "kind": "script",
+        "in_hash": true,
+        "executable": true
+      },
+      {
+        "path": "root-cause-tracing.md",
+        "bytes": 5321,
+        "sha256": "75b933b6a8c40bdb2031b10f21654395b56ec6ab6bc7b018c18d3fe57aeb7fb8",
+        "kind": "document",
+        "in_hash": true,
+        "executable": false
+      }
+    ],
+    "counts": {
+      "script": 2,
+      "document": 4,
+      "data": 0,
+      "binary": 0
+    },
+    "composition": "instructions with scripts"
+  },
+  "about_this_card": {
+    "schema": "Skill Card v1.2",
+    "date": "2026-11-11",
+    "by": "Claude Opus 5.5, claude-opus-5-5, by hand from the skill files, the skills.sh listing and audits, and GitHub metadata, with the hash, file list, sizes, harness limits and repository figures computed by script",
+    "skill_run": false,
+    "scripts_analysed": false,
+    "security_check_run": false,
+    "external_service_contacted": false,
+    "registry_read": true,
+    "empty_values": 35
+  }
+}

@@ -1,0 +1,1080 @@
+{
+  "schema": "Skill Card v1.2",
+  "skill": "vercel-react-best-practices",
+  "version": "vercel-labs/agent-skills at 1a2c79d4",
+  "what_it_does": {
+    "name": "vercel-react-best-practices",
+    "summary": "A performance optimization guide for React and Next.js applications, maintained by Vercel, with 70 rules across 8 categories prioritized by impact, from eliminating waterfalls and bundle size down to advanced patterns. Each rule is a Markdown file with a brief explanation, an incorrect and a correct code example and references, and AGENTS.md compiles all rules into one document. The rules guide automated refactoring and code generation. Use it when writing new React components or Next.js pages, implementing data fetching, reviewing code for performance issues, refactoring React or Next.js code, or optimizing bundle size or load times.",
+    "tasks": [
+      "eliminate async waterfalls with Promise.all, deferred awaits and Suspense boundaries",
+      "reduce bundle size with direct imports, next/dynamic and deferred third-party libraries",
+      "speed up server rendering with React.cache, LRU caching, parallel fetching and minimal serialization",
+      "authenticate Server Actions inside each action",
+      "cut re-renders with memoization, derived state, transitions and refs",
+      "improve rendering and JavaScript hot paths such as hydration, SVG, loops and lookups"
+    ],
+    "author_description": "React and Next.js performance optimization guidelines from Vercel Engineering. This skill should be used when writing, reviewing, or refactoring React/Next.js code to ensure optimal performance patterns. Triggers on tasks involving React components, Next.js pages, data fetching, bundle optimization, or performance improvements.",
+    "outputs": [
+      {
+        "what": "new or refactored React and Next.js code that follows the rules",
+        "kind": "information",
+        "form": "TypeScript, TSX, CSS and config source files",
+        "destination": "the user's project"
+      },
+      {
+        "what": "performance issues found in a code review, with the rule that applies",
+        "kind": "recommendation",
+        "form": "text in the agent's reply",
+        "destination": "the conversation with the user"
+      },
+      {
+        "what": "SVG files with reduced coordinate precision",
+        "kind": "information",
+        "form": "SVG file",
+        "destination": "the SVG file passed to svgo, such as icon.svg"
+      }
+    ],
+    "sample_output": "const userById = new Map(users.map(u => [u.id, u]))",
+    "inputs": [
+      {
+        "what": "existing React or Next.js code",
+        "type": "source files in the user's project",
+        "required": "conditional",
+        "for": "reviewing or refactoring code",
+        "example": "not declared"
+      },
+      {
+        "what": "whether the project uses Next.js 13.5 or later, React Compiler or the latest React",
+        "type": "facts about the project setup",
+        "required": "conditional",
+        "for": "choosing between rule variants such as optimizePackageImports, manual memoization or useEffectEvent",
+        "example": "not declared"
+      }
+    ],
+    "when_input_is_missing": "not declared",
+    "exclusions": "not declared",
+    "adoption": [
+      {
+        "registry": "skills.sh",
+        "installs": "889.2K",
+        "first_seen": "2026-01-19",
+        "counts": "the skill",
+        "read": "2026-11-11"
+      },
+      {
+        "registry": "GitHub",
+        "stars": 33874,
+        "forks": 2960,
+        "counts": "the vercel-labs/agent-skills repository, which holds 9 skills",
+        "read": "2026-11-11"
+      }
+    ]
+  },
+  "what_it_needs": {
+    "compatibility": {
+      "harnesses": "not declared",
+      "models": "not declared",
+      "capabilities": "not declared",
+      "fits": {
+        "Agent Skills specification": "does not fit, the name does not match the folder name react-best-practices",
+        "Codex": "fits, SKILL.md is 7,251 bytes, under the 8,000 byte cut",
+        "Claude Code": "fits, 149 lines, listing text 329 characters",
+        "ClawHub": "fits, folder 230,383 bytes"
+      }
+    },
+    "software_dependencies": [
+      {
+        "name": "react and react-dom",
+        "kind": "package",
+        "version": "not declared",
+        "for": "example"
+      },
+      {
+        "name": "next",
+        "kind": "package",
+        "version": "13.5 or later for optimizePackageImports",
+        "for": "example"
+      },
+      {
+        "name": "swr",
+        "kind": "package",
+        "version": "not declared",
+        "for": "example"
+      },
+      {
+        "name": "better-all",
+        "kind": "package",
+        "version": "not declared",
+        "for": "example"
+      },
+      {
+        "name": "lru-cache",
+        "kind": "package",
+        "version": "not declared",
+        "for": "example"
+      },
+      {
+        "name": "zod",
+        "kind": "package",
+        "version": "not declared",
+        "for": "example"
+      },
+      {
+        "name": "@vercel/analytics",
+        "kind": "package",
+        "version": "not declared",
+        "for": "example"
+      },
+      {
+        "name": "svgo, run with npx",
+        "kind": "package",
+        "version": "not declared",
+        "for": "example"
+      },
+      {
+        "name": "Node.js",
+        "kind": "runtime",
+        "version": "20 or later for toSorted()",
+        "for": "example"
+      },
+      {
+        "name": "pnpm",
+        "kind": "binary",
+        "version": "not declared",
+        "for": "install"
+      }
+    ],
+    "credentials": "none",
+    "cost": {
+      "context_tokens": {
+        "discovery": 82,
+        "load": 1813,
+        "on_demand": 54173,
+        "on_demand_files": [
+          "AGENTS.md",
+          "rules/advanced-effect-event-deps.md",
+          "rules/advanced-event-handler-refs.md",
+          "rules/advanced-init-once.md",
+          "rules/advanced-use-latest.md",
+          "rules/async-api-routes.md",
+          "rules/async-cheap-condition-before-await.md",
+          "rules/async-defer-await.md",
+          "rules/async-dependencies.md",
+          "rules/async-parallel.md",
+          "rules/async-suspense-boundaries.md",
+          "rules/bundle-analyzable-paths.md",
+          "rules/bundle-barrel-imports.md",
+          "rules/bundle-conditional.md",
+          "rules/bundle-defer-third-party.md",
+          "rules/bundle-dynamic-imports.md",
+          "rules/bundle-preload.md",
+          "rules/client-event-listeners.md",
+          "rules/client-localstorage-schema.md",
+          "rules/client-passive-event-listeners.md",
+          "rules/client-swr-dedup.md",
+          "rules/js-batch-dom-css.md",
+          "rules/js-cache-function-results.md",
+          "rules/js-cache-property-access.md",
+          "rules/js-cache-storage.md",
+          "rules/js-combine-iterations.md",
+          "rules/js-early-exit.md",
+          "rules/js-flatmap-filter.md",
+          "rules/js-hoist-regexp.md",
+          "rules/js-index-maps.md",
+          "rules/js-length-check-first.md",
+          "rules/js-min-max-loop.md",
+          "rules/js-request-idle-callback.md",
+          "rules/js-set-map-lookups.md",
+          "rules/js-tosorted-immutable.md",
+          "rules/rendering-activity.md",
+          "rules/rendering-animate-svg-wrapper.md",
+          "rules/rendering-conditional-render.md",
+          "rules/rendering-content-visibility.md",
+          "rules/rendering-hoist-jsx.md",
+          "rules/rendering-hydration-no-flicker.md",
+          "rules/rendering-hydration-suppress-warning.md",
+          "rules/rendering-resource-hints.md",
+          "rules/rendering-script-defer-async.md",
+          "rules/rendering-svg-precision.md",
+          "rules/rendering-usetransition-loading.md",
+          "rules/rerender-defer-reads.md",
+          "rules/rerender-dependencies.md",
+          "rules/rerender-derived-state-no-effect.md",
+          "rules/rerender-derived-state.md",
+          "rules/rerender-functional-setstate.md",
+          "rules/rerender-lazy-state-init.md",
+          "rules/rerender-memo-with-default-value.md",
+          "rules/rerender-memo.md",
+          "rules/rerender-move-effect-to-event.md",
+          "rules/rerender-no-inline-components.md",
+          "rules/rerender-simple-expression-in-memo.md",
+          "rules/rerender-split-combined-hooks.md",
+          "rules/rerender-transitions.md",
+          "rules/rerender-use-deferred-value.md",
+          "rules/rerender-use-ref-transient-values.md",
+          "rules/server-after-nonblocking.md",
+          "rules/server-auth-actions.md",
+          "rules/server-cache-lru.md",
+          "rules/server-cache-react.md",
+          "rules/server-dedup-props.md",
+          "rules/server-hoist-static-io.md",
+          "rules/server-no-shared-module-state.md",
+          "rules/server-parallel-fetching.md",
+          "rules/server-parallel-nested-fetching.md",
+          "rules/server-serialization.md"
+        ]
+      },
+      "run_tokens": "not examined",
+      "services": "none"
+    }
+  },
+  "what_it_touches": {
+    "side_effects": {
+      "install": "changes state",
+      "run": "changes state",
+      "changes": [
+        {
+          "what": "creates and edits React and Next.js source files when writing or refactoring code",
+          "affects": "workspace",
+          "confirmation": "not declared",
+          "reversible": "not declared"
+        },
+        {
+          "what": "sets experimental.optimizePackageImports in next.config.js",
+          "affects": "workspace",
+          "confirmation": "not declared",
+          "reversible": "not declared"
+        },
+        {
+          "what": "rewrites an SVG file in place with npx svgo --precision=1 --multipass icon.svg",
+          "affects": "workspace",
+          "confirmation": "not declared",
+          "reversible": "not declared"
+        },
+        {
+          "what": "installs build dependencies with pnpm install",
+          "affects": "software environment",
+          "confirmation": "not declared",
+          "reversible": "not declared"
+        },
+        {
+          "what": "regenerates AGENTS.md and test-cases.json with pnpm build",
+          "affects": "workspace",
+          "confirmation": "not declared",
+          "reversible": "not declared"
+        }
+      ]
+    },
+    "network_access": [
+      {
+        "host": "the npm registry, not named in the files",
+        "purpose": "install",
+        "when": "when svgo is run with npx or build dependencies are installed with pnpm install",
+        "sends": [
+          "none"
+        ],
+        "receives": "the packages"
+      }
+    ],
+    "tools_and_permissions": {
+      "allowed_tools": "none",
+      "tools": [
+        {
+          "tool": "npx svgo",
+          "kind": "shell command",
+          "for": "reducing SVG coordinate precision",
+          "origin": "third party"
+        },
+        {
+          "tool": "pnpm install, pnpm build, pnpm validate, pnpm extract-tests, pnpm dev",
+          "kind": "shell command",
+          "for": "maintaining the rules, compiling AGENTS.md and extracting test cases",
+          "origin": "third party"
+        },
+        {
+          "tool": "file read and edit tools of the agent",
+          "kind": "agent tool",
+          "for": "reading rule files and writing or editing project code",
+          "origin": "built in"
+        }
+      ]
+    },
+    "machine_access": {
+      "paths": [
+        {
+          "path": "rules/*.md and AGENTS.md",
+          "operation": "read",
+          "scope": "skill folder"
+        },
+        {
+          "path": "React and Next.js source files of the project",
+          "operation": "read",
+          "scope": "workspace"
+        },
+        {
+          "path": "React and Next.js source files and next.config.js of the project",
+          "operation": "write",
+          "scope": "workspace"
+        },
+        {
+          "path": "SVG files passed to svgo, such as icon.svg",
+          "operation": "write",
+          "scope": "workspace"
+        },
+        {
+          "path": "AGENTS.md and test-cases.json regenerated by pnpm build",
+          "operation": "write",
+          "scope": "skill folder"
+        }
+      ],
+      "settings": [
+        {
+          "name": "experimental.optimizePackageImports in next.config.js",
+          "access": "set",
+          "reason": "automatically optimizes barrel imports at build time"
+        }
+      ]
+    }
+  },
+  "what_is_known": {
+    "checks": [
+      {
+        "id": "C1",
+        "tool": "Snyk, skills.sh audit, version not stated",
+        "date": "2026-09-14",
+        "scope": "unknown",
+        "result": "pass, risk level LOW, no issues detected",
+        "report": "https://skills.sh/vercel-labs/agent-skills/vercel-react-best-practices/security/snyk"
+      },
+      {
+        "id": "C2",
+        "tool": "Gen Agent Trust Hub, skills.sh audit, version not stated",
+        "date": "2026-09-14",
+        "scope": "SKILL.md and the rules, as cited in its analysis",
+        "result": "pass, risk level SAFE, indirect prompt injection surface described, user-provided React code is processed with no sanitization or boundary markers defined",
+        "report": "https://skills.sh/vercel-labs/agent-skills/vercel-react-best-practices/security/agent-trust-hub"
+      },
+      {
+        "id": "C3",
+        "tool": "Socket, skills.sh audit, version not stated",
+        "date": "2026-09-14",
+        "scope": "the skill package, hash ca7b0c0c6e5f2750043f7f0cd72d16ac4e2abc48f9b5500d047a4b77a2506212",
+        "result": "pass, checks for malicious behaviour, security concerns, code obfuscation and suspicious patterns",
+        "report": "https://skills.sh/vercel-labs/agent-skills/vercel-react-best-practices/security/socket"
+      }
+    ],
+    "vulnerabilities": "none",
+    "risks": [
+      {
+        "risk": "Instructions hidden in user-provided React code reach the agent, since code is ingested for refactoring with no sanitization or boundary markers defined.",
+        "source": "check C2",
+        "severity": "SAFE overall by C2",
+        "mitigation": "none in the files, C2 notes that no boundary markers are defined",
+        "taxonomy": "https://www.ibm.com/docs/en/watsonx/saas?topic=ai-risk-atlas"
+      },
+      {
+        "risk": "A rule applied during automated refactoring where its exceptions hold can change program behaviour, such as the order of side effects when awaits are reordered.",
+        "source": "model",
+        "severity": "none",
+        "mitigation": "none stated, some rules name when to keep the original code",
+        "taxonomy": "not examined"
+      }
+    ],
+    "limitations": [
+      "Manual memoization with memo() and useMemo() and manual hoisting of static JSX are unnecessary when React Compiler is enabled.",
+      "toSorted() needs Chrome 110+, Safari 16+, Firefox 115+ or Node.js 20+, and older environments need a spread copy before sort().",
+      "Math.min and Math.max with spread can be slower or throw for very large arrays.",
+      "useEffectEvent is available only on the latest React.",
+      "In traditional serverless each invocation runs in isolation, so an in-process LRU cache does not persist across requests.",
+      "Suspense boundaries are not for critical layout data, SEO-critical content above the fold or small, fast queries."
+    ],
+    "known_problems": [
+      {
+        "problem": "lucide-react deep import paths resolve to an implicit any type under strict or noImplicitAny",
+        "workaround": "prefer optimizePackageImports, or verify the library exports types for its subpaths"
+      },
+      {
+        "problem": "localStorage getItem() and setItem() throw in private browsing, when quota is exceeded or when disabled",
+        "workaround": "wrap every call in try-catch"
+      },
+      {
+        "problem": "requestIdleCallback is missing in unsupported browsers",
+        "workaround": "fall back to setTimeout"
+      },
+      {
+        "problem": "a global regex keeps mutable lastIndex state between calls",
+        "workaround": "not stated beyond the warning"
+      }
+    ],
+    "evaluations": "none"
+  },
+  "who_stands_behind_it": {
+    "authorship": {
+      "author": "vercel, from the frontmatter metadata, and Vercel Engineering, from metadata.json, originally created by @shuding at Vercel, from README.md",
+      "publisher": "the vercel-labs organisation on GitHub",
+      "signer": "none",
+      "contact": "not declared"
+    },
+    "license": {
+      "frontmatter": "MIT",
+      "license_file": "none",
+      "registry": "not declared",
+      "repository": "none"
+    },
+    "maintenance": {
+      "last_change": "2026-04-14",
+      "registry_update": "not declared",
+      "deprecated": "not declared",
+      "first_seen": "2026-01-14",
+      "content_changes": 57,
+      "releases": 5,
+      "last_release": "2026-10-27"
+    }
+  },
+  "which_files": {
+    "version": {
+      "hash": "sha256:37c1ee962b0e34e374d96fb38b1a3864b6236ccd7d2843dfca98b17341b45ad3",
+      "left_out": "none",
+      "author_version": "1.0.0",
+      "registry_version": "not declared",
+      "commit": "1a2c79d4"
+    },
+    "source": {
+      "kind": "repository",
+      "location": "GitHub vercel-labs/agent-skills, path skills/react-best-practices",
+      "commit": "1a2c79d4",
+      "retrieved": "2026-11-11",
+      "also_listed_on": "skills.sh, https://skills.sh/vercel-labs/agent-skills/vercel-react-best-practices",
+      "homepage": "not declared",
+      "produced_by": "AGENTS.md is compiled from rules/ by pnpm build with the build scripts in src/, version and date not stated"
+    },
+    "files": [
+      {
+        "path": "AGENTS.md",
+        "bytes": 108261,
+        "sha256": "fc93e7421177bbf869cce892bc60a6c83a4517d974bc3bf65c4e2c1e58a6ccf6",
+        "kind": "document",
+        "in_hash": true,
+        "executable": false
+      },
+      {
+        "path": "README.md",
+        "bytes": 3360,
+        "sha256": "9eafb2123d3b8b2aef41fba0db2648a3f4f49996f8c7c8bb2c86263befd8b48a",
+        "kind": "document",
+        "in_hash": true,
+        "executable": false
+      },
+      {
+        "path": "SKILL.md",
+        "bytes": 7251,
+        "sha256": "71ed7794962fa6e803ee83030517b5b93a9f70fbfeb431ec4535c5480a8d8355",
+        "kind": "document",
+        "in_hash": true,
+        "executable": false
+      },
+      {
+        "path": "metadata.json",
+        "bytes": 921,
+        "sha256": "c4e18bac3290fbe1b471a605867d4df68b03144ea26b8befdbe8f9d8fd124354",
+        "kind": "data",
+        "in_hash": true,
+        "executable": false
+      },
+      {
+        "path": "rules/_sections.md",
+        "bytes": 1554,
+        "sha256": "01c59969e4e867f0708c8f8ef9c6d87fab9a07d0586244f429ff84013db8a115",
+        "kind": "document",
+        "in_hash": true,
+        "executable": false
+      },
+      {
+        "path": "rules/_template.md",
+        "bytes": 631,
+        "sha256": "99df2a3ea088c6c22de2484ddc7e964d0e9923846f44c63380343ecc64455442",
+        "kind": "document",
+        "in_hash": true,
+        "executable": false
+      },
+      {
+        "path": "rules/advanced-effect-event-deps.md",
+        "bytes": 1802,
+        "sha256": "55ed8f9f27a1bff803d6fa55828176207714b02123cbb97ddb8a90d88024a723",
+        "kind": "document",
+        "in_hash": true,
+        "executable": false
+      },
+      {
+        "path": "rules/advanced-event-handler-refs.md",
+        "bytes": 1483,
+        "sha256": "a3097edeecfb2ff6851cd66ed8cdf0617c3c88180504bee824aa6e75a215bbbc",
+        "kind": "document",
+        "in_hash": true,
+        "executable": false
+      },
+      {
+        "path": "rules/advanced-init-once.md",
+        "bytes": 958,
+        "sha256": "3e4dc22173eb0e2b6dcf583e3babd862b8696328f8f59aee7c4d746c5bc05f6c",
+        "kind": "document",
+        "in_hash": true,
+        "executable": false
+      },
+      {
+        "path": "rules/advanced-use-latest.md",
+        "bytes": 1072,
+        "sha256": "8a3f64dfe5a77d1564248faf17fe662ae75b55d497a243cb30b38eb07ccbbf9a",
+        "kind": "document",
+        "in_hash": true,
+        "executable": false
+      },
+      {
+        "path": "rules/async-api-routes.md",
+        "bytes": 1125,
+        "sha256": "523338540d73427dc14c0cbb19f2741ebccdf8b105a7b2c1b33d2905cf237a42",
+        "kind": "document",
+        "in_hash": true,
+        "executable": false
+      },
+      {
+        "path": "rules/async-cheap-condition-before-await.md",
+        "bytes": 1220,
+        "sha256": "03107c1f70a293cd58a8abc5474c5548e20ea4efdf01b6d45aae7ad0ac1cb32c",
+        "kind": "document",
+        "in_hash": true,
+        "executable": false
+      },
+      {
+        "path": "rules/async-defer-await.md",
+        "bytes": 2208,
+        "sha256": "f3c142d090615abdcc99d31c123be37b31f0f1ed8d9ec9f7789a3bc6883ae0fb",
+        "kind": "document",
+        "in_hash": true,
+        "executable": false
+      },
+      {
+        "path": "rules/async-dependencies.md",
+        "bytes": 1293,
+        "sha256": "16ef469f877e30c6b8e1e1b4bc3e527312fa3c6318cb785a4eca186ea236131a",
+        "kind": "document",
+        "in_hash": true,
+        "executable": false
+      },
+      {
+        "path": "rules/async-parallel.md",
+        "bytes": 654,
+        "sha256": "6d2f841896279e976dfcdc1ac89e70771ac188baadfd43c096b5706cb838b961",
+        "kind": "document",
+        "in_hash": true,
+        "executable": false
+      },
+      {
+        "path": "rules/async-suspense-boundaries.md",
+        "bytes": 2510,
+        "sha256": "de05fedac2eb7ae563b887b5a424464ec3dfaf84e5b7797467ebe2a796ac8afc",
+        "kind": "document",
+        "in_hash": true,
+        "executable": false
+      },
+      {
+        "path": "rules/bundle-analyzable-paths.md",
+        "bytes": 2382,
+        "sha256": "62090b5c815fd71bf1133dce754f51abc16a9456d0ccd025fd627de27726e92a",
+        "kind": "document",
+        "in_hash": true,
+        "executable": false
+      },
+      {
+        "path": "rules/bundle-barrel-imports.md",
+        "bytes": 2795,
+        "sha256": "e648f6d54525f07a691357040ca5bff6ea3424788a91ff63812adb29622a671b",
+        "kind": "document",
+        "in_hash": true,
+        "executable": false
+      },
+      {
+        "path": "rules/bundle-conditional.md",
+        "bytes": 949,
+        "sha256": "09c8259c3efb04fc0abb8e412ccbda217c222ae8118516283e571c995fe3a7d4",
+        "kind": "document",
+        "in_hash": true,
+        "executable": false
+      },
+      {
+        "path": "rules/bundle-defer-third-party.md",
+        "bytes": 920,
+        "sha256": "3719fb47b191e8db4fe22686ec88448ad5af9e6838585425abbe103d0b642e37",
+        "kind": "document",
+        "in_hash": true,
+        "executable": false
+      },
+      {
+        "path": "rules/bundle-dynamic-imports.md",
+        "bytes": 791,
+        "sha256": "401817a7369f315fc5a68a1095742ff7d53d0461906880dc9d64a41495ee1986",
+        "kind": "document",
+        "in_hash": true,
+        "executable": false
+      },
+      {
+        "path": "rules/bundle-preload.md",
+        "bytes": 1149,
+        "sha256": "d1f7cc28da7cd5ab249acd287edc5b761afcfb194e9cb62cd44c5f3543db2de2",
+        "kind": "document",
+        "in_hash": true,
+        "executable": false
+      },
+      {
+        "path": "rules/client-event-listeners.md",
+        "bytes": 1969,
+        "sha256": "242a873349febc1ce685e85617994784dbab92c2eaa68aed7fed5a83e7680e93",
+        "kind": "document",
+        "in_hash": true,
+        "executable": false
+      },
+      {
+        "path": "rules/client-localstorage-schema.md",
+        "bytes": 1950,
+        "sha256": "0fb7cdf9dc93fdf22f87e3669f953fb9d4ac9b0be42eec4a29fe9a2560610b88",
+        "kind": "document",
+        "in_hash": true,
+        "executable": false
+      },
+      {
+        "path": "rules/client-passive-event-listeners.md",
+        "bytes": 1644,
+        "sha256": "1f35016f9053de69e884ee9be00654e37979c2ca85f5e57764dc2626ff7acb4b",
+        "kind": "document",
+        "in_hash": true,
+        "executable": false
+      },
+      {
+        "path": "rules/client-swr-dedup.md",
+        "bytes": 1159,
+        "sha256": "644652c39c6cc00de8d1c77a7273612e868dc3f7edda30764164c12ec0f764a3",
+        "kind": "document",
+        "in_hash": true,
+        "executable": false
+      },
+      {
+        "path": "rules/js-batch-dom-css.md",
+        "bytes": 3266,
+        "sha256": "480b891b9eaf96e929dc1e964274a4828e3a78009b7d00ccd965a0d425215959",
+        "kind": "document",
+        "in_hash": true,
+        "executable": false
+      },
+      {
+        "path": "rules/js-cache-function-results.md",
+        "bytes": 1949,
+        "sha256": "3daaa11d24f4295cb6be8bc6f407f2ce83cc7b5bd1f0e68891ea8ab835721dc7",
+        "kind": "document",
+        "in_hash": true,
+        "executable": false
+      },
+      {
+        "path": "rules/js-cache-property-access.md",
+        "bytes": 532,
+        "sha256": "73e47431e74878a927061bf0ddc7cd91a7556cb35d2573f3421e82300d9ae311",
+        "kind": "document",
+        "in_hash": true,
+        "executable": false
+      },
+      {
+        "path": "rules/js-cache-storage.md",
+        "bytes": 1651,
+        "sha256": "11b826b0433898c1ece2d3547010d8e77db9fb240185748c45db91493de9b6cc",
+        "kind": "document",
+        "in_hash": true,
+        "executable": false
+      },
+      {
+        "path": "rules/js-combine-iterations.md",
+        "bytes": 753,
+        "sha256": "71add08aeeb43091d4ff4c0b2842cce8b4bdef8ad3e732cc034bb5a84827e746",
+        "kind": "document",
+        "in_hash": true,
+        "executable": false
+      },
+      {
+        "path": "rules/js-early-exit.md",
+        "bytes": 1133,
+        "sha256": "925ce5ce87f3347186ca62212f29cc6baa2b8c85a96d2720ad07c3d0abf781c0",
+        "kind": "document",
+        "in_hash": true,
+        "executable": false
+      },
+      {
+        "path": "rules/js-flatmap-filter.md",
+        "bytes": 1411,
+        "sha256": "9e5b166a41914d975bef7635467f8fb32cd98b5c3126c0bc6f163490812fb5f0",
+        "kind": "document",
+        "in_hash": true,
+        "executable": false
+      },
+      {
+        "path": "rules/js-hoist-regexp.md",
+        "bytes": 1028,
+        "sha256": "f9e9aef2f7c2307dd7310f283df85dcada45fc43e9bb941b0c3aa414dec21ec4",
+        "kind": "document",
+        "in_hash": true,
+        "executable": false
+      },
+      {
+        "path": "rules/js-index-maps.md",
+        "bytes": 837,
+        "sha256": "5df1bdc2cfabb2c98abd55d26762e5c18189535c2e686184f426082e62920391",
+        "kind": "document",
+        "in_hash": true,
+        "executable": false
+      },
+      {
+        "path": "rules/js-length-check-first.md",
+        "bytes": 1747,
+        "sha256": "8b54a311c826b299272f29187fc58bc55772a04c4a72eeb29456ee96dc9fc624",
+        "kind": "document",
+        "in_hash": true,
+        "executable": false
+      },
+      {
+        "path": "rules/js-min-max-loop.md",
+        "bytes": 2290,
+        "sha256": "87dfb67e2f39df6ad8bcfb5b78c5fb364d3c07554ad188a202408d99f3763421",
+        "kind": "document",
+        "in_hash": true,
+        "executable": false
+      },
+      {
+        "path": "rules/js-request-idle-callback.md",
+        "bytes": 2647,
+        "sha256": "ee08f83905b4011abbc33d594033157d77561b5bbd9b36b04f0f409581ffec32",
+        "kind": "document",
+        "in_hash": true,
+        "executable": false
+      },
+      {
+        "path": "rules/js-set-map-lookups.md",
+        "bytes": 532,
+        "sha256": "a7fd781a6ba9ad49065961b6f9a90ef486bf6b648390e1a08704025f98e1642b",
+        "kind": "document",
+        "in_hash": true,
+        "executable": false
+      },
+      {
+        "path": "rules/js-tosorted-immutable.md",
+        "bytes": 1782,
+        "sha256": "d0a5e1b0fec48a0a81397957e2f068e224329f7c42cb5feeed8aae6fa64025e8",
+        "kind": "document",
+        "in_hash": true,
+        "executable": false
+      },
+      {
+        "path": "rules/rendering-activity.md",
+        "bytes": 564,
+        "sha256": "1e5e7eaf3555e61d6a2e900089c676527d26259501db5594f59544b6c664f85a",
+        "kind": "document",
+        "in_hash": true,
+        "executable": false
+      },
+      {
+        "path": "rules/rendering-animate-svg-wrapper.md",
+        "bytes": 1185,
+        "sha256": "9c6ae0ca7a51434e803887c64cded760956579a1452ccb80a461a03f9c937c77",
+        "kind": "document",
+        "in_hash": true,
+        "executable": false
+      },
+      {
+        "path": "rules/rendering-conditional-render.md",
+        "bytes": 980,
+        "sha256": "2ec2fa23c4148285144687050c52369adba3da2fbe3d486f8d3e0aad8f06f2bc",
+        "kind": "document",
+        "in_hash": true,
+        "executable": false
+      },
+      {
+        "path": "rules/rendering-content-visibility.md",
+        "bytes": 815,
+        "sha256": "64eee6d5b916fe74df33363994b27fc7f71bea3bcedc7ee04bda23107ca3e6e4",
+        "kind": "document",
+        "in_hash": true,
+        "executable": false
+      },
+      {
+        "path": "rules/rendering-hoist-jsx.md",
+        "bytes": 1039,
+        "sha256": "93b229560fae92005ed9a2a829064607b39b2e984e92d221d05b2d41df2b7c0e",
+        "kind": "document",
+        "in_hash": true,
+        "executable": false
+      },
+      {
+        "path": "rules/rendering-hydration-no-flicker.md",
+        "bytes": 2308,
+        "sha256": "dc7ab358c67c177bca6e6f360fbc935ebe4efa928c0ba3ebd3f9f3d9e2000ca3",
+        "kind": "document",
+        "in_hash": true,
+        "executable": false
+      },
+      {
+        "path": "rules/rendering-hydration-suppress-warning.md",
+        "bytes": 872,
+        "sha256": "915bacb934e2927d84b37a3f3d225a47b309ac8f9e494ed2bcb66ce07c5676a2",
+        "kind": "document",
+        "in_hash": true,
+        "executable": false
+      },
+      {
+        "path": "rules/rendering-resource-hints.md",
+        "bytes": 2549,
+        "sha256": "351b1095d641717b930f1b2253282b7120af3023bc74e06c17675168d4286864",
+        "kind": "document",
+        "in_hash": true,
+        "executable": false
+      },
+      {
+        "path": "rules/rendering-script-defer-async.md",
+        "bytes": 1868,
+        "sha256": "4cea07b7875ba7fc2c7465ff23b63a2bb334f90aaf2d9293d38d67b05fdb32ab",
+        "kind": "document",
+        "in_hash": true,
+        "executable": false
+      },
+      {
+        "path": "rules/rendering-svg-precision.md",
+        "bytes": 588,
+        "sha256": "ed468533f6e95f622859c884b122cf21f9f593ed6bb3d500a54de4b9f9bcb9fb",
+        "kind": "document",
+        "in_hash": true,
+        "executable": false
+      },
+      {
+        "path": "rules/rendering-usetransition-loading.md",
+        "bytes": 2074,
+        "sha256": "3a1249c3f13026b6f54ab5712c388df219d6af01b12aa542749acd99a46f4bc1",
+        "kind": "document",
+        "in_hash": true,
+        "executable": false
+      },
+      {
+        "path": "rules/rerender-defer-reads.md",
+        "bytes": 973,
+        "sha256": "234050a77faf50cb306be10a9e15bd4421134ab5907e75f13e6d78e2bd262dc9",
+        "kind": "document",
+        "in_hash": true,
+        "executable": false
+      },
+      {
+        "path": "rules/rerender-dependencies.md",
+        "bytes": 824,
+        "sha256": "17eb5830956fb56486fd3cfc7431f5849d39751730c05ad9e77dd4f0c27169c5",
+        "kind": "document",
+        "in_hash": true,
+        "executable": false
+      },
+      {
+        "path": "rules/rerender-derived-state-no-effect.md",
+        "bytes": 1201,
+        "sha256": "cb11ec76f50aa7b6847269f02d79b120c889a30d9ecd2c1d578f75144419c77a",
+        "kind": "document",
+        "in_hash": true,
+        "executable": false
+      },
+      {
+        "path": "rules/rerender-derived-state.md",
+        "bytes": 728,
+        "sha256": "1c326bb67b01fb084eb00c8911b0a7cff54681c2315b629f88e49b64eaa6481d",
+        "kind": "document",
+        "in_hash": true,
+        "executable": false
+      },
+      {
+        "path": "rules/rerender-functional-setstate.md",
+        "bytes": 2968,
+        "sha256": "5e68df6b2ae8058e67f476ff1ac67bde159f5a9d18df439e46eabcdeb7b52e58",
+        "kind": "document",
+        "in_hash": true,
+        "executable": false
+      },
+      {
+        "path": "rules/rerender-lazy-state-init.md",
+        "bytes": 2016,
+        "sha256": "4ae844740f266fc8cbf050701230286624a2440ec5be67b9a63d9edc3c580573",
+        "kind": "document",
+        "in_hash": true,
+        "executable": false
+      },
+      {
+        "path": "rules/rerender-memo-with-default-value.md",
+        "bytes": 1173,
+        "sha256": "81c47476564ad8a79fc68fc442734255ca7d6829424359464503fda0a9f9a0dd",
+        "kind": "document",
+        "in_hash": true,
+        "executable": false
+      },
+      {
+        "path": "rules/rerender-memo.md",
+        "bytes": 1148,
+        "sha256": "1f258990c2f27ff6256b3cc5c43300631bb3f0d81f749aed08d07fcdcc131dd1",
+        "kind": "document",
+        "in_hash": true,
+        "executable": false
+      },
+      {
+        "path": "rules/rerender-move-effect-to-event.md",
+        "bytes": 1268,
+        "sha256": "abc2cbf167bee056743023351e96806a411d3398da8802093620aecf0721f029",
+        "kind": "document",
+        "in_hash": true,
+        "executable": false
+      },
+      {
+        "path": "rules/rerender-no-inline-components.md",
+        "bytes": 2135,
+        "sha256": "1cc32907a770272524ba682eef9e7efdd8ad4533b6f89b718a1fcd7d1d0eb6a3",
+        "kind": "document",
+        "in_hash": true,
+        "executable": false
+      },
+      {
+        "path": "rules/rerender-simple-expression-in-memo.md",
+        "bytes": 1018,
+        "sha256": "5bdcf2d1558ba5204e643c887b7b4060f89630969425651eb68e96427d97f800",
+        "kind": "document",
+        "in_hash": true,
+        "executable": false
+      },
+      {
+        "path": "rules/rerender-split-combined-hooks.md",
+        "bytes": 1844,
+        "sha256": "6f45d703343484ef9acef9388397f3642966ae6a5a258899a0cf1f9977cfbf6c",
+        "kind": "document",
+        "in_hash": true,
+        "executable": false
+      },
+      {
+        "path": "rules/rerender-transitions.md",
+        "bytes": 1055,
+        "sha256": "60f4033909a62df5e5b8c601494f9e50a562e2f8c1c2d81eac24f38142265f1c",
+        "kind": "document",
+        "in_hash": true,
+        "executable": false
+      },
+      {
+        "path": "rules/rerender-use-deferred-value.md",
+        "bytes": 1846,
+        "sha256": "8c3579576a61a949884167745dcfaf1d5426ba305cc61fd0a79602d70fda4909",
+        "kind": "document",
+        "in_hash": true,
+        "executable": false
+      },
+      {
+        "path": "rules/rerender-use-ref-transient-values.md",
+        "bytes": 1742,
+        "sha256": "f1a649af9d1d0b5c762f6c9c4c1c70c90d7df82aa10296ee87aadb78c1b76c54",
+        "kind": "document",
+        "in_hash": true,
+        "executable": false
+      },
+      {
+        "path": "rules/server-after-nonblocking.md",
+        "bytes": 2012,
+        "sha256": "d0b8d24a3db9f0f65f9e2bddbf230b0e03a5f60e1229d93a4a18f5e7a991c7c2",
+        "kind": "document",
+        "in_hash": true,
+        "executable": false
+      },
+      {
+        "path": "rules/server-auth-actions.md",
+        "bytes": 2649,
+        "sha256": "a2ca8aa102839251c7971ec784560fab943c20b36fe6f80365d4110c13260c23",
+        "kind": "document",
+        "in_hash": true,
+        "executable": false
+      },
+      {
+        "path": "rules/server-cache-lru.md",
+        "bytes": 1353,
+        "sha256": "1924b64561841923b88a657085097a0aeba3e0ba2d5470b9f5c15cc10d6ae70f",
+        "kind": "document",
+        "in_hash": true,
+        "executable": false
+      },
+      {
+        "path": "rules/server-cache-react.md",
+        "bytes": 2228,
+        "sha256": "fddeea6c870bb3da4134b61d54b7d09b83d2603f929b7547cd3dc1dc269edd5c",
+        "kind": "document",
+        "in_hash": true,
+        "executable": false
+      },
+      {
+        "path": "rules/server-dedup-props.md",
+        "bytes": 2060,
+        "sha256": "c2747424cdac46be62f835f245a0aa887b0090b416d28e2ac8676702645eeb37",
+        "kind": "document",
+        "in_hash": true,
+        "executable": false
+      },
+      {
+        "path": "rules/server-hoist-static-io.md",
+        "bytes": 4423,
+        "sha256": "5abea4dd882b13661bd5f7dfb93f9e547d5f08176c61c448ade91b210ed5d49f",
+        "kind": "document",
+        "in_hash": true,
+        "executable": false
+      },
+      {
+        "path": "rules/server-no-shared-module-state.md",
+        "bytes": 1766,
+        "sha256": "4d869bf1cd2f1632e5ca4c0e64b1cf0e71c5f5a0f940bc8a22174d205e735ed7",
+        "kind": "document",
+        "in_hash": true,
+        "executable": false
+      },
+      {
+        "path": "rules/server-parallel-fetching.md",
+        "bytes": 1554,
+        "sha256": "569a2e9fc04f9606686cd75c5894ef8781b502786a7fffe241396846c7733472",
+        "kind": "document",
+        "in_hash": true,
+        "executable": false
+      },
+      {
+        "path": "rules/server-parallel-nested-fetching.md",
+        "bytes": 992,
+        "sha256": "ad5d9656984d4a959997a2367bf59cc6632297b4634a1dd13a087939d83f30b3",
+        "kind": "document",
+        "in_hash": true,
+        "executable": false
+      },
+      {
+        "path": "rules/server-serialization.md",
+        "bytes": 996,
+        "sha256": "f4c7d68b29c82381baad059c4a7f09e868e71ec9c3115a26ad3ae7d24c0dfe1f",
+        "kind": "document",
+        "in_hash": true,
+        "executable": false
+      }
+    ],
+    "counts": {
+      "script": 0,
+      "document": 75,
+      "data": 1,
+      "binary": 0
+    },
+    "composition": "instructions only"
+  },
+  "about_this_card": {
+    "schema": "Skill Card v1.2",
+    "date": "2026-11-11",
+    "by": "Claude Opus 5.5, claude-opus-5-5, by hand from the skill files, the skills.sh listing and audits, and GitHub metadata, with the hash, file list, sizes, harness limits and repository figures computed by script",
+    "skill_run": false,
+    "scripts_analysed": false,
+    "security_check_run": false,
+    "external_service_contacted": false,
+    "registry_read": true,
+    "empty_values": 45
+  }
+}

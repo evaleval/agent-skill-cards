@@ -1,0 +1,568 @@
+{
+  "schema": "Skill Card v1.2",
+  "skill": "audit-website",
+  "version": "squirrelscan/skills at 29f17762",
+  "what_it_does": {
+    "name": "audit-website",
+    "summary": "Instructions for auditing a website with the squirrel CLI and fixing the findings in the site's code. The agent runs squirrel audit against a URL with the LLM report format, presents the score, grade and top issues, maps each issue to the template, component or content file behind it, applies the fixes the user approves in batches and re-audits until a score target is met. A reference file describes the LLM report and diff format. Use it to discover and assess website or webapp issues and drive them to fixed.",
+    "tasks": [
+      "audit a website against 300+ rules with the squirrel CLI",
+      "map audit issues to the templates, components or content files behind them",
+      "fix approved issues in batches and re-audit until the score target is met",
+      "compare audits against a baseline to catch regressions",
+      "tailor audits by disabling rules that do not apply to the site",
+      "start the fix loop from a squirrelscan channel event"
+    ],
+    "author_description": "Audit a website with the squirrelscan CLI and fix the findings in code. Runs SEO, performance, security, technical, content, accessibility, and 16 other rule categories (300+ rules), returns an LLM-optimized report, then drives an iterative fix loop, mapping issues to source files, applying fixes, and re-auditing until the site scores well. Use to discover and assess website or webapp issues and drive them to fixed.",
+    "outputs": [
+      {
+        "what": "audit report with health score, grade, issues by category, broken links and recommendations",
+        "kind": "information",
+        "form": "compact XML and text hybrid in the llm format",
+        "destination": "the terminal and the agent's context, cached locally for later reports"
+      },
+      {
+        "what": "the report presented to the user with proposed fixes and judgment calls flagged for review",
+        "kind": "recommendation",
+        "form": "message to the user",
+        "destination": "the conversation"
+      },
+      {
+        "what": "fixes to the templates, components and content files behind each finding",
+        "kind": "action",
+        "form": "edited source files",
+        "destination": "the user's project"
+      },
+      {
+        "what": "diff and regression reports against a baseline audit",
+        "kind": "information",
+        "form": "compact XML diff in the llm format",
+        "destination": "the terminal and the agent's context"
+      },
+      {
+        "what": "before and after score comparison with a summary of every change made",
+        "kind": "information",
+        "form": "message to the user",
+        "destination": "the conversation"
+      },
+      {
+        "what": "rules disabled for findings that do not apply",
+        "kind": "action",
+        "form": "a [rules] disable entry in squirrel.toml or the website's disable_rules",
+        "destination": "squirrel.toml in the project, or the squirrelscan cloud"
+      },
+      {
+        "what": "a published report, a capped summary that samples affected pages",
+        "kind": "action",
+        "form": "published report",
+        "destination": "squirrelscan"
+      }
+    ],
+    "sample_output": "<score overall=\"78\" grade=\"C\">",
+    "inputs": [
+      {
+        "what": "the URL of the site to audit",
+        "type": "a URL as a command argument",
+        "required": "required",
+        "for": "every audit",
+        "example": "squirrel audit https://example.com --format llm"
+      },
+      {
+        "what": "the site's source code and content files",
+        "type": "a local project",
+        "required": "conditional",
+        "for": "the fix loop",
+        "example": "not declared"
+      },
+      {
+        "what": "an audit id",
+        "type": "an id as a command argument",
+        "required": "conditional",
+        "for": "re-rendering a cached audit or diffing against a baseline",
+        "example": "squirrel report --diff <baseline-audit-id> --format llm"
+      },
+      {
+        "what": "the run_id of a cloud audit",
+        "type": "an id from a squirrelscan channel event",
+        "required": "conditional",
+        "for": "a fix loop started from a channel event",
+        "example": "not declared"
+      },
+      {
+        "what": "Web Bot Auth headers",
+        "type": "repeated -H flags",
+        "required": "optional",
+        "for": "a site that blocks unknown crawlers",
+        "example": "-H \"Name: Value\""
+      }
+    ],
+    "when_input_is_missing": [
+      {
+        "case": "the user does not provide a URL",
+        "behaviour": "the agent asks which site to audit"
+      },
+      {
+        "case": "the audit exits with code 3, 4 or 5",
+        "behaviour": "nothing was audited and there is no score, so no fix loop starts"
+      },
+      {
+        "case": "the start URL redirects to another site",
+        "behaviour": "the destination is relayed and the audit re-run with --follow-redirect only after the user confirms the site"
+      },
+      {
+        "case": "a finding needs a judgment call, such as a broken link",
+        "behaviour": "it is flagged for user review instead of guessing"
+      }
+    ],
+    "exclusions": [
+      "not for CLI setup, login, publishing, MCP or general CLI usage, which the companion squirrelscan skill covers"
+    ],
+    "adoption": [
+      {
+        "registry": "skills.sh",
+        "installs": "75.0K",
+        "first_seen": "2026-01-22",
+        "counts": "the skill",
+        "read": "2026-11-11"
+      },
+      {
+        "registry": "GitHub",
+        "stars": 108,
+        "forks": 10,
+        "counts": "the squirrelscan/skills repository, which holds 2 skills",
+        "read": "2026-11-11"
+      }
+    ]
+  },
+  "what_it_needs": {
+    "compatibility": {
+      "harnesses": "not declared",
+      "models": "not declared",
+      "capabilities": "not declared",
+      "fits": {
+        "Agent Skills specification": "fits, name 13 characters, description 419 characters, body 88 lines and about 1,538 tokens",
+        "Codex": "fits, SKILL.md is 6,829 bytes, under the 8,000 byte cut",
+        "Claude Code": "fits, 98 lines, listing text 419 characters",
+        "ClawHub": "fits, folder 21,820 bytes"
+      }
+    },
+    "software_dependencies": [
+      {
+        "name": "squirrel CLI",
+        "kind": "binary",
+        "version": "0.0.108 or later for --level",
+        "for": "run"
+      }
+    ],
+    "credentials": [
+      {
+        "kind": "other",
+        "name": "Web Bot Auth header values",
+        "used_for": "auditing a site that blocks unknown crawlers",
+        "from": "command argument",
+        "goes_to": "the audited website"
+      }
+    ],
+    "cost": {
+      "context_tokens": {
+        "discovery": 105,
+        "load": 1707,
+        "on_demand": 2282,
+        "on_demand_files": [
+          "references/OUTPUT-FORMAT.md"
+        ]
+      },
+      "run_tokens": "not examined",
+      "services": [
+        {
+          "name": "squirrelscan",
+          "needs": "account",
+          "price": "signed in, every pass is billed in credits, 50 plus 2 per audited page, signed out or with --offline it costs nothing",
+          "quota": "not declared",
+          "calls_per_use": "not declared"
+        }
+      ]
+    }
+  },
+  "what_it_touches": {
+    "side_effects": {
+      "install": "changes state",
+      "run": "changes state",
+      "changes": [
+        {
+          "what": "installs the squirrel CLI from squirrelscan.com/download",
+          "affects": "software environment",
+          "confirmation": "not declared",
+          "reversible": "not declared"
+        },
+        {
+          "what": "edits templates, components and content files to fix findings",
+          "affects": "workspace",
+          "confirmation": "yes",
+          "reversible": "not declared"
+        },
+        {
+          "what": "caches audits locally",
+          "affects": "other",
+          "confirmation": "not declared",
+          "reversible": "not declared"
+        },
+        {
+          "what": "signed in, adds an audited site to the user's dashboard and schedules it unless --ephemeral is passed",
+          "affects": "external service",
+          "confirmation": "not declared",
+          "reversible": "not declared"
+        },
+        {
+          "what": "signed in, spends squirrelscan credits on every audit pass",
+          "affects": "external service",
+          "confirmation": "not declared",
+          "reversible": "not declared"
+        },
+        {
+          "what": "disables rules in squirrel.toml or in the website's cloud disable_rules",
+          "affects": "workspace",
+          "confirmation": "yes",
+          "reversible": "not declared"
+        },
+        {
+          "what": "publishes a report to share results",
+          "affects": "external service",
+          "confirmation": "yes",
+          "reversible": "not declared"
+        }
+      ]
+    },
+    "network_access": [
+      {
+        "host": "the website the user names, formed at run time",
+        "purpose": "data source",
+        "when": "every audit, with Web Bot Auth headers only when passed",
+        "sends": [
+          "credential"
+        ],
+        "receives": "the site's pages, crawled up to 25, 100 or 500 by level"
+      },
+      {
+        "host": "squirrelscan.com",
+        "purpose": "install",
+        "when": "once, when the squirrel CLI is installed from squirrelscan.com/download",
+        "sends": [
+          "none"
+        ],
+        "receives": "the squirrel CLI"
+      },
+      {
+        "host": "the squirrelscan cloud, host not named in the files",
+        "purpose": "data source",
+        "when": "when signed in, for cloud runs, channel events and reports fetched by run_id",
+        "sends": [
+          "query text"
+        ],
+        "receives": "cloud audit reports and channel events"
+      },
+      {
+        "host": "the squirrelscan cloud, host not named in the files",
+        "purpose": "publish",
+        "when": "when the user wants to share results",
+        "sends": [
+          "user content"
+        ],
+        "receives": "a published report"
+      },
+      {
+        "host": "docs.squirrelscan.com",
+        "purpose": "data source",
+        "when": "when looking up a rule",
+        "sends": [
+          "query text"
+        ],
+        "receives": "the rule's documentation"
+      }
+    ],
+    "tools_and_permissions": {
+      "allowed_tools": "Bash(squirrel:*) Read Edit Grep Glob",
+      "tools": [
+        {
+          "tool": "squirrel audit and squirrel report",
+          "kind": "shell command",
+          "for": "running audits, re-rendering cached audits and diffing against a baseline",
+          "origin": "third party"
+        },
+        {
+          "tool": "Bash, limited to squirrel",
+          "kind": "agent tool",
+          "for": "running the squirrel CLI",
+          "origin": "built in"
+        },
+        {
+          "tool": "Read, Edit, Grep and Glob",
+          "kind": "agent tool",
+          "for": "mapping issues to source files and applying fixes",
+          "origin": "built in"
+        },
+        {
+          "tool": "the project's build and existing checks",
+          "kind": "shell command",
+          "for": "verifying the project still builds after each batch",
+          "origin": "third party"
+        },
+        {
+          "tool": "claude",
+          "kind": "shell command",
+          "for": "piping the LLM report to an agent, in one example",
+          "origin": "third party"
+        }
+      ]
+    },
+    "machine_access": {
+      "paths": [
+        {
+          "path": "the site's templates, components and content files",
+          "operation": "read",
+          "scope": "workspace"
+        },
+        {
+          "path": "the site's templates, components and content files",
+          "operation": "write",
+          "scope": "workspace"
+        },
+        {
+          "path": "squirrel.toml",
+          "operation": "write",
+          "scope": "workspace"
+        },
+        {
+          "path": "the local audit cache, location not named",
+          "operation": "write",
+          "scope": "unknown"
+        },
+        {
+          "path": "references/OUTPUT-FORMAT.md",
+          "operation": "read",
+          "scope": "skill folder"
+        }
+      ],
+      "settings": [
+        {
+          "name": "PATH",
+          "access": "read",
+          "reason": "the squirrel CLI must be accessible in PATH"
+        },
+        {
+          "name": "[rules] disable in squirrel.toml",
+          "access": "set",
+          "reason": "to stop reporting a finding class that does not apply to the site"
+        },
+        {
+          "name": "disable_rules of the website in the squirrelscan cloud",
+          "access": "set",
+          "reason": "to stop reporting a finding class in cloud runs"
+        }
+      ]
+    }
+  },
+  "what_is_known": {
+    "checks": [
+      {
+        "id": "C1",
+        "tool": "Snyk, skills.sh audit, version not stated",
+        "date": "2026-11-05",
+        "scope": "unknown",
+        "result": "warn, risk level MEDIUM, 1 issue, W011 third-party content exposure, indirect prompt injection risk, scored low risk 0.10",
+        "report": "https://skills.sh/squirrelscan/skills/audit-website/security/snyk"
+      },
+      {
+        "id": "C2",
+        "tool": "Gen Agent Trust Hub, skills.sh audit, version not stated",
+        "date": "2026-11-05",
+        "scope": "SKILL.md instructions and allowed tools, as cited in its analysis",
+        "result": "pass, risk level SAFE, two surfaces described, indirect prompt injection from crawled sites and channel events, and command execution limited to the squirrel binary",
+        "report": "https://skills.sh/squirrelscan/skills/audit-website/security/agent-trust-hub"
+      },
+      {
+        "id": "C3",
+        "tool": "Socket, skills.sh audit, version not stated",
+        "date": "2026-11-06",
+        "scope": "the skill package, hash 8d312b4b5bdb098e4c584b30a13992d0eeebd572c9adea44a93c8cf6375bc755",
+        "result": "pass, checks for malicious behaviour, security concerns, code obfuscation and suspicious patterns",
+        "report": "https://skills.sh/squirrelscan/skills/audit-website/security/socket"
+      }
+    ],
+    "vulnerabilities": [
+      {
+        "finding": "Third-party content exposure, indirect prompt injection risk, W011",
+        "check": "C1",
+        "severity": "MEDIUM, scored low risk 0.10",
+        "location": "not stated",
+        "status": "open",
+        "fix": "not stated"
+      }
+    ],
+    "risks": [
+      {
+        "risk": "Instructions hidden in a crawled page or a channel event reach the agent through the audit report, while the agent can edit the project's source code.",
+        "source": "check C1, check C2",
+        "severity": "MEDIUM by C1, SAFE overall by C2",
+        "mitigation": "in the instructions, event text is treated as data and the user confirms before any change, no technical boundary",
+        "taxonomy": "https://www.ibm.com/docs/en/watsonx/saas?topic=ai-risk-atlas"
+      },
+      {
+        "risk": "Repeated re-audits in the fix loop spend squirrelscan credits when signed in, 50 plus 2 per audited page on every pass.",
+        "source": "model",
+        "severity": "none",
+        "mitigation": "signed out or with --offline it costs nothing, and a quick first pass caps pages at 25",
+        "taxonomy": "not examined"
+      },
+      {
+        "risk": "Web Bot Auth header values passed with -H on the command line can stay in shell history or logs.",
+        "source": "model",
+        "severity": "none",
+        "mitigation": "header values are redacted in squirrel output, shell history not addressed",
+        "taxonomy": "not examined"
+      }
+    ],
+    "limitations": [
+      "A skipped check is not clean and is not reported as fixed.",
+      "Exit codes 3, 4 and 5 mean nothing was audited and there is no score.",
+      "Requests listed under refused-fetches are unknown, not missing.",
+      "A local dev server does not show true rendering, performance and redirect behaviour.",
+      "The quick pass samples only part of the site, so sign-off needs a --level full crawl.",
+      "--level needs squirrel 0.0.108 or later.",
+      "A published report is a capped summary that samples affected pages, so fixes come from the local report.",
+      "Broken links and other judgment calls need a human decision."
+    ],
+    "known_problems": [
+      {
+        "problem": "the site blocks unknown crawlers, such as Shopify or Cloudflare",
+        "workaround": "pass Web Bot Auth headers with repeated -H flags"
+      },
+      {
+        "problem": "the start URL redirected to another site",
+        "workaround": "relay the destination and re-run with --follow-redirect after the user confirms"
+      },
+      {
+        "problem": "an interrupted crawl",
+        "workaround": "continue it with --resume"
+      },
+      {
+        "problem": "cached results after deploys or content changes",
+        "workaround": "re-audit with --refresh"
+      },
+      {
+        "problem": "a finding class does not apply to the site",
+        "workaround": "disable it in squirrel.toml or the website's disable_rules and re-audit"
+      }
+    ],
+    "evaluations": "none"
+  },
+  "who_stands_behind_it": {
+    "authorship": {
+      "author": "squirrelscan, from the metadata of SKILL.md",
+      "publisher": "the squirrelscan organisation on GitHub",
+      "signer": "none",
+      "contact": "not declared"
+    },
+    "license": {
+      "frontmatter": "See LICENSE file in repository root",
+      "license_file": "none",
+      "registry": "not declared",
+      "repository": "MIT, as GitHub detects it"
+    },
+    "maintenance": {
+      "last_change": "2026-11-04",
+      "registry_update": "not declared",
+      "deprecated": "not declared",
+      "first_seen": "2026-07-08",
+      "content_changes": 10,
+      "releases": 0,
+      "last_release": "none"
+    }
+  },
+  "which_files": {
+    "version": {
+      "hash": "sha256:d611567e7fd2a37d078501bf75fa9aeb1c4fbbe51f67d68f40d97a2249514fc3",
+      "left_out": "none",
+      "author_version": "2.9",
+      "registry_version": "not declared",
+      "commit": "29f17762"
+    },
+    "source": {
+      "kind": "repository",
+      "location": "GitHub squirrelscan/skills, path skills/audit-website",
+      "commit": "29f17762",
+      "retrieved": "2026-11-11",
+      "also_listed_on": "skills.sh, https://skills.sh/squirrelscan/skills/audit-website",
+      "homepage": "not declared",
+      "produced_by": "none"
+    },
+    "files": [
+      {
+        "path": "README.md",
+        "bytes": 1152,
+        "sha256": "d1861f0933872da5d42d77794c7305a1b46b64c86c320fb8a7b721c7155c3fc9",
+        "kind": "document",
+        "in_hash": true,
+        "executable": false
+      },
+      {
+        "path": "SKILL.md",
+        "bytes": 6829,
+        "sha256": "b5e1b50fc0ceb6de4d1bc7774810bfd75d97230743209d47d5818831cf49edae",
+        "kind": "document",
+        "in_hash": true,
+        "executable": false
+      },
+      {
+        "path": "agents/openai.yaml",
+        "bytes": 229,
+        "sha256": "128361e8b4f7f25812492c31136c2b7327720b9f3e140a1c7770d805d885fad6",
+        "kind": "data",
+        "in_hash": true,
+        "executable": false
+      },
+      {
+        "path": "assets/icon-large.png",
+        "bytes": 2763,
+        "sha256": "5a5ccd84f57b8a030caf51cc7e57b1b412996ad7db837303a2473f6e4313073c",
+        "kind": "binary",
+        "in_hash": true,
+        "executable": false
+      },
+      {
+        "path": "assets/icon-small.svg",
+        "bytes": 1721,
+        "sha256": "ea7f6275693d96577383d550f97eda5e5fdd70da51b7f770dabf84bb72b7759d",
+        "kind": "data",
+        "in_hash": true,
+        "executable": false
+      },
+      {
+        "path": "references/OUTPUT-FORMAT.md",
+        "bytes": 9126,
+        "sha256": "a59e875cc5450a2f66d980c10b24ffd9be30020197e15c54b06aa155b1be8f5f",
+        "kind": "document",
+        "in_hash": true,
+        "executable": false
+      }
+    ],
+    "counts": {
+      "script": 0,
+      "document": 3,
+      "data": 2,
+      "binary": 1
+    },
+    "composition": "instructions only"
+  },
+  "about_this_card": {
+    "schema": "Skill Card v1.2",
+    "date": "2026-11-11",
+    "by": "Claude Opus 5.5, claude-opus-5-5, by hand from the skill files, the skills.sh listing and audits, and GitHub metadata, with the hash, file list, sizes, harness limits and repository figures computed by script",
+    "skill_run": false,
+    "scripts_analysed": false,
+    "security_check_run": false,
+    "external_service_contacted": false,
+    "registry_read": true,
+    "empty_values": 38
+  }
+}

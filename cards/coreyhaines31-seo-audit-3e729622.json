@@ -1,0 +1,553 @@
+{
+  "schema": "Skill Card v1.2",
+  "skill": "seo-audit",
+  "version": "coreyhaines31/marketingskills at 3e729622",
+  "what_it_does": {
+    "name": "seo-audit",
+    "summary": "Instructions and seven reference documents for auditing the SEO of a website. The audit runs in priority order through crawlability and indexation, technical foundations, on-page optimization, content quality and authority, with added checklists for multilingual sites, local businesses, title tags and pages ranking in positions 8 to 20. The result is an audit report with an executive summary, findings with issue, impact, evidence, fix and priority, and a prioritized action plan. Use it when someone wants to audit or diagnose SEO, asks why traffic dropped or a page won't rank, or just says their SEO is bad.",
+    "tasks": [
+      "audit crawlability, indexation and technical SEO",
+      "check Core Web Vitals, mobile-friendliness, HTTPS and URL structure",
+      "review title tags, meta descriptions, headings, images and internal linking",
+      "check hreflang, canonicals and sitemaps on multilingual and multi-regional sites",
+      "diagnose local SEO, Business Profiles, citations, reviews and location pages",
+      "move pages ranking in positions 8 to 20 onto page one and fix weak click-through"
+    ],
+    "author_description": "When the user wants to audit or diagnose SEO, or asks why traffic dropped, a page won't rank, or whether a setup like canonicals, hreflang, or redirects is right: technical SEO, indexing, Google updates, on-page and titles, Core Web Vitals, local SEO. Start here when someone just says their SEO is bad. For pages at scale, see programmatic-seo. For structured data, see schema. For AI search, see ai-seo.",
+    "outputs": [
+      {
+        "what": "SEO audit report with executive summary, technical, on-page and content findings, and a prioritized action plan",
+        "kind": "recommendation",
+        "form": "structured text report, each finding with Issue, Impact, Evidence, Fix and Priority",
+        "destination": "a message to the user"
+      },
+      {
+        "what": "proposed title changes for a bulk title audit",
+        "kind": "recommendation",
+        "form": "Markdown table with page, current title, proposed title and reason",
+        "destination": "a message to the user, for the owner to approve line by line"
+      },
+      {
+        "what": "local SEO plan and artifacts, field edits, citation cleanup table, review drafts, location-page outline or measurement plan",
+        "kind": "recommendation",
+        "form": "text and tables",
+        "destination": "a message to the user"
+      },
+      {
+        "what": "rankings push candidates bucketed into striking distance, weak click-through and near the top, with the smallest change per page",
+        "kind": "recommendation",
+        "form": "text and tables",
+        "destination": "a message to the user"
+      }
+    ],
+    "sample_output": "| /pricing | Plans That Grow With You | Acme Pricing: Plans and Costs | Matches the \"acme pricing\" query |",
+    "inputs": [
+      {
+        "what": "the site or pages to audit",
+        "type": "a URL, with the scope as full site or specific pages",
+        "required": "required",
+        "for": "every audit",
+        "example": "URL: https://example.com"
+      },
+      {
+        "what": "product marketing context",
+        "type": "a Markdown file in the workspace",
+        "required": "optional",
+        "for": "every task",
+        "example": ".agents/product-marketing.md"
+      },
+      {
+        "what": "site context, business goal, priority keywords, known issues, traffic level and recent changes or migrations",
+        "type": "answers to questions in natural language",
+        "required": "conditional",
+        "for": "information not already covered by the product marketing context",
+        "example": "What type of site? (SaaS, e-commerce, blog, etc.)"
+      },
+      {
+        "what": "Search Console and analytics access or data",
+        "type": "account access or exported reports",
+        "required": "optional",
+        "for": "indexation checks and finding rankings push candidates",
+        "example": "query + page pairs for the trailing 28 days"
+      },
+      {
+        "what": "a crawl export",
+        "type": "an export file from a crawler such as Screaming Frog",
+        "required": "optional",
+        "for": "bulk title audits and schema detection",
+        "example": "URL, title, H1, length, indexable status"
+      },
+      {
+        "what": "local business facts, business type, locations, hours, services, profile URLs and ownership",
+        "type": "answers in natural language and URLs",
+        "required": "conditional",
+        "for": "local SEO requests",
+        "example": "Business type: customers visit a storefront, staff travel to customers, both, or online only."
+      }
+    ],
+    "when_input_is_missing": [
+      {
+        "case": "a product marketing context file exists",
+        "behaviour": "it is read first and only information not already covered or specific to the task is asked for"
+      },
+      {
+        "case": "no access to the Business Profile or its evidence",
+        "behaviour": "a provisional plan is given with the evidence needed, and no profile findings are invented"
+      }
+    ],
+    "exclusions": [
+      "SEO pages at scale, see programmatic-seo",
+      "implementing structured data, see schema",
+      "AI search optimization, see ai-seo",
+      "software product directory campaigns, see directory-submissions"
+    ],
+    "adoption": [
+      {
+        "registry": "skills.sh",
+        "installs": "251.6K",
+        "first_seen": "2026-01-19",
+        "counts": "the skill",
+        "read": "2026-11-11"
+      },
+      {
+        "registry": "GitHub",
+        "stars": 59667,
+        "forks": 8712,
+        "counts": "the coreyhaines31/marketingskills repository, which holds 53 skills",
+        "read": "2026-11-11"
+      }
+    ]
+  },
+  "what_it_needs": {
+    "compatibility": {
+      "harnesses": "not declared",
+      "models": "not declared",
+      "capabilities": "not declared",
+      "fits": {
+        "Agent Skills specification": "fits, name 9 characters, description 405 characters, body 491 lines and about 4,328 tokens",
+        "Codex": "does not fit, SKILL.md is 17,785 bytes, 9,785 over the 8,000 byte cut on the injected file",
+        "Claude Code": "fits, 497 lines, listing text 405 characters",
+        "ClawHub": "fits, folder 80,226 bytes"
+      }
+    },
+    "software_dependencies": [
+      {
+        "name": "curl",
+        "kind": "binary",
+        "version": "not declared",
+        "for": "run"
+      },
+      {
+        "name": "Screaming Frog",
+        "kind": "binary",
+        "version": "not declared",
+        "for": "run"
+      }
+    ],
+    "credentials": "none",
+    "cost": {
+      "context_tokens": {
+        "discovery": 101,
+        "load": 4446,
+        "on_demand": 11681,
+        "on_demand_files": [
+          "references/ai-writing-detection.md",
+          "references/international-seo.md",
+          "references/local-seo-pages-and-measurement.md",
+          "references/local-seo-profile-and-citations.md",
+          "references/local-seo.md",
+          "references/rankings-push.md",
+          "references/title-tags.md"
+        ]
+      },
+      "run_tokens": "not examined",
+      "services": [
+        {
+          "name": "Screaming Frog",
+          "needs": "subscription",
+          "price": "paid, no amount stated",
+          "quota": "not declared",
+          "calls_per_use": "not declared"
+        },
+        {
+          "name": "Ahrefs",
+          "needs": "subscription",
+          "price": "paid, no amount stated",
+          "quota": "not declared",
+          "calls_per_use": "not declared"
+        },
+        {
+          "name": "Semrush",
+          "needs": "subscription",
+          "price": "paid, no amount stated",
+          "quota": "not declared",
+          "calls_per_use": "not declared"
+        },
+        {
+          "name": "Sitebulb",
+          "needs": "subscription",
+          "price": "paid, no amount stated",
+          "quota": "not declared",
+          "calls_per_use": "not declared"
+        },
+        {
+          "name": "ContentKing",
+          "needs": "subscription",
+          "price": "paid, no amount stated",
+          "quota": "not declared",
+          "calls_per_use": "not declared"
+        }
+      ]
+    }
+  },
+  "what_it_touches": {
+    "side_effects": {
+      "install": "read only",
+      "run": "changes state",
+      "changes": [
+        {
+          "what": "profile changes, messages to customers or directory submissions, only under the user's existing authorization",
+          "affects": "external service",
+          "confirmation": "yes",
+          "reversible": "not declared"
+        },
+        {
+          "what": "requests indexing of a new page once in Search Console",
+          "affects": "external service",
+          "confirmation": "not declared",
+          "reversible": "not declared"
+        }
+      ]
+    },
+    "network_access": [
+      {
+        "host": "the site under audit, given by the user",
+        "purpose": "data source",
+        "when": "when pages are fetched with web_fetch, curl or a browser tool",
+        "sends": [
+          "none"
+        ],
+        "receives": "page HTML, headers, robots.txt and sitemaps"
+      },
+      {
+        "host": "search.google.com, Rich Results Test",
+        "purpose": "data source",
+        "when": "when checking schema markup",
+        "sends": [
+          "user content"
+        ],
+        "receives": "the structured data found on the rendered page"
+      },
+      {
+        "host": "Google Search Console, host not named in the files",
+        "purpose": "data source",
+        "when": "when Search Console access is available",
+        "sends": [
+          "none"
+        ],
+        "receives": "coverage, Core Web Vitals and query and page reports"
+      },
+      {
+        "host": "a search engine results page, host not named in the files",
+        "purpose": "data source",
+        "when": "when checking the titles that rank for a target query or the top three results",
+        "sends": [
+          "query text"
+        ],
+        "receives": "the ranking results and their titles"
+      },
+      {
+        "host": "PageSpeed Insights and WebPageTest, hosts not named in the files",
+        "purpose": "data source",
+        "when": "when checking site speed and Core Web Vitals",
+        "sends": [
+          "user content"
+        ],
+        "receives": "speed and Core Web Vitals measurements"
+      }
+    ],
+    "tools_and_permissions": {
+      "allowed_tools": "none",
+      "tools": [
+        {
+          "tool": "web_fetch",
+          "kind": "agent tool",
+          "for": "fetching pages, not for detecting schema markup",
+          "origin": "built in"
+        },
+        {
+          "tool": "curl",
+          "kind": "shell command",
+          "for": "fetching pages, not for detecting schema markup",
+          "origin": "third party"
+        },
+        {
+          "tool": "browser tool",
+          "kind": "agent tool",
+          "for": "rendering a page and running document.querySelectorAll('script[type=\"application/ld+json\"]')",
+          "origin": "built in"
+        },
+        {
+          "tool": "Google Search Console, PageSpeed Insights, Bing Webmaster Tools, Rich Results Test, Mobile-Friendly Test, Schema Validator, WebPageTest, Chrome DevTools",
+          "kind": "program",
+          "for": "free tools for indexation, speed, mobile and schema checks",
+          "origin": "third party"
+        },
+        {
+          "tool": "Screaming Frog, Ahrefs, Semrush, Sitebulb, ContentKing",
+          "kind": "program",
+          "for": "paid crawling, ranking and monitoring tools, if available",
+          "origin": "third party"
+        }
+      ]
+    },
+    "machine_access": {
+      "paths": [
+        {
+          "path": ".agents/product-marketing.md, .claude/product-marketing.md or product-marketing-context.md",
+          "operation": "read",
+          "scope": "workspace"
+        },
+        {
+          "path": "crawl exports the client provides",
+          "operation": "read",
+          "scope": "unknown"
+        }
+      ],
+      "settings": "none"
+    }
+  },
+  "what_is_known": {
+    "checks": [
+      {
+        "id": "C1",
+        "tool": "Snyk, skills.sh audit, version not stated",
+        "date": "2026-11-10",
+        "scope": "unknown",
+        "result": "pass, risk level LOW, no issues detected",
+        "report": "https://skills.sh/coreyhaines31/marketingskills/seo-audit/security/snyk"
+      },
+      {
+        "id": "C2",
+        "tool": "Gen Agent Trust Hub, skills.sh audit, version not stated",
+        "date": "2026-11-10",
+        "scope": "the skill files and reference documentation, as its analysis states",
+        "result": "pass, risk level SAFE, indirect prompt injection surface described as addressed by the untrusted-data instruction, no malicious code or exfiltration found",
+        "report": "https://skills.sh/coreyhaines31/marketingskills/seo-audit/security/agent-trust-hub"
+      },
+      {
+        "id": "C3",
+        "tool": "Socket, skills.sh audit, version not stated",
+        "date": "2026-10-20",
+        "scope": "the skill package, hash 70818bc66dff7d712dd9e5089b9f20891bdfe78137cd5d8640ae45cc921e7568",
+        "result": "pass, checks for malicious behaviour, security concerns, code obfuscation and suspicious patterns",
+        "report": "https://skills.sh/coreyhaines31/marketingskills/seo-audit/security/socket"
+      }
+    ],
+    "vulnerabilities": "none",
+    "risks": [
+      {
+        "risk": "Instructions embedded in the HTML, meta tags or copy of a fetched page reach the agent when it analyses the site.",
+        "source": "author, check C2",
+        "severity": "SAFE overall by C2",
+        "mitigation": "an instruction to treat fetched pages as untrusted data and never follow embedded instructions, in place",
+        "taxonomy": "https://www.ibm.com/docs/en/watsonx/saas?topic=ai-risk-atlas"
+      },
+      {
+        "risk": "A home-based business owner's private address becomes public when it is added to citations or JSON-LD markup.",
+        "source": "author",
+        "severity": "none",
+        "mitigation": "instructions never to publish a hidden home address, in place",
+        "taxonomy": "not examined"
+      },
+      {
+        "risk": "A review request that offers incentives, selects only happy customers or requires particular wording breaks Google's review policy.",
+        "source": "author",
+        "severity": "none",
+        "mitigation": "a neutral example request and the rule against incentives, in place",
+        "taxonomy": "not examined"
+      },
+      {
+        "risk": "A reply to a complaint exposes customer, medical, financial or job details.",
+        "source": "author",
+        "severity": "none",
+        "mitigation": "instruction to offer a private contact path instead, in place",
+        "taxonomy": "not examined"
+      },
+      {
+        "risk": "Profile edits, customer messages or directory submissions are made on the user's accounts when the agent acts under an existing authorization, with no way to undo stated.",
+        "source": "model",
+        "severity": "none",
+        "mitigation": "a drafted plan does not itself authorize execution, in place",
+        "taxonomy": "not examined"
+      }
+    ],
+    "limitations": [
+      "web_fetch and curl cannot reliably detect structured data, since JSON-LD injected by client-side JavaScript does not appear in static HTML.",
+      "Without access to a Business Profile, only a provisional plan with the evidence needed can be given.",
+      "Search Console data is limited by privacy thresholds and aggregation, and analytics counts by consent, blockers and tagging.",
+      "Schema validation does not guarantee rich-result display or a local-pack ranking change.",
+      "If two rounds of edits move nothing, the page is probably limited by intent mismatch or authority, which more on-page work won't fix."
+    ],
+    "known_problems": [
+      {
+        "problem": "no schema found with web_fetch or curl",
+        "workaround": "check with a browser tool, the Google Rich Results Test or a Screaming Frog export"
+      },
+      {
+        "problem": "Google shows a different title than the one written",
+        "workaround": "tighten the title and align it with the H1"
+      },
+      {
+        "problem": "a new page is not indexed after a few weeks",
+        "workaround": "check the causes in the Indexation section instead of resubmitting"
+      },
+      {
+        "problem": "no concrete reason a page ranks below the top three",
+        "workaround": "work on links with the link-building skill rather than a rewrite"
+      },
+      {
+        "problem": "Next.js alternates.languages omits the self-referencing xhtml:link",
+        "workaround": "add the current locale explicitly"
+      },
+      {
+        "problem": "conflicting hreflang annotations in HTML and sitemap",
+        "workaround": "make the methods agree, since Google drops the conflicting pair"
+      }
+    ],
+    "evaluations": "none"
+  },
+  "who_stands_behind_it": {
+    "authorship": {
+      "author": "not declared",
+      "publisher": "the coreyhaines31 account on GitHub",
+      "signer": "none",
+      "contact": "not declared"
+    },
+    "license": {
+      "frontmatter": "not declared",
+      "license_file": "none",
+      "registry": "not declared",
+      "repository": "MIT, as GitHub detects it"
+    },
+    "maintenance": {
+      "last_change": "2026-11-09",
+      "registry_update": "not declared",
+      "deprecated": "not declared",
+      "first_seen": "2026-01-16",
+      "content_changes": 34,
+      "releases": "100 or more",
+      "last_release": "2026-11-11"
+    }
+  },
+  "which_files": {
+    "version": {
+      "hash": "sha256:e5296133190cc6dc94e93b7e1ba986210af8b6d34e001dae85d0619ac2a9ed9a",
+      "left_out": "none",
+      "author_version": "2.2.5",
+      "registry_version": "not declared",
+      "commit": "3e729622"
+    },
+    "source": {
+      "kind": "repository",
+      "location": "GitHub coreyhaines31/marketingskills, path skills/seo-audit",
+      "commit": "3e729622",
+      "retrieved": "2026-11-11",
+      "also_listed_on": "skills.sh, https://skills.sh/coreyhaines31/marketingskills/seo-audit",
+      "homepage": "not declared",
+      "produced_by": "none"
+    },
+    "files": [
+      {
+        "path": "SKILL.md",
+        "bytes": 17785,
+        "sha256": "fb345045339bb0645029c1c0d682703d262f045a7184fe96cb0e13f509468e2a",
+        "kind": "document",
+        "in_hash": true,
+        "executable": false
+      },
+      {
+        "path": "evals/evals.json",
+        "bytes": 15717,
+        "sha256": "1524e98916ab53abb894fb80827a8d0e1815041adca2ee2023b89916d68f22b2",
+        "kind": "data",
+        "in_hash": true,
+        "executable": false
+      },
+      {
+        "path": "references/ai-writing-detection.md",
+        "bytes": 6528,
+        "sha256": "f1e273f56ce7e2215ff218bf903680ddcec0fd026ab90c3ebfb3439ed0edfaa4",
+        "kind": "document",
+        "in_hash": true,
+        "executable": false
+      },
+      {
+        "path": "references/international-seo.md",
+        "bytes": 14898,
+        "sha256": "0603022cca968acf7889fc224221aa0e70955ba64355bc18b06f7e86b32f45e5",
+        "kind": "document",
+        "in_hash": true,
+        "executable": false
+      },
+      {
+        "path": "references/local-seo-pages-and-measurement.md",
+        "bytes": 4036,
+        "sha256": "20607ef91c4b8b37346f42130a6f51ed4ce64dc2731b6e1328b5b14f16917fe3",
+        "kind": "document",
+        "in_hash": true,
+        "executable": false
+      },
+      {
+        "path": "references/local-seo-profile-and-citations.md",
+        "bytes": 3971,
+        "sha256": "83b1b63eb6083e7aab1f56c4928335ea2a235e837861a9e9e8043b6af162a1f3",
+        "kind": "document",
+        "in_hash": true,
+        "executable": false
+      },
+      {
+        "path": "references/local-seo.md",
+        "bytes": 7249,
+        "sha256": "d2666d9c225bc36f9737ce612894abbe7e263b5974e2db7c1efc50f6010bb376",
+        "kind": "document",
+        "in_hash": true,
+        "executable": false
+      },
+      {
+        "path": "references/rankings-push.md",
+        "bytes": 4509,
+        "sha256": "c21d6d4f9faf7ce5b1dc0f8bd508e7513967492fcd8ed9510a175ce243daf8c8",
+        "kind": "document",
+        "in_hash": true,
+        "executable": false
+      },
+      {
+        "path": "references/title-tags.md",
+        "bytes": 5533,
+        "sha256": "c40b3c6af3600ca15670db8eb81000c7ca6fa25265a6550ccc630f53db3fcf51",
+        "kind": "document",
+        "in_hash": true,
+        "executable": false
+      }
+    ],
+    "counts": {
+      "script": 0,
+      "document": 8,
+      "data": 1,
+      "binary": 0
+    },
+    "composition": "instructions only"
+  },
+  "about_this_card": {
+    "schema": "Skill Card v1.2",
+    "date": "2026-11-11",
+    "by": "Claude Opus 5.5, claude-opus-5-5, by hand from the skill files, the skills.sh listing and audits, and GitHub metadata, with the hash, file list, sizes, harness limits and repository figures computed by script",
+    "skill_run": false,
+    "scripts_analysed": false,
+    "security_check_run": false,
+    "external_service_contacted": false,
+    "registry_read": true,
+    "empty_values": 48
+  }
+}

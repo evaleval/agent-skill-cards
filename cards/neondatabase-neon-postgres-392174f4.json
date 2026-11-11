@@ -1,0 +1,804 @@
+{
+  "schema": "Skill Card v1.2",
+  "skill": "neon-postgres",
+  "version": "neondatabase/agent-skills at 392174f4",
+  "what_it_does": {
+    "name": "neon-postgres",
+    "summary": "Instructions and six reference documents for working with Lakebase Postgres on Neon, with no bundled scripts. They cover choosing pooled or direct connections and drivers, branching, migrations, computes, autoscaling, scale to zero, instant restore, read replicas and Neon-specific diagnostics through the neon CLI or the Neon MCP server. The references add branch workflows, a four-step egress optimization procedure and Lakebase Search setup for vector, full-text and hybrid search, with SQL and TypeScript examples. Use it when the work is an existing DATABASE_URL, SQL, schema, inspection or search on Neon.",
+    "tasks": [
+      "pick pooled or direct connections and a driver",
+      "create normal or schema-only branches and reset a branch from its parent",
+      "diagnose performance with neon inspect db checks",
+      "manage computes, autoscaling and scale to zero",
+      "find and fix query patterns that cause high egress",
+      "set up vector, full-text and hybrid search with Lakebase Search",
+      "covers the Neon access path to Lakebase Postgres, not the Databricks one"
+    ],
+    "author_description": "Guides and best practices for working with Lakebase Postgres on Neon: connections, pooled vs direct, schema migrations, branching (including schema-only, reset-from-parent, and branch-per-PR workflows), autoscaling, scale-to-zero, instant restore, read replicas, IP allow lists, logical replication, egress optimization, and Lakebase Search. Use when the work is an existing DATABASE_URL, SQL, schema, inspect, or search. New backends, Auth, files, Functions, and LLM calls go to the parent `neon` skill. Live queries, reactive UIs, and realtime data go to `neon-realtime`. Also use for \"@neondatabase/serverless\", \"@neon/neon-js\", \"neon inspect db\", \"neon postgres computes\", \"Neon branch\", \"schema-only branch\", \"reset branch\", \"branch per PR\", high database bills, network transfer or egress, SELECT * optimization, query overfetching, \"semantic search\", \"vector search\", \"full-text search\", \"BM25\", or \"hybrid search\".",
+    "outputs": [
+      {
+        "what": "a new Neon branch, normal or schema-only, with its connection string",
+        "kind": "action",
+        "form": "Neon branch",
+        "destination": "the user's Neon project"
+      },
+      {
+        "what": "the connection string stored as DATABASE_URL",
+        "kind": "information",
+        "form": "a key in an env file",
+        "destination": ".env in the workspace"
+      },
+      {
+        "what": "a recommended branch type, connection type or fix, with the commands to run",
+        "kind": "recommendation",
+        "form": "message to the user",
+        "destination": "the conversation"
+      },
+      {
+        "what": "diagnostic results from inspect checks and EXPLAIN plans",
+        "kind": "information",
+        "form": "terminal text or MCP tool result",
+        "destination": "the agent's context"
+      },
+      {
+        "what": "changed computes, extensions, schema migrations, search indexes and reset branches",
+        "kind": "action",
+        "form": "changes in the Neon project and database",
+        "destination": "the user's Neon project"
+      },
+      {
+        "what": "application code with egress fixes, migration files, schema.ts, drizzle.config.ts and neon.ts",
+        "kind": "information",
+        "form": "source files",
+        "destination": "the workspace"
+      }
+    ],
+    "sample_output": "Do you want me to update your `.env` `DATABASE_URL` to this new branch connection string?",
+    "inputs": [
+      {
+        "what": "an existing database connection string",
+        "type": "DATABASE_URL from the prompt, the environment or the repo",
+        "required": "optional",
+        "for": "connecting to an existing database",
+        "example": "not declared"
+      },
+      {
+        "what": "a Neon project to work in",
+        "type": "a project id or a .neon file that points at a project",
+        "required": "conditional",
+        "for": "when no DATABASE_URL is supplied",
+        "example": "neon set-context --project-id <your-project-id>"
+      },
+      {
+        "what": "the purpose of a new branch",
+        "type": "a request in natural language",
+        "required": "conditional",
+        "for": "branch creation",
+        "example": "I need to test a risky migration against production-like data."
+      },
+      {
+        "what": "branch name, parent and expiry",
+        "type": "command arguments",
+        "required": "conditional",
+        "for": "branch creation",
+        "example": "neon branches create --name migration-test --parent main --expires-at 2026-12-15T18:02:16Z"
+      },
+      {
+        "what": "a compute id and its new settings",
+        "type": "command arguments",
+        "required": "conditional",
+        "for": "compute changes",
+        "example": "neon postgres computes update <compute-id> --cu 0.25-2 --suspend-timeout 300"
+      },
+      {
+        "what": "a diagnostic check",
+        "type": "a check name",
+        "required": "conditional",
+        "for": "troubleshooting and performance",
+        "example": "neon inspect db <check>"
+      },
+      {
+        "what": "the application codebase with its database queries",
+        "type": "source files",
+        "required": "conditional",
+        "for": "egress optimization",
+        "example": "not declared"
+      },
+      {
+        "what": "documents and query text to search",
+        "type": "table rows and a query string",
+        "required": "conditional",
+        "for": "Lakebase Search",
+        "example": "not declared"
+      }
+    ],
+    "when_input_is_missing": [
+      {
+        "case": "no DATABASE_URL is supplied and no .neon file points at a project",
+        "behaviour": "organizations and projects are listed with the CLI or MCP server and the user selects or creates a project"
+      },
+      {
+        "case": "the branch request is ambiguous",
+        "behaviour": "one clarifying question asks whether realistic data or only schema structure is needed"
+      },
+      {
+        "case": "the neon CLI is missing or not authenticated",
+        "behaviour": "installation or neon auth is guided, then MCP is used, then the Neon REST API"
+      },
+      {
+        "case": "the parent neon skill is not installed",
+        "behaviour": "it is fetched from neon.com or installed with neon skills -s neon -y"
+      },
+      {
+        "case": "pg_stat_statements stats are empty or unavailable",
+        "behaviour": "after asking, stats are reset and collected for at least an hour, or the codebase is analyzed directly"
+      },
+      {
+        "case": "a check reports a missing extension",
+        "behaviour": "the user is asked before CREATE EXTENSION is run"
+      },
+      {
+        "case": "no prepaid AI Gateway credits",
+        "behaviour": "documents and queries are embedded with another provider's model and RRF is used"
+      }
+    ],
+    "exclusions": [
+      "not for new backends, Auth, files, Functions and LLM calls, which go to the parent neon skill",
+      "not for live queries, reactive UIs and realtime data, which go to neon-realtime",
+      "not for login, users, sessions and @neon/auth, which belong in neon-auth",
+      "not for generic Postgres query, index or schema work, which goes to postgres-best-practices"
+    ],
+    "adoption": [
+      {
+        "registry": "skills.sh",
+        "installs": "308.4K",
+        "first_seen": "2026-01-21",
+        "counts": "the skill",
+        "read": "2026-11-11"
+      },
+      {
+        "registry": "GitHub",
+        "stars": 112,
+        "forks": 26,
+        "counts": "the neondatabase/agent-skills repository, which holds 8 skills",
+        "read": "2026-11-11"
+      }
+    ]
+  },
+  "what_it_needs": {
+    "compatibility": {
+      "harnesses": "not declared",
+      "models": "not declared",
+      "capabilities": "not declared",
+      "fits": {
+        "Agent Skills specification": "fits, name 13 characters, description 922 characters, body 291 lines and about 4,569 tokens",
+        "Codex": "does not fit, SKILL.md is 19,382 bytes, 11,382 over the 8,000 byte cut on the injected file",
+        "Claude Code": "fits, 311 lines, listing text 922 characters",
+        "ClawHub": "fits, folder 79,155 bytes"
+      }
+    },
+    "software_dependencies": [
+      {
+        "name": "neon CLI",
+        "kind": "binary",
+        "version": "not declared",
+        "for": "run"
+      },
+      {
+        "name": "pg_stat_statements and neon Postgres extensions",
+        "kind": "package",
+        "version": "not declared",
+        "for": "run"
+      },
+      {
+        "name": "Postgres for Lakebase Search",
+        "kind": "runtime",
+        "version": "16 or later",
+        "for": "run"
+      },
+      {
+        "name": "lakebase_vector, pgvector and lakebase_text Postgres extensions",
+        "kind": "package",
+        "version": "not declared",
+        "for": "example"
+      },
+      {
+        "name": "pg (node-postgres)",
+        "kind": "package",
+        "version": "not declared",
+        "for": "example"
+      },
+      {
+        "name": "@neondatabase/serverless",
+        "kind": "package",
+        "version": "not declared",
+        "for": "example"
+      },
+      {
+        "name": "@vercel/functions",
+        "kind": "package",
+        "version": "not declared",
+        "for": "example"
+      },
+      {
+        "name": "@neon/config",
+        "kind": "package",
+        "version": "not declared",
+        "for": "example"
+      },
+      {
+        "name": "@neon/ai-sdk-provider",
+        "kind": "package",
+        "version": "1.0.0+, 1.1.0 for Jev reranking",
+        "for": "example"
+      },
+      {
+        "name": "ai (Vercel AI SDK)",
+        "kind": "package",
+        "version": "6+, 7.0.133 for Jev reranking",
+        "for": "example"
+      },
+      {
+        "name": "dotenv",
+        "kind": "package",
+        "version": "not declared",
+        "for": "example"
+      },
+      {
+        "name": "openai, alternative to the AI SDK",
+        "kind": "package",
+        "version": "not declared",
+        "for": "example"
+      },
+      {
+        "name": "drizzle-orm",
+        "kind": "package",
+        "version": "0.36+",
+        "for": "example"
+      },
+      {
+        "name": "drizzle-kit",
+        "kind": "package",
+        "version": "0.27+",
+        "for": "example"
+      }
+    ],
+    "credentials": [
+      {
+        "kind": "other",
+        "name": "DATABASE_URL and DATABASE_URL_UNPOOLED connection strings",
+        "used_for": "connecting to the Neon database",
+        "from": "environment variable",
+        "goes_to": "the Neon database host in the connection string"
+      },
+      {
+        "kind": "token",
+        "name": "NEON_AI_GATEWAY_TOKEN",
+        "used_for": "embedding and reranking requests to the Neon AI Gateway",
+        "from": "environment variable",
+        "goes_to": "the host in NEON_AI_GATEWAY_BASE_URL"
+      },
+      {
+        "kind": "API key",
+        "name": "Neon CLI authentication through neon auth or API key auth",
+        "used_for": "managing projects, branches and computes",
+        "from": "unknown",
+        "goes_to": "the Neon API, host not named in the files"
+      }
+    ],
+    "cost": {
+      "context_tokens": {
+        "discovery": 231,
+        "load": 4846,
+        "on_demand": 14944,
+        "on_demand_files": [
+          "references/branching.md",
+          "references/egress-optimization.md",
+          "references/vector-search.md",
+          "references/full-text-search.md",
+          "references/hybrid-search.md",
+          "references/lakebase-search-drizzle.md"
+        ]
+      },
+      "run_tokens": "not examined",
+      "services": [
+        {
+          "name": "Neon",
+          "needs": "account",
+          "price": "not declared",
+          "quota": "plan limits, Free, Launch and Scale differ on suspend timeout, restore history and root branch allowances",
+          "calls_per_use": "not declared"
+        },
+        {
+          "name": "Neon AI Gateway",
+          "needs": "API key",
+          "price": "prepaid AI Gateway credits, available on every Neon plan, including Free",
+          "quota": "the endpoint's input and rate limits, figures not declared",
+          "calls_per_use": "not declared"
+        }
+      ]
+    }
+  },
+  "what_it_touches": {
+    "side_effects": {
+      "install": "changes state",
+      "run": "changes state",
+      "changes": [
+        {
+          "what": "installs the parent neon skill with neon skills -s neon -y",
+          "affects": "software environment",
+          "confirmation": "not declared",
+          "reversible": "not declared"
+        },
+        {
+          "what": "writes DATABASE_URL and gateway variables to .env",
+          "affects": "workspace",
+          "confirmation": "yes",
+          "reversible": "not declared"
+        },
+        {
+          "what": "creates Neon projects and branches",
+          "affects": "external service",
+          "confirmation": "not declared",
+          "reversible": "not declared"
+        },
+        {
+          "what": "resets a child branch from its parent, replacing its schema and data",
+          "affects": "external service",
+          "confirmation": "not declared",
+          "reversible": "yes"
+        },
+        {
+          "what": "updates, starts, suspends, restarts or deletes computes and adds read replicas",
+          "affects": "external service",
+          "confirmation": "not declared",
+          "reversible": "not declared"
+        },
+        {
+          "what": "creates Postgres extensions",
+          "affects": "external service",
+          "confirmation": "yes",
+          "reversible": "not declared"
+        },
+        {
+          "what": "resets pg_stat_statements statistics",
+          "affects": "external service",
+          "confirmation": "yes",
+          "reversible": "no"
+        },
+        {
+          "what": "runs schema migrations, creates tables and indexes and inserts embeddings",
+          "affects": "external service",
+          "confirmation": "not declared",
+          "reversible": "not declared"
+        },
+        {
+          "what": "applies neon.ts branch policy with neon deploy or neon config apply",
+          "affects": "external service",
+          "confirmation": "not declared",
+          "reversible": "not declared"
+        },
+        {
+          "what": "edits application queries and writes neon.ts, drizzle.config.ts, schema.ts and migration files",
+          "affects": "workspace",
+          "confirmation": "not declared",
+          "reversible": "not declared"
+        },
+        {
+          "what": "installs npm packages",
+          "affects": "software environment",
+          "confirmation": "not declared",
+          "reversible": "not declared"
+        }
+      ]
+    },
+    "network_access": [
+      {
+        "host": "neon.com",
+        "purpose": "install",
+        "when": "when the parent neon skill is not installed",
+        "sends": [
+          "none"
+        ],
+        "receives": "the neon SKILL.md"
+      },
+      {
+        "host": "neon.com",
+        "purpose": "data source",
+        "when": "when the agent follows a docs link such as the connection methods guide",
+        "sends": [
+          "none"
+        ],
+        "receives": "documentation pages in Markdown"
+      },
+      {
+        "host": "the Neon API, not named in the files",
+        "purpose": "other",
+        "when": "on neon CLI or MCP server calls for projects, branches, computes and inspections",
+        "sends": [
+          "credential",
+          "query text"
+        ],
+        "receives": "projects, branches, computes, connection strings and check results"
+      },
+      {
+        "host": "the database host in DATABASE_URL, formed at run time",
+        "purpose": "data source",
+        "when": "on every SQL query, migration and diagnostic",
+        "sends": [
+          "credential",
+          "query text",
+          "user content"
+        ],
+        "receives": "query results and plans"
+      },
+      {
+        "host": "the host in NEON_AI_GATEWAY_BASE_URL, formed at run time",
+        "purpose": "model call",
+        "when": "when embeddings are generated or candidates are reranked with Jev",
+        "sends": [
+          "credential",
+          "user content",
+          "query text"
+        ],
+        "receives": "embedding vectors and relevance probabilities"
+      },
+      {
+        "host": "npm registry, not named in the files",
+        "purpose": "install",
+        "when": "when the example packages are installed with npm install",
+        "sends": [
+          "none"
+        ],
+        "receives": "the packages"
+      }
+    ],
+    "tools_and_permissions": {
+      "allowed_tools": "none",
+      "tools": [
+        {
+          "tool": "neon CLI, neon inspect db, neon branches, neon postgres computes, neon env pull, neon deploy",
+          "kind": "shell command",
+          "for": "project, branch and compute management, connection strings and diagnostics",
+          "origin": "third party"
+        },
+        {
+          "tool": "Neon MCP server, inspect_database, run_sql, explain_sql_statement, list_slow_queries, create_branch, describe_branch",
+          "kind": "external server",
+          "for": "the same operations when the CLI cannot be used",
+          "origin": "third party"
+        },
+        {
+          "tool": "Neon REST API",
+          "kind": "external server",
+          "for": "branch creation and reset when neither CLI nor MCP works",
+          "origin": "third party"
+        },
+        {
+          "tool": "npm install and npx drizzle-kit generate and migrate",
+          "kind": "shell command",
+          "for": "installing packages and generating and applying migrations",
+          "origin": "third party"
+        },
+        {
+          "tool": "shell and file tools of the agent",
+          "kind": "agent tool",
+          "for": "running the commands and editing .env and code",
+          "origin": "built in"
+        }
+      ]
+    },
+    "machine_access": {
+      "paths": [
+        {
+          "path": ".env",
+          "operation": "read",
+          "scope": "workspace"
+        },
+        {
+          "path": ".env",
+          "operation": "write",
+          "scope": "workspace"
+        },
+        {
+          "path": ".neon",
+          "operation": "read",
+          "scope": "workspace"
+        },
+        {
+          "path": "neon.ts",
+          "operation": "write",
+          "scope": "workspace"
+        },
+        {
+          "path": "drizzle.config.ts, src/schema.ts and drizzle/ migration files",
+          "operation": "write",
+          "scope": "workspace"
+        },
+        {
+          "path": "application code with database queries",
+          "operation": "write",
+          "scope": "workspace"
+        }
+      ],
+      "settings": [
+        {
+          "name": "NEON_AI_GATEWAY_BASE_URL",
+          "access": "read",
+          "reason": "the base host for AI Gateway requests"
+        },
+        {
+          "name": "Neon CLI context, neon set-context --project-id",
+          "access": "set",
+          "reason": "to avoid repeating --project-id"
+        },
+        {
+          "name": "lakebase_bm25.default_limit, lakebase_bm25.prefilter, lakebase_ann.probes, lakebase_ann.epsilon, lakebase_ann.prefilter",
+          "access": "set",
+          "reason": "per-query search tuning with SET LOCAL"
+        },
+        {
+          "name": "the project's preloaded-library list",
+          "access": "read",
+          "reason": "to confirm the Lakebase Search libraries remain enabled"
+        }
+      ]
+    }
+  },
+  "what_is_known": {
+    "checks": [
+      {
+        "id": "C1",
+        "tool": "Snyk, skills.sh audit, version not stated",
+        "date": "2026-11-06",
+        "scope": "unknown",
+        "result": "pass, risk level LOW, no issues detected",
+        "report": "https://skills.sh/neondatabase/agent-skills/neon-postgres/security/snyk"
+      },
+      {
+        "id": "C2",
+        "tool": "Gen Agent Trust Hub, skills.sh audit, version not stated",
+        "date": "2026-11-06",
+        "scope": "unknown",
+        "result": "pass, risk level SAFE, external downloads, command execution, credentials unsafe and indirect prompt injection described as standard practice",
+        "report": "https://skills.sh/neondatabase/agent-skills/neon-postgres/security/agent-trust-hub"
+      },
+      {
+        "id": "C3",
+        "tool": "Socket, skills.sh audit, version not stated",
+        "date": "2026-11-07",
+        "scope": "the skill package, hash 5c46bf3b8ef179abe3f296b31b9ec35b458ff3ff33e2fcb7fb3d6db4224042f2",
+        "result": "pass, checks for malicious behavior, security concerns, code obfuscation and suspicious patterns",
+        "report": "https://skills.sh/neondatabase/agent-skills/neon-postgres/security/socket"
+      }
+    ],
+    "vulnerabilities": "none",
+    "risks": [
+      {
+        "risk": "Instructions hidden in user-supplied SQL, schema definitions, code or .env files reach an agent that can run neon CLI commands, write .env and execute SQL.",
+        "source": "check C2",
+        "severity": "SAFE overall by C2",
+        "mitigation": "none for boundary markers, C2 notes that parameterized queries and ORM migrations are recommended",
+        "taxonomy": "https://www.ibm.com/docs/en/watsonx/saas?topic=ai-risk-atlas"
+      },
+      {
+        "risk": "Database connection strings with credentials are read from and written to .env, where an overwrite can lose an existing value.",
+        "source": "check C2",
+        "severity": "SAFE overall by C2",
+        "mitigation": "read .env before modifying it and never overwrite an existing key without explicit confirmation, stated in the files",
+        "taxonomy": "not examined"
+      },
+      {
+        "risk": "Resetting a child branch from its parent replaces its schema and data, and local changes on the child branch are lost.",
+        "source": "author",
+        "severity": "none",
+        "mitigation": "--preserve-under-name keeps a backup branch, optional",
+        "taxonomy": "not examined"
+      },
+      {
+        "risk": "Dropping indexes that unused-indexes lists, or running VACUUM FULL or REINDEX on a bloat estimate, can harm the workload or take locks.",
+        "source": "author",
+        "severity": "none",
+        "mitigation": "confirm the observation window, constraints and workload and plan locks first, stated in the files",
+        "taxonomy": "not examined"
+      },
+      {
+        "risk": "EXPLAIN ANALYZE executes the statement, so running it on mutating SQL changes data.",
+        "source": "author",
+        "severity": "none",
+        "mitigation": "do not run it autonomously for mutating SQL, stated in the files",
+        "taxonomy": "not examined"
+      },
+      {
+        "risk": "A normal branch copies production rows, including sensitive data, into a development or test environment.",
+        "source": "author",
+        "severity": "none",
+        "mitigation": "schema-only branches or an anonymized parent branch, recommended in the files",
+        "taxonomy": "not examined"
+      },
+      {
+        "risk": "The parent neon skill fetched from https://neon.com/docs/ai/skills/neon/SKILL.md is loaded without a pinned version or hash, so its instructions can change between runs.",
+        "source": "model",
+        "severity": "none",
+        "mitigation": "none stated",
+        "taxonomy": "not examined"
+      },
+      {
+        "risk": "Document bodies and query text leave the machine to the Neon AI Gateway when embeddings are generated or results are reranked with Jev.",
+        "source": "model",
+        "severity": "none",
+        "mitigation": "none stated",
+        "taxonomy": "not examined"
+      }
+    ],
+    "limitations": [
+      "Schema-only branching is in Beta.",
+      "Only child branches can be reset from parent, a branch with children cannot be reset, and reset may be unavailable for up to 24 hours after a parent is restored from snapshot.",
+      "Root branch allowances and per-branch storage limits can cap how many schema-only branches users can create.",
+      "The first query after suspend typically has a cold-start penalty of around hundreds of ms.",
+      "Cache and Postgres statistics reset when compute restarts, including scale-to-zero suspension.",
+      "outliers and calls require pg_stat_statements, and lfc-hit-rate and working-set require the neon extension.",
+      "The MCP explain_sql_statement tool does not expose the FILECACHE or PREFETCH options.",
+      "Free cannot change the suspend timeout, and Launch can only enable or disable suspension.",
+      "Lakebase Search requires Postgres 16 or later.",
+      "Drizzle cannot express CREATE EXTENSION, and BM25 has no Drizzle helper.",
+      "Each Jev request must fit Jev 1.14's 65,536-token context window."
+    ],
+    "known_problems": [
+      {
+        "problem": "migrations, dumps or replication fail over the pooled connection, for example prepared statement \"s0\" already exists",
+        "workaround": "use the direct DATABASE_URL_UNPOOLED, for Prisma through directUrl"
+      },
+      {
+        "problem": "one failing database fails an all-databases inspection",
+        "workaround": "retry the check with an explicit databaseName"
+      },
+      {
+        "problem": "unexpected behavior or errors with schema-only branches",
+        "workaround": "share feedback in the Neon Console or open a support conversation in the Neon Discord"
+      },
+      {
+        "problem": "pg_stat_statements is empty after the compute scaled to zero",
+        "workaround": "after asking, reset the stats and let representative traffic run for at least an hour"
+      },
+      {
+        "problem": "an AI Gateway model shows enabled: false",
+        "workaround": "the branch's AI Gateway page in the Neon Console lists the reason and the fix"
+      },
+      {
+        "problem": "the OpenAI SDK v6 base64 decoder can turn float arrays into zeros",
+        "workaround": "pass encoding_format: \"float\" explicitly"
+      },
+      {
+        "problem": "a numeric lakebase_ann.probes value that does not match lists errors",
+        "workaround": "keep probes at 'auto' unless an IVF lists layout exists"
+      },
+      {
+        "problem": "drizzle-kit push drops the post-seed lakebase_bm25 index",
+        "workaround": "use drizzle-kit generate then migrate"
+      },
+      {
+        "problem": "Jev reranking fails",
+        "workaround": "catch the error and fall back to RRF"
+      }
+    ],
+    "evaluations": "none"
+  },
+  "who_stands_behind_it": {
+    "authorship": {
+      "author": "not declared",
+      "publisher": "the neondatabase organisation on GitHub",
+      "signer": "none",
+      "contact": "https://neon.com/discord and https://console.neon.tech/app/projects?modal=feedback, named for schema-only branch support"
+    },
+    "license": {
+      "frontmatter": "not declared",
+      "license_file": "none",
+      "registry": "not declared",
+      "repository": "Apache-2.0, as GitHub detects it"
+    },
+    "maintenance": {
+      "last_change": "2026-11-06",
+      "registry_update": "not declared",
+      "deprecated": "not declared",
+      "first_seen": "2026-01-27",
+      "content_changes": 51,
+      "releases": 0,
+      "last_release": "none"
+    }
+  },
+  "which_files": {
+    "version": {
+      "hash": "sha256:1ba2ccf8c58232374f7beeeb43689073857d0e385b22c1d2ce79d32064cbe0bf",
+      "left_out": "none",
+      "author_version": "not declared",
+      "registry_version": "not declared",
+      "commit": "392174f4"
+    },
+    "source": {
+      "kind": "repository",
+      "location": "GitHub neondatabase/agent-skills, path skills/neon-postgres",
+      "commit": "392174f4",
+      "retrieved": "2026-11-11",
+      "also_listed_on": "skills.sh, https://skills.sh/neondatabase/agent-skills/neon-postgres",
+      "homepage": "not declared",
+      "produced_by": "none"
+    },
+    "files": [
+      {
+        "path": "SKILL.md",
+        "bytes": 19382,
+        "sha256": "e208be6fd3db0ee5e943e607241fb58e808566b0ecae55d97088244af39d86a4",
+        "kind": "document",
+        "in_hash": true,
+        "executable": false
+      },
+      {
+        "path": "references/branching.md",
+        "bytes": 12665,
+        "sha256": "2212db6f23cfe5ac666ace66f1e434a40234bfcb1c046e9ab883d6206643ab1a",
+        "kind": "document",
+        "in_hash": true,
+        "executable": false
+      },
+      {
+        "path": "references/egress-optimization.md",
+        "bytes": 9498,
+        "sha256": "c103951687a0f9d6ca2c3ee74b3fa68a0925c2269fb0aa13156f087d44a78e18",
+        "kind": "document",
+        "in_hash": true,
+        "executable": false
+      },
+      {
+        "path": "references/full-text-search.md",
+        "bytes": 4324,
+        "sha256": "ddeb529f7a6c520b4a94007f6196c47ed8f632b764b8be31e37a7b51324c8186",
+        "kind": "document",
+        "in_hash": true,
+        "executable": false
+      },
+      {
+        "path": "references/hybrid-search.md",
+        "bytes": 10636,
+        "sha256": "047b80f8d23df81565bb030a9c3b0a79dd7eea86da1b7b64c2e861e20dfd78d5",
+        "kind": "document",
+        "in_hash": true,
+        "executable": false
+      },
+      {
+        "path": "references/lakebase-search-drizzle.md",
+        "bytes": 10159,
+        "sha256": "1e9c764004a40010186b89647d92fb1ee79eeaba64a674cf01e75415413e8067",
+        "kind": "document",
+        "in_hash": true,
+        "executable": false
+      },
+      {
+        "path": "references/vector-search.md",
+        "bytes": 12491,
+        "sha256": "062a6d1d7aa8185731d2ce5aa9efa201dfae64221a3383e42b66e4f5a438a84f",
+        "kind": "document",
+        "in_hash": true,
+        "executable": false
+      }
+    ],
+    "counts": {
+      "script": 0,
+      "document": 7,
+      "data": 0,
+      "binary": 0
+    },
+    "composition": "instructions only"
+  },
+  "about_this_card": {
+    "schema": "Skill Card v1.2",
+    "date": "2026-11-11",
+    "by": "Claude Opus 5.5, claude-opus-5-5, by hand from the skill files, the skills.sh listing and audits, and GitHub metadata, with the hash, file list, sizes, harness limits and repository figures computed by script",
+    "skill_run": false,
+    "scripts_analysed": false,
+    "security_check_run": false,
+    "external_service_contacted": false,
+    "registry_read": true,
+    "empty_values": 71
+  }
+}

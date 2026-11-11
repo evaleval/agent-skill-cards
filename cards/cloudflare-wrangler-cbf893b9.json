@@ -1,0 +1,611 @@
+{
+  "schema": "Skill Card v1.2",
+  "skill": "wrangler",
+  "version": "cloudflare/skills at cbf893b9",
+  "what_it_does": {
+    "name": "wrangler",
+    "summary": "Instructions for running and troubleshooting Wrangler CLI commands in Cloudflare Workers projects that already have a wrangler.jsonc, wrangler.json or wrangler.toml file. The agent inspects the project, retrieves the current Cloudflare documentation for the task, edits config and bindings, and runs local development, Preview deployments, deployments, secrets and resource commands through the project's own Wrangler version. It validates with wrangler types, typechecks and wrangler deploy --dry-run, then reports what changed, the target environment, the checks performed and any validation gaps. A second file drafts and, after approval, posts feedback about the skill as a public GitHub issue.",
+    "tasks": [
+      "local development with local or remote bindings",
+      "deploy Workers and framework applications",
+      "edit Wrangler config, bindings and environments",
+      "create and manage Workers Previews for branches and pull requests",
+      "set secrets and choose API token scopes",
+      "generate binding and runtime types",
+      "submit skill feedback as a GitHub issue on cloudflare/skills"
+    ],
+    "author_description": "Run or troubleshoot Wrangler CLI commands in projects that have a wrangler.jsonc, wrangler.json, or wrangler.toml file, including local development, Previews, deployment, and resource management. For new projects and projects without a Wrangler configuration file, use the cf CLI instead.",
+    "outputs": [
+      {
+        "what": "changed Wrangler config, bindings and compatibility date",
+        "kind": "information",
+        "form": "wrangler.jsonc, wrangler.json or wrangler.toml",
+        "destination": "the config source used by the project's build or deploy command"
+      },
+      {
+        "what": "deployed Workers, Preview deployments and Worker versions",
+        "kind": "action",
+        "form": "a deployment with a returned URL",
+        "destination": "the target Cloudflare account, Worker and environment"
+      },
+      {
+        "what": "secrets set or deleted, and changes to remote resources and data",
+        "kind": "action",
+        "form": "a new Worker version or a resource change",
+        "destination": "the target Cloudflare account"
+      },
+      {
+        "what": "generated binding and runtime types",
+        "kind": "information",
+        "form": "type declaration files",
+        "destination": "the project"
+      },
+      {
+        "what": "a report of what changed, the target environment, checks performed and unresolved validation gaps, with links to the documentation used",
+        "kind": "information",
+        "form": "message to the user",
+        "destination": "the conversation"
+      },
+      {
+        "what": "a skill feedback issue",
+        "kind": "action",
+        "form": "GitHub issue",
+        "destination": "the cloudflare/skills repository"
+      }
+    ],
+    "sample_output": "skill-feedback: wrangler: <summary of the problem>",
+    "inputs": [
+      {
+        "what": "a project with a Wrangler configuration file",
+        "type": "a project folder",
+        "required": "required",
+        "for": "every task",
+        "example": "wrangler.jsonc"
+      },
+      {
+        "what": "the target account, Worker, environment and resource",
+        "type": "names and an --env value",
+        "required": "conditional",
+        "for": "commands that change a target",
+        "example": "not declared"
+      },
+      {
+        "what": "an authenticated login or an account-owned API token",
+        "type": "a Wrangler login or token",
+        "required": "conditional",
+        "for": "remote commands",
+        "example": "wrangler login"
+      },
+      {
+        "what": "secret values",
+        "type": "interactive input or a protected file or stdin",
+        "required": "conditional",
+        "for": "setting secrets locally, in CI or on a deployed Worker",
+        "example": "not declared"
+      },
+      {
+        "what": "the user's report of incorrect, outdated or missing guidance",
+        "type": "text in the conversation",
+        "required": "conditional",
+        "for": "skill feedback",
+        "example": "Unknown option: --preview"
+      }
+    ],
+    "when_input_is_missing": [
+      {
+        "case": "the project has no Wrangler configuration file, is new, or has cloudflare.config.ts",
+        "behaviour": "the cf CLI is used instead and Wrangler is not added"
+      },
+      {
+        "case": "the project has a Wrangler configuration file but Wrangler is not a dependency",
+        "behaviour": "Wrangler is added locally following the installation guide"
+      },
+      {
+        "case": "documentation retrieval is unavailable",
+        "behaviour": "the gap is stated and local evidence is used rather than invented syntax"
+      },
+      {
+        "case": "the target Worker or Wrangler environment is unclear",
+        "behaviour": "the target is established and confirmed with the user before running commands"
+      },
+      {
+        "case": "the user declines to send feedback or to approve the issue text",
+        "behaviour": "no issue is posted"
+      }
+    ],
+    "exclusions": [
+      "not for new projects, use the cf CLI",
+      "not for projects with cloudflare.config.ts",
+      "not for projects with no Cloudflare configuration",
+      "do not add Wrangler to projects that use the cf CLI"
+    ],
+    "adoption": [
+      {
+        "registry": "skills.sh",
+        "installs": "144.6K",
+        "first_seen": "2026-01-19",
+        "counts": "the skill",
+        "read": "2026-11-11"
+      },
+      {
+        "registry": "GitHub",
+        "stars": 3338,
+        "forks": 348,
+        "counts": "the cloudflare/skills repository, which holds 22 skills",
+        "read": "2026-11-11"
+      }
+    ]
+  },
+  "what_it_needs": {
+    "compatibility": {
+      "harnesses": "not declared",
+      "models": "not declared",
+      "capabilities": "not declared",
+      "fits": {
+        "Agent Skills specification": "fits, name 8 characters, description 288 characters, body 71 lines and about 2,872 tokens",
+        "Codex": "does not fit, SKILL.md is 11,813 bytes, 3,813 over the 8,000 byte cut on the injected file",
+        "Claude Code": "fits, 75 lines, listing text 288 characters",
+        "ClawHub": "fits, folder 14,594 bytes"
+      }
+    },
+    "software_dependencies": [
+      {
+        "name": "Wrangler, project-local",
+        "kind": "package",
+        "version": "4.135.0 or later for Workers Previews",
+        "for": "run"
+      },
+      {
+        "name": "the project's package manager",
+        "kind": "binary",
+        "version": "not declared",
+        "for": "install"
+      },
+      {
+        "name": "Cloudflare Vite plugin",
+        "kind": "package",
+        "version": "not declared",
+        "for": "run"
+      },
+      {
+        "name": "gh",
+        "kind": "binary",
+        "version": "not declared",
+        "for": "example"
+      }
+    ],
+    "credentials": [
+      {
+        "kind": "token",
+        "name": "account-owned API token",
+        "used_for": "remote Wrangler commands with granular access",
+        "from": "unknown",
+        "goes_to": "Cloudflare, host not named in the files"
+      },
+      {
+        "kind": "token",
+        "name": "wrangler login OAuth flow",
+        "used_for": "authenticating Wrangler to a Cloudflare account",
+        "from": "unknown",
+        "goes_to": "Cloudflare, host not named in the files"
+      },
+      {
+        "kind": "other",
+        "name": "Worker secrets and local secret files",
+        "used_for": "secrets set locally, in CI or on a deployed Worker",
+        "from": "unknown",
+        "goes_to": "Cloudflare, host not named in the files"
+      }
+    ],
+    "cost": {
+      "context_tokens": {
+        "discovery": 72,
+        "load": 2953,
+        "on_demand": 695,
+        "on_demand_files": [
+          "references/skill-feedback.md"
+        ]
+      },
+      "run_tokens": "not examined",
+      "services": [
+        {
+          "name": "Cloudflare Workers",
+          "needs": "account",
+          "price": "not declared",
+          "quota": "not declared",
+          "calls_per_use": "not declared"
+        }
+      ]
+    }
+  },
+  "what_it_touches": {
+    "side_effects": {
+      "install": "read only",
+      "run": "changes state",
+      "changes": [
+        {
+          "what": "edits Wrangler config, bindings and compatibility date",
+          "affects": "workspace",
+          "confirmation": "not declared",
+          "reversible": "not declared"
+        },
+        {
+          "what": "installs dependencies and adds or upgrades Wrangler locally",
+          "affects": "software environment",
+          "confirmation": "not declared",
+          "reversible": "not declared"
+        },
+        {
+          "what": "regenerates type declarations with wrangler types",
+          "affects": "workspace",
+          "confirmation": "not declared",
+          "reversible": "not declared"
+        },
+        {
+          "what": "deploys Workers and Preview deployments",
+          "affects": "external service",
+          "confirmation": "not declared",
+          "reversible": "not declared"
+        },
+        {
+          "what": "wrangler secret put and secret delete create a version and deploy it immediately",
+          "affects": "external service",
+          "confirmation": "not declared",
+          "reversible": "not declared"
+        },
+        {
+          "what": "can overwrite dashboard variables and routes, and omitted identifiers can trigger automatic provisioning",
+          "affects": "external service",
+          "confirmation": "not declared",
+          "reversible": "not declared"
+        },
+        {
+          "what": "writes to production resources, destructive testing and deletion of named Previews",
+          "affects": "external service",
+          "confirmation": "yes",
+          "reversible": "not declared"
+        },
+        {
+          "what": "rolls back a Worker to an earlier version, without its connected resources and data",
+          "affects": "external service",
+          "confirmation": "not declared",
+          "reversible": "not declared"
+        },
+        {
+          "what": "posts a public GitHub issue on cloudflare/skills",
+          "affects": "external service",
+          "confirmation": "yes",
+          "reversible": "not declared"
+        }
+      ]
+    },
+    "network_access": [
+      {
+        "host": "developers.cloudflare.com",
+        "purpose": "data source",
+        "when": "when retrieving documentation for a task",
+        "sends": [
+          "none"
+        ],
+        "receives": "documentation pages"
+      },
+      {
+        "host": "Cloudflare MCP server, not named in the files",
+        "purpose": "data source",
+        "when": "when the Cloudflare MCP docs tool is available",
+        "sends": [
+          "query text"
+        ],
+        "receives": "documentation"
+      },
+      {
+        "host": "Cloudflare API, not named in the files",
+        "purpose": "publish",
+        "when": "remote commands, deployments, Previews, secrets and resource management",
+        "sends": [
+          "credential",
+          "file content"
+        ],
+        "receives": "deployment results, Preview URLs and resource state"
+      },
+      {
+        "host": "package registry, not named in the files",
+        "purpose": "install",
+        "when": "when dependencies or Wrangler are installed",
+        "sends": [
+          "none"
+        ],
+        "receives": "the packages"
+      },
+      {
+        "host": "github.com",
+        "purpose": "publish",
+        "when": "when the user approves a skill feedback issue",
+        "sends": [
+          "credential",
+          "user content"
+        ],
+        "receives": "the issue URL"
+      }
+    ],
+    "tools_and_permissions": {
+      "allowed_tools": "none",
+      "tools": [
+        {
+          "tool": "wrangler, run through the project's scripts or package manager",
+          "kind": "program",
+          "for": "local development, deploy, Previews, secrets, types, rollback and resource management",
+          "origin": "third party"
+        },
+        {
+          "tool": "the project's package manager",
+          "kind": "shell command",
+          "for": "installing dependencies from the existing lockfile",
+          "origin": "third party"
+        },
+        {
+          "tool": "Cloudflare MCP docs tool",
+          "kind": "external server",
+          "for": "retrieving Cloudflare documentation",
+          "origin": "third party"
+        },
+        {
+          "tool": "gh issue create --repo cloudflare/skills",
+          "kind": "shell command",
+          "for": "posting approved skill feedback",
+          "origin": "third party"
+        },
+        {
+          "tool": "Cloudflare roles and API token permissions",
+          "kind": "permission",
+          "for": "the narrowest scope that satisfies the remote operation",
+          "origin": "third party"
+        },
+        {
+          "tool": "shell, file and web fetch tools of the agent",
+          "kind": "agent tool",
+          "for": "running commands, editing config and fetching documentation pages",
+          "origin": "built in"
+        }
+      ]
+    },
+    "machine_access": {
+      "paths": [
+        {
+          "path": "wrangler.jsonc, wrangler.json or wrangler.toml",
+          "operation": "write",
+          "scope": "workspace"
+        },
+        {
+          "path": "cloudflare.config.ts",
+          "operation": "read",
+          "scope": "workspace"
+        },
+        {
+          "path": "package scripts and the lockfile",
+          "operation": "read",
+          "scope": "workspace"
+        },
+        {
+          "path": "wrangler/config-schema.json, usually under node_modules",
+          "operation": "read",
+          "scope": "workspace"
+        },
+        {
+          "path": "generated type declarations",
+          "operation": "write",
+          "scope": "workspace"
+        },
+        {
+          "path": "local secret files",
+          "operation": "read",
+          "scope": "workspace"
+        },
+        {
+          "path": "references/skill-feedback.md",
+          "operation": "read",
+          "scope": "skill folder"
+        }
+      ],
+      "settings": [
+        {
+          "name": "CLOUDFLARE_ENV",
+          "access": "set",
+          "reason": "selects the environment for the Cloudflare Vite plugin at dev or build time"
+        },
+        {
+          "name": "compatibility date",
+          "access": "set",
+          "reason": "set to today for a new project"
+        },
+        {
+          "name": "secrets.required",
+          "access": "read",
+          "reason": "checked when local secrets are missing"
+        }
+      ]
+    }
+  },
+  "what_is_known": {
+    "checks": [
+      {
+        "id": "C1",
+        "tool": "Snyk, skills.sh audit, version not stated",
+        "date": "2026-10-28",
+        "scope": "unknown",
+        "result": "pass, risk level LOW, no issues detected",
+        "report": "https://skills.sh/cloudflare/skills/wrangler/security/snyk"
+      },
+      {
+        "id": "C2",
+        "tool": "Gen Agent Trust Hub, skills.sh audit, version not stated",
+        "date": "2026-10-28",
+        "scope": "unknown",
+        "result": "pass, risk level SAFE, describes secure secret management, links only to official Cloudflare domains, and project-local Wrangler",
+        "report": "https://skills.sh/cloudflare/skills/wrangler/security/agent-trust-hub"
+      },
+      {
+        "id": "C3",
+        "tool": "Socket, skills.sh audit, version not stated",
+        "date": "2026-10-28",
+        "scope": "the skill package, hash 398aebc6edb1d2e690b00bf25b9cae335a7c7354573917545a1bd2c954c93399",
+        "result": "pass, checks for malicious behaviour, security concerns, code obfuscation and suspicious patterns",
+        "report": "https://skills.sh/cloudflare/skills/wrangler/security/socket"
+      }
+    ],
+    "vulnerabilities": "none",
+    "risks": [
+      {
+        "risk": "Preview URLs are reachable by anyone when no access controls are configured.",
+        "source": "author",
+        "severity": "none",
+        "mitigation": "the user is told and decides whether to protect the URLs",
+        "taxonomy": "not examined"
+      },
+      {
+        "risk": "A deploy can overwrite dashboard variables and routes when dashboard changes are not reconciled with the config.",
+        "source": "author",
+        "severity": "none",
+        "mitigation": "reconcile dashboard changes with the config before deploying",
+        "taxonomy": "not examined"
+      },
+      {
+        "risk": "A locally running Worker can still write to real resources when remote bindings are selected.",
+        "source": "author",
+        "severity": "none",
+        "mitigation": "check the selected bindings before testing writes",
+        "taxonomy": "not examined"
+      },
+      {
+        "risk": "A rollback leaves connected resources and their data as they are, so data changed by a bad deploy stays changed.",
+        "source": "author",
+        "severity": "none",
+        "mitigation": "check rollback limitations before a rollback",
+        "taxonomy": "not examined"
+      },
+      {
+        "risk": "Sensitive information from the conversation becomes public when it is left in a feedback issue posted on GitHub.",
+        "source": "author",
+        "severity": "none",
+        "mitigation": "credentials, identifiers and private data are removed and the user approves the exact text, in place",
+        "taxonomy": "not examined"
+      },
+      {
+        "risk": "Instructions planted in a fetched documentation page or MCP result reach the agent, since pages are fetched and followed without delimiters.",
+        "source": "model",
+        "severity": "none",
+        "mitigation": "none stated",
+        "taxonomy": "https://www.ibm.com/docs/en/watsonx/saas?topic=ai-risk-atlas"
+      }
+    ],
+    "limitations": [
+      "A successful dry run checks the build and packaging, it does not prove remote resources or runtime behavior work.",
+      "The wrangler login OAuth flow does not support granular authorization.",
+      "Workers Previews requires project-local Wrangler 4.135.0 or later, and project commands do not use a newer global installation.",
+      "Connected resources and their data are not rolled back with Worker code.",
+      "A returned Preview URL does not validate behavior that depends on bindings Wrangler reports as missing.",
+      "Local secret files are not automatically uploaded as deployed secrets.",
+      "With the Cloudflare Vite plugin, setting an environment at deploy time does not retarget its flattened config."
+    ],
+    "known_problems": [
+      {
+        "problem": "a documentation page moves",
+        "workaround": "rediscover it through the Wrangler command index or Cloudflare docs search"
+      },
+      {
+        "problem": "documentation retrieval is unavailable",
+        "workaround": "state the gap and use available local evidence"
+      },
+      {
+        "problem": "a required feature needs a newer Wrangler",
+        "workaround": "make the dependency upgrade explicit"
+      },
+      {
+        "problem": "local secrets are missing",
+        "workaround": "check file precedence and any secrets.required declaration in the secrets docs"
+      },
+      {
+        "problem": "submitting the feedback issue fails",
+        "workaround": "give the user the approved title and body and the link to create the issue manually"
+      }
+    ],
+    "evaluations": "none"
+  },
+  "who_stands_behind_it": {
+    "authorship": {
+      "author": "not declared",
+      "publisher": "the cloudflare organisation on GitHub",
+      "signer": "none",
+      "contact": "issues on the cloudflare/skills repository, https://github.com/cloudflare/skills/issues/new"
+    },
+    "license": {
+      "frontmatter": "not declared",
+      "license_file": "none",
+      "registry": "not declared",
+      "repository": "Apache-2.0, as GitHub detects it"
+    },
+    "maintenance": {
+      "last_change": "2026-10-27",
+      "registry_update": "not declared",
+      "deprecated": "not declared",
+      "first_seen": "2026-01-28",
+      "content_changes": 17,
+      "releases": 0,
+      "last_release": "none"
+    }
+  },
+  "which_files": {
+    "version": {
+      "hash": "sha256:97052c293ef66b948982fdc06f7b93c659be17a3ae673f50bb19e3bc3327db92",
+      "left_out": "none",
+      "author_version": "not declared",
+      "registry_version": "not declared",
+      "commit": "cbf893b9"
+    },
+    "source": {
+      "kind": "repository",
+      "location": "GitHub cloudflare/skills, path skills/wrangler",
+      "commit": "cbf893b9",
+      "retrieved": "2026-11-11",
+      "also_listed_on": "skills.sh, https://skills.sh/cloudflare/skills/wrangler",
+      "homepage": "not declared",
+      "produced_by": "none"
+    },
+    "files": [
+      {
+        "path": "SKILL.md",
+        "bytes": 11813,
+        "sha256": "a39de5c69f50e88759736a6ec7ad07f402c15f7a58a3224bcf979dce42013b13",
+        "kind": "document",
+        "in_hash": true,
+        "executable": false
+      },
+      {
+        "path": "references/skill-feedback.md",
+        "bytes": 2781,
+        "sha256": "f24d02c8beebbc7484c7c9d42e957e7b58c92bcf80798e8b86111b850913a57a",
+        "kind": "document",
+        "in_hash": true,
+        "executable": false
+      }
+    ],
+    "counts": {
+      "script": 0,
+      "document": 2,
+      "data": 0,
+      "binary": 0
+    },
+    "composition": "instructions only"
+  },
+  "about_this_card": {
+    "schema": "Skill Card v1.2",
+    "date": "2026-11-11",
+    "by": "Claude Opus 5.5, claude-opus-5-5, by hand from the skill files, the skills.sh listing and audits, and GitHub metadata, with the hash, file list, sizes, harness limits and repository figures computed by script",
+    "skill_run": false,
+    "scripts_analysed": false,
+    "security_check_run": false,
+    "external_service_contacted": false,
+    "registry_read": true,
+    "empty_values": 62
+  }
+}

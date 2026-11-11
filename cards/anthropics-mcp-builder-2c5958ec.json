@@ -1,0 +1,760 @@
+{
+  "schema": "Skill Card v1.2",
+  "skill": "mcp-builder",
+  "version": "anthropics/skills at 2c5958ec",
+  "what_it_does": {
+    "name": "mcp-builder",
+    "summary": "A guide in four phases for creating MCP servers that let LLMs use external services through well-designed tools, with reference guides for TypeScript SDK v2, TypeScript SDK v1, Python FastMCP and MCP best practices. It covers research and planning, implementation of tools with input schemas, pagination and actionable errors, then build and test with npm run build, py_compile and the MCP Inspector. It ends with ten evaluation questions in an XML file and a Python harness that runs them against the server with Claude and writes a report. Use it when building MCP servers to integrate external APIs or services in Python or Node/TypeScript.",
+    "tasks": [
+      "research the MCP specification, SDK docs and the target service's API",
+      "set up a TypeScript or Python MCP server project",
+      "implement tools with schemas, annotations, pagination and actionable errors",
+      "build and test the server with npm run build, py_compile and the MCP Inspector",
+      "migrate a TypeScript SDK v1 project to v2 with the codemod",
+      "write 10 read-only evaluation questions in an XML file",
+      "run the evaluation harness over stdio, sse or http and read the report"
+    ],
+    "author_description": "Guide for creating high-quality MCP (Model Context Protocol) servers that enable LLMs to interact with external services through well-designed tools. Use when building MCP servers to integrate external APIs or services, whether in Python (FastMCP) or Node/TypeScript (MCP SDK).",
+    "outputs": [
+      {
+        "what": "an MCP server project with source files, package.json and tsconfig.json, or a Python server module",
+        "kind": "information",
+        "form": "TypeScript or Python source files",
+        "destination": "a project folder named {service}-mcp-server or a module named {service}_mcp"
+      },
+      {
+        "what": "a self-check script that calls the built server's tools",
+        "kind": "information",
+        "form": "TypeScript file",
+        "destination": "scripts/smoke.ts in the server project"
+      },
+      {
+        "what": "evaluation questions with verified answers",
+        "kind": "information",
+        "form": "XML file of qa_pair elements",
+        "destination": "a file the agent names, for instance evaluation.xml"
+      },
+      {
+        "what": "evaluation report with accuracy, durations, tool calls, and the agent's summary and feedback per task",
+        "kind": "information",
+        "form": "Markdown text",
+        "destination": "the terminal, or the file given with -o such as evaluation_report.md"
+      },
+      {
+        "what": "a note to the user that v2 is the current stable SDK when a project already uses v1",
+        "kind": "recommendation",
+        "form": "a sentence or two in the chat",
+        "destination": "the user"
+      }
+    ],
+    "sample_output": "# Evaluation Report",
+    "inputs": [
+      {
+        "what": "the external service or API the server integrates, with its API documentation",
+        "type": "a service name and its documentation",
+        "required": "required",
+        "for": "every task",
+        "example": "not declared"
+      },
+      {
+        "what": "an evaluation file",
+        "type": "a positional path to an XML file",
+        "required": "conditional",
+        "for": "running the evaluation harness",
+        "example": "python scripts/evaluation.py -t stdio -c python -a my_mcp_server.py evaluation.xml"
+      },
+      {
+        "what": "the command and arguments that start the server",
+        "type": "the -c and -a options",
+        "required": "conditional",
+        "for": "evaluating a stdio server",
+        "example": "-c python -a my_mcp_server.py"
+      },
+      {
+        "what": "the server URL and HTTP headers",
+        "type": "the -u and -H options",
+        "required": "conditional",
+        "for": "evaluating an sse or http server",
+        "example": "-u https://example.com/mcp -H \"Authorization: Bearer token123\""
+      },
+      {
+        "what": "environment variables for the server process",
+        "type": "the -e option in KEY=VALUE format",
+        "required": "optional",
+        "for": "evaluating a stdio server",
+        "example": "-e API_KEY=abc123 -e DEBUG=true"
+      },
+      {
+        "what": "the Claude model for the evaluation",
+        "type": "the -m option",
+        "required": "optional",
+        "for": "running the evaluation harness",
+        "example": "-m claude-3-5-sonnet-20241022"
+      },
+      {
+        "what": "an output file for the report",
+        "type": "the -o option",
+        "required": "optional",
+        "for": "saving the evaluation report",
+        "example": "-o evaluation_report.md"
+      }
+    ],
+    "when_input_is_missing": [
+      {
+        "case": "the evaluation file does not exist",
+        "behaviour": "the harness prints Error: Evaluation file not found and exits"
+      },
+      {
+        "case": "stdio transport without -c",
+        "behaviour": "the harness prints Error: Command is required for stdio transport and exits"
+      },
+      {
+        "case": "sse or http transport without -u",
+        "behaviour": "the harness prints that a URL is required for that transport and exits"
+      },
+      {
+        "case": "a header or environment variable without a separator",
+        "behaviour": "the harness prints a warning and ignores it"
+      },
+      {
+        "case": "the project already depends on @modelcontextprotocol/sdk",
+        "behaviour": "tell the user once that v2 is the current stable release, then continue with v1 unless the user asks to migrate"
+      }
+    ],
+    "exclusions": "not declared",
+    "adoption": [
+      {
+        "registry": "skills.sh",
+        "installs": "140.1K",
+        "first_seen": "2026-01-19",
+        "counts": "the skill",
+        "read": "2026-11-11"
+      },
+      {
+        "registry": "GitHub",
+        "stars": 192784,
+        "forks": 22682,
+        "counts": "the anthropics/skills repository, which holds 20 skills",
+        "read": "2026-11-11"
+      }
+    ]
+  },
+  "what_it_needs": {
+    "compatibility": {
+      "harnesses": "not declared",
+      "models": "Claude through the Anthropic API for the evaluation harness, default claude-3-7-sonnet-20250219",
+      "capabilities": "tool calling",
+      "fits": {
+        "Agent Skills specification": "fits, name 11 characters, description 277 characters, body 247 lines and about 2,693 tokens",
+        "Codex": "does not fit, SKILL.md is 11,129 bytes, 3,129 over the 8,000 byte cut on the injected file",
+        "Claude Code": "fits, 252 lines, listing text 277 characters",
+        "ClawHub": "fits, folder 159,159 bytes"
+      }
+    },
+    "software_dependencies": [
+      {
+        "name": "anthropic",
+        "kind": "package",
+        "version": ">=0.39.0",
+        "for": "run"
+      },
+      {
+        "name": "mcp",
+        "kind": "package",
+        "version": ">=1.1.0",
+        "for": "run"
+      },
+      {
+        "name": "Python",
+        "kind": "runtime",
+        "version": "not declared",
+        "for": "run"
+      },
+      {
+        "name": "Node.js",
+        "kind": "runtime",
+        "version": "20+ for SDK v2, >=18 for SDK v1",
+        "for": "example"
+      },
+      {
+        "name": "npm and npx",
+        "kind": "binary",
+        "version": "not declared",
+        "for": "example"
+      },
+      {
+        "name": "@modelcontextprotocol/server",
+        "kind": "package",
+        "version": "^2.3.1",
+        "for": "example"
+      },
+      {
+        "name": "@modelcontextprotocol/express and @modelcontextprotocol/node, Streamable HTTP only",
+        "kind": "package",
+        "version": "^2.0.2 and ^2.1.1",
+        "for": "example"
+      },
+      {
+        "name": "express",
+        "kind": "package",
+        "version": "^5.1.0",
+        "for": "example"
+      },
+      {
+        "name": "zod",
+        "kind": "package",
+        "version": "^4.2.0 for SDK v2, ^3.23.8 for SDK v1",
+        "for": "example"
+      },
+      {
+        "name": "@modelcontextprotocol/client, typescript, tsx, @types/node, @types/express",
+        "kind": "package",
+        "version": "^2.3.1, ^5.9.3, ^4.19.2, ^24.0.0, ^5.0.0",
+        "for": "example"
+      },
+      {
+        "name": "@modelcontextprotocol/sdk and axios, SDK v1 alternative",
+        "kind": "package",
+        "version": "^1.6.1 and ^1.7.9",
+        "for": "example"
+      },
+      {
+        "name": "pydantic and httpx, Python alternative",
+        "kind": "package",
+        "version": "not declared",
+        "for": "example"
+      },
+      {
+        "name": "@modelcontextprotocol/inspector",
+        "kind": "package",
+        "version": "not declared",
+        "for": "example"
+      },
+      {
+        "name": "@modelcontextprotocol/codemod",
+        "kind": "package",
+        "version": "latest",
+        "for": "example"
+      }
+    ],
+    "credentials": [
+      {
+        "kind": "API key",
+        "name": "ANTHROPIC_API_KEY",
+        "used_for": "calling Claude in the evaluation harness",
+        "from": "environment variable",
+        "goes_to": "the Anthropic API, host not named in the files"
+      },
+      {
+        "kind": "token",
+        "name": "the Authorization header, Bearer token123 in the examples",
+        "used_for": "connecting the harness to an sse or http server",
+        "from": "command argument",
+        "goes_to": "the MCP server URL given with -u"
+      },
+      {
+        "kind": "token",
+        "name": "server environment variables such as API_KEY or GITHUB_TOKEN",
+        "used_for": "passing the service credentials to a stdio server under test",
+        "from": "command argument",
+        "goes_to": "stays on the machine"
+      },
+      {
+        "kind": "API key",
+        "name": "EXAMPLE_API_KEY in the example servers",
+        "used_for": "authenticating the built server to the upstream API",
+        "from": "environment variable",
+        "goes_to": "the upstream API, api.example.com in the examples"
+      }
+    ],
+    "cost": {
+      "context_tokens": {
+        "discovery": 69,
+        "load": 2782,
+        "on_demand": 29503,
+        "on_demand_files": [
+          "reference/mcp_best_practices.md",
+          "reference/node_mcp_server_v2.md",
+          "reference/node_mcp_server.md",
+          "reference/python_mcp_server.md",
+          "reference/evaluation.md"
+        ]
+      },
+      "run_tokens": "not examined",
+      "services": [
+        {
+          "name": "Anthropic API",
+          "needs": "API key",
+          "price": "not declared",
+          "quota": "not declared",
+          "calls_per_use": "not declared"
+        }
+      ]
+    }
+  },
+  "what_it_touches": {
+    "side_effects": {
+      "install": "changes state",
+      "run": "changes state",
+      "changes": [
+        {
+          "what": "creates the server project files, the evaluation XML file and the report file",
+          "affects": "workspace",
+          "confirmation": "not declared",
+          "reversible": "not declared"
+        },
+        {
+          "what": "installs packages with npm install and pip install -r scripts/requirements.txt",
+          "affects": "software environment",
+          "confirmation": "not declared",
+          "reversible": "not declared"
+        },
+        {
+          "what": "rewrites a v1 project in place with npx @modelcontextprotocol/codemod@latest v1-to-v2",
+          "affects": "workspace",
+          "confirmation": "yes",
+          "reversible": "not declared"
+        },
+        {
+          "what": "sets ANTHROPIC_API_KEY with export",
+          "affects": "shell environment",
+          "confirmation": "not declared",
+          "reversible": "not declared"
+        },
+        {
+          "what": "launches the stdio server under test as a local process",
+          "affects": "system",
+          "confirmation": "not declared",
+          "reversible": "not declared"
+        },
+        {
+          "what": "calls the tools of the server under test, which reach the integrated service",
+          "affects": "external service",
+          "confirmation": "not declared",
+          "reversible": "not declared"
+        }
+      ]
+    },
+    "network_access": [
+      {
+        "host": "modelcontextprotocol.io and ts.sdk.modelcontextprotocol.io",
+        "purpose": "data source",
+        "when": "when studying the MCP specification and the TypeScript SDK v2 docs",
+        "sends": [
+          "none"
+        ],
+        "receives": "the sitemap and specification pages as markdown, the SDK docs index"
+      },
+      {
+        "host": "raw.githubusercontent.com",
+        "purpose": "data source",
+        "when": "when loading the TypeScript or Python SDK README with WebFetch",
+        "sends": [
+          "none"
+        ],
+        "receives": "the SDK README files"
+      },
+      {
+        "host": "the target service's API documentation, not named in the files",
+        "purpose": "data source",
+        "when": "when planning the implementation with web search and WebFetch",
+        "sends": [
+          "query text"
+        ],
+        "receives": "endpoints, authentication requirements and data models"
+      },
+      {
+        "host": "the Anthropic API, not named in the files",
+        "purpose": "model call",
+        "when": "for each turn of each evaluation question",
+        "sends": [
+          "credential",
+          "user content"
+        ],
+        "receives": "the model's tool calls and responses"
+      },
+      {
+        "host": "the MCP server URL given with -u",
+        "purpose": "other",
+        "when": "when evaluating an sse or http server",
+        "sends": [
+          "credential",
+          "query text"
+        ],
+        "receives": "the tool list and tool results"
+      },
+      {
+        "host": "the npm registry and pypi.org, not named in the files",
+        "purpose": "install",
+        "when": "when the packages are installed with npm install, npx or pip install",
+        "sends": [
+          "none"
+        ],
+        "receives": "the packages"
+      }
+    ],
+    "tools_and_permissions": {
+      "allowed_tools": "none",
+      "tools": [
+        {
+          "tool": "WebFetch and web search",
+          "kind": "agent tool",
+          "for": "loading SDK READMEs, MCP docs and the service's API documentation",
+          "origin": "built in"
+        },
+        {
+          "tool": "python scripts/evaluation.py with scripts/connections.py",
+          "kind": "program",
+          "for": "running evaluation questions against the server with Claude",
+          "origin": "skill"
+        },
+        {
+          "tool": "npm install, npm run build, npm run smoke",
+          "kind": "shell command",
+          "for": "installing dependencies, compiling and self-checking the TypeScript server",
+          "origin": "third party"
+        },
+        {
+          "tool": "npx @modelcontextprotocol/inspector",
+          "kind": "shell command",
+          "for": "testing the server in an interactive UI",
+          "origin": "third party"
+        },
+        {
+          "tool": "npx @modelcontextprotocol/codemod@latest v1-to-v2",
+          "kind": "shell command",
+          "for": "migrating a v1 project to SDK v2",
+          "origin": "third party"
+        },
+        {
+          "tool": "python -m py_compile and pip install",
+          "kind": "shell command",
+          "for": "checking Python syntax and installing the harness dependencies",
+          "origin": "third party"
+        },
+        {
+          "tool": "the MCP server under test",
+          "kind": "external server",
+          "for": "listing and calling its tools during content exploration and evaluation",
+          "origin": "third party"
+        },
+        {
+          "tool": "shell and file tools of the agent",
+          "kind": "agent tool",
+          "for": "running the commands and writing the project and XML files",
+          "origin": "built in"
+        }
+      ]
+    },
+    "machine_access": {
+      "paths": [
+        {
+          "path": "the server project folder {service}-mcp-server with src/, scripts/ and dist/",
+          "operation": "write",
+          "scope": "workspace"
+        },
+        {
+          "path": "the project's package.json, checked for @modelcontextprotocol/sdk",
+          "operation": "read",
+          "scope": "workspace"
+        },
+        {
+          "path": "scripts/evaluation.py and scripts/connections.py",
+          "operation": "read",
+          "scope": "skill folder"
+        },
+        {
+          "path": "the evaluation XML file the agent names",
+          "operation": "read",
+          "scope": "unknown"
+        },
+        {
+          "path": "the report file given with -o",
+          "operation": "write",
+          "scope": "unknown"
+        }
+      ],
+      "settings": [
+        {
+          "name": "TRANSPORT",
+          "access": "read",
+          "reason": "the example server serves Streamable HTTP when TRANSPORT=http, stdio otherwise"
+        },
+        {
+          "name": "PORT",
+          "access": "read",
+          "reason": "the port of the example HTTP server, 3000 by default"
+        },
+        {
+          "name": "variables given with -e, such as DEBUG=true",
+          "access": "set",
+          "reason": "passed to the environment of the stdio server under test"
+        }
+      ]
+    }
+  },
+  "what_is_known": {
+    "checks": [
+      {
+        "id": "C1",
+        "tool": "Snyk, skills.sh audit, version not stated",
+        "date": "2026-10-28",
+        "scope": "unknown",
+        "result": "warn, risk level MEDIUM, 1 issue, W011 third-party content exposure, indirect prompt injection risk, scored low risk 0.10",
+        "report": "https://skills.sh/anthropics/skills/mcp-builder/security/snyk"
+      },
+      {
+        "id": "C2",
+        "tool": "Gen Agent Trust Hub, skills.sh audit, version not stated",
+        "date": "2026-10-28",
+        "scope": "SKILL.md, scripts/evaluation.py and scripts/connections.py, as cited in its analysis",
+        "result": "pass, risk level SAFE, three surfaces described, indirect prompt injection through evaluation questions, external documentation downloads and local process execution",
+        "report": "https://skills.sh/anthropics/skills/mcp-builder/security/agent-trust-hub"
+      },
+      {
+        "id": "C3",
+        "tool": "Socket, skills.sh audit, version not stated",
+        "date": "2026-10-28",
+        "scope": "the skill package, hash 0b67705c6324e7d51f8e5c2ce688ab6e125f16385c486d329e173a3f44c06adc",
+        "result": "pass, checks for malicious behaviour, security concerns, code obfuscation and suspicious patterns",
+        "report": "https://skills.sh/anthropics/skills/mcp-builder/security/socket"
+      }
+    ],
+    "vulnerabilities": [
+      {
+        "finding": "Third-party content exposure, indirect prompt injection risk, W011",
+        "check": "C1",
+        "severity": "MEDIUM",
+        "location": "not stated",
+        "status": "open",
+        "fix": "not stated"
+      }
+    ],
+    "risks": [
+      {
+        "risk": "Instructions planted in fetched SDK READMEs or GitHub-hosted documentation reach the agent, since the workflow loads these externally authored files with WebFetch.",
+        "source": "check C1",
+        "severity": "MEDIUM by C1",
+        "mitigation": "none stated",
+        "taxonomy": "https://www.ibm.com/docs/en/watsonx/saas?topic=ai-risk-atlas"
+      },
+      {
+        "risk": "A crafted question in the evaluation XML file can steer the evaluation agent and the server tools it holds, since question text goes to the model without boundary markers or sanitisation.",
+        "source": "check C2",
+        "severity": "SAFE overall by C2",
+        "mitigation": "none in the files, C2 notes that no boundary markers or sanitisation are applied",
+        "taxonomy": "https://www.ibm.com/docs/en/watsonx/saas?topic=ai-risk-atlas"
+      },
+      {
+        "risk": "The harness runs whatever command and arguments are given with -c and -a as a local process with the user's privileges.",
+        "source": "check C2",
+        "severity": "SAFE overall by C2",
+        "mitigation": "the command must be given explicitly on the command line, as C2 notes",
+        "taxonomy": "not examined"
+      },
+      {
+        "risk": "A Streamable HTTP server exposed beyond localhost without bearer auth accepts tool calls from anyone who reaches it, since the handler verifies no tokens.",
+        "source": "author",
+        "severity": "none",
+        "mitigation": "requireBearerAuth and Host and Origin validation, shown in the v2 guide, in place only when the builder adds them",
+        "taxonomy": "not examined"
+      },
+      {
+        "risk": "Evaluation runs against a live service can change its data when the agent calls a state-changing tool, since the harness passes every tool of the server to the model.",
+        "source": "model",
+        "severity": "none",
+        "mitigation": "questions must need only read-only operations, a rule for the question author, not enforced by the harness",
+        "taxonomy": "not examined"
+      },
+      {
+        "risk": "Tokens and API keys given with -e or -H stay in shell history or logs, as the examples pass GITHUB_TOKEN and a bearer token on the command line.",
+        "source": "model",
+        "severity": "none",
+        "mitigation": "none stated",
+        "taxonomy": "not examined"
+      }
+    ],
+    "limitations": [
+      "TypeScript SDK v1 receives bug and security fixes only, and v1 code samples do not apply to v2.",
+      "SDK v2 does not support Zod 3, and Zod 4.0 to 4.1 schemas fail to type-check in registerTool.",
+      "A factory that returns one shared McpServer instance fails concurrent HTTP requests with -32603 Internal server error.",
+      "One console.log in a stdio server corrupts the JSON-RPC stream.",
+      "Tool annotations are hints, not security guarantees.",
+      "SSE is deprecated in favor of Streamable HTTP.",
+      "For sse and http transports the server must be started separately before the evaluation runs.",
+      "The harness scores answers by direct string comparison, so answers must be single verifiable values."
+    ],
+    "known_problems": [
+      {
+        "problem": "connection errors in the evaluation",
+        "workaround": "verify the stdio command and arguments, or the URL and headers, and that required API keys are set"
+      },
+      {
+        "problem": "low accuracy in the evaluation",
+        "workaround": "review the agent's feedback, tool descriptions, parameter docs, returned data size and error messages"
+      },
+      {
+        "problem": "evaluation tasks time out",
+        "workaround": "use a more capable model, check returned data size and pagination, simplify the questions"
+      },
+      {
+        "problem": "the codemod could not rewrite some spots safely",
+        "workaround": "find them with grep -rn '@mcp-codemod-error' . and fix them, then run npx tsc --noEmit"
+      },
+      {
+        "problem": "the SDK drops .describe() text or logs a fallback warning with an older Zod",
+        "workaround": "keep zod at ^4.2.0 or later"
+      }
+    ],
+    "evaluations": "none"
+  },
+  "who_stands_behind_it": {
+    "authorship": {
+      "author": "Anthropic, PBC, from the license file",
+      "publisher": "the anthropics organisation on GitHub",
+      "signer": "none",
+      "contact": "not declared"
+    },
+    "license": {
+      "frontmatter": "Complete terms in LICENSE.txt",
+      "license_file": "LICENSE.txt, Apache License, Version 2.0, copyright 2026 Anthropic, PBC",
+      "registry": "not declared",
+      "repository": "none"
+    },
+    "maintenance": {
+      "last_change": "2026-10-28",
+      "registry_update": "not declared",
+      "deprecated": "not declared",
+      "first_seen": "2025-12-01",
+      "content_changes": 2,
+      "releases": 0,
+      "last_release": "none"
+    }
+  },
+  "which_files": {
+    "version": {
+      "hash": "sha256:501a1d3c41113affcf2fa17c9fcb765640fee847c9a2723c72cb770939fa8a6f",
+      "left_out": "none",
+      "author_version": "not declared",
+      "registry_version": "not declared",
+      "commit": "2c5958ec"
+    },
+    "source": {
+      "kind": "repository",
+      "location": "GitHub anthropics/skills, path skills/mcp-builder",
+      "commit": "2c5958ec",
+      "retrieved": "2026-11-11",
+      "also_listed_on": "skills.sh, https://skills.sh/anthropics/skills/mcp-builder",
+      "homepage": "not declared",
+      "produced_by": "none"
+    },
+    "files": [
+      {
+        "path": "LICENSE.txt",
+        "bytes": 11345,
+        "sha256": "bc6b3af2f331cbc7fb0da1344efb2cbe5877a31498b4d70dbc7000f3405a1362",
+        "kind": "document",
+        "in_hash": true,
+        "executable": false
+      },
+      {
+        "path": "SKILL.md",
+        "bytes": 11129,
+        "sha256": "b483b56d6673134497e45489c317f26ae0f1429c194db0297e43073e17e6748c",
+        "kind": "document",
+        "in_hash": true,
+        "executable": false
+      },
+      {
+        "path": "reference/evaluation.md",
+        "bytes": 21663,
+        "sha256": "8c99479f8a2d22a636c38e274537aac3610879e26f34e0709825077c4576f427",
+        "kind": "document",
+        "in_hash": true,
+        "executable": false
+      },
+      {
+        "path": "reference/mcp_best_practices.md",
+        "bytes": 7330,
+        "sha256": "80fb4369a349447cf18ecdd7494fe7938b6065377e9f08c077cec411093a3007",
+        "kind": "document",
+        "in_hash": true,
+        "executable": false
+      },
+      {
+        "path": "reference/node_mcp_server.md",
+        "bytes": 28745,
+        "sha256": "ee3c95d812e450f6168b734390d0c9ef6f8ebeef041d73a122c972dfbd4d476a",
+        "kind": "document",
+        "in_hash": true,
+        "executable": false
+      },
+      {
+        "path": "reference/node_mcp_server_v2.md",
+        "bytes": 35171,
+        "sha256": "49b2fe48f33910b743ae3a56353fffa5d5f252f531053f24f2da4e5914c0d3aa",
+        "kind": "document",
+        "in_hash": true,
+        "executable": false
+      },
+      {
+        "path": "reference/python_mcp_server.md",
+        "bytes": 25099,
+        "sha256": "2da52f77e675191014ca2e146a4b95aa04d0ca7dd7e2b100322df15ade685e80",
+        "kind": "document",
+        "in_hash": true,
+        "executable": false
+      },
+      {
+        "path": "scripts/connections.py",
+        "bytes": 4875,
+        "sha256": "9403668a2041568772082a8b334122c1f88daf0541fb393af4522d0094a47a6e",
+        "kind": "script",
+        "in_hash": true,
+        "executable": false
+      },
+      {
+        "path": "scripts/evaluation.py",
+        "bytes": 12579,
+        "sha256": "49ed1d17cdce5da101b210197740713f49b935c29d4f339542a14b132658e6f7",
+        "kind": "script",
+        "in_hash": true,
+        "executable": false
+      },
+      {
+        "path": "scripts/example_evaluation.xml",
+        "bytes": 1194,
+        "sha256": "9272b348ddcc4b06ba562367ccd0770e018158c0068ac5116d5e34aaeff8777a",
+        "kind": "data",
+        "in_hash": true,
+        "executable": false
+      },
+      {
+        "path": "scripts/requirements.txt",
+        "bytes": 29,
+        "sha256": "d5d7558b2368ecea9dfeed7d1fbc71ee9e0750bebd1282faa527d528a344c3c7",
+        "kind": "document",
+        "in_hash": true,
+        "executable": false
+      }
+    ],
+    "counts": {
+      "script": 2,
+      "document": 8,
+      "data": 1,
+      "binary": 0
+    },
+    "composition": "instructions with scripts"
+  },
+  "about_this_card": {
+    "schema": "Skill Card v1.2",
+    "date": "2026-11-11",
+    "by": "Claude Opus 5.5, claude-opus-5-5, by hand from the skill files, the skills.sh listing and audits, and GitHub metadata, with the hash, file list, sizes, harness limits and repository figures computed by script",
+    "skill_run": false,
+    "scripts_analysed": false,
+    "security_check_run": false,
+    "external_service_contacted": false,
+    "registry_read": true,
+    "empty_values": 49
+  }
+}

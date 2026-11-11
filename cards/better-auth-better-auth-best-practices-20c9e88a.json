@@ -1,0 +1,544 @@
+{
+  "schema": "Skill Card v1.2",
+  "skill": "better-auth-best-practices",
+  "version": "better-auth/skills at 20c9e88a",
+  "what_it_does": {
+    "name": "better-auth-best-practices",
+    "summary": "A single SKILL.md of instructions for setting up and configuring Better Auth, a TypeScript authentication library, in a project. It covers installing better-auth, setting BETTER_AUTH_SECRET and BETTER_AUTH_URL, creating auth.ts and a route handler and running migrations, with a quick reference for database adapters, sessions, plugins, hooks, security options and the client. It looks up documentation for the installed Better Auth version through the Better Auth MCP or better-auth.com/llms.txt. Use it when users mention Better Auth, betterauth or auth.ts, or need TypeScript authentication with email/password, OAuth or plugins.",
+    "tasks": [
+      "install Better Auth and set its environment variables",
+      "create auth.ts and a route handler for the framework",
+      "run schema migrations with the built-in adapter, Drizzle or Prisma",
+      "configure sessions, cookie cache and secondary storage",
+      "add server and client plugins",
+      "configure security options, rate limiting and hooks",
+      "look up documentation that matches the installed version"
+    ],
+    "author_description": "Configure Better Auth server and client, set up database adapters, manage sessions, add plugins, and handle environment variables. Use when users mention Better Auth, betterauth, auth.ts, or need to set up TypeScript authentication with email/password, OAuth, or plugin configuration.",
+    "outputs": [
+      {
+        "what": "the Better Auth configuration with database and options",
+        "kind": "information",
+        "form": "TypeScript file",
+        "destination": "auth.ts in ./, ./lib, ./utils or under ./src, or a custom path given with --config"
+      },
+      {
+        "what": "a route handler for the project's framework",
+        "kind": "information",
+        "form": "source file",
+        "destination": "a path the agent chooses in the project"
+      },
+      {
+        "what": "a generated auth schema for Drizzle or Prisma",
+        "kind": "information",
+        "form": "schema file",
+        "destination": "src/db/auth-schema.ts or prisma/schema.prisma"
+      },
+      {
+        "what": "the auth schema applied to the database through migrations",
+        "kind": "action",
+        "form": "database schema change",
+        "destination": "the project's database"
+      },
+      {
+        "what": "configuration advice on adapters, sessions, plugins and security options",
+        "kind": "recommendation",
+        "form": "chat text",
+        "destination": "the agent's answer to the user"
+      }
+    ],
+    "sample_output": "{ status: \"ok\" }",
+    "inputs": [
+      {
+        "what": "the Better Auth version of the project",
+        "type": "a version named by the user, or the resolved better-auth version in the lockfile or package manifest",
+        "required": "optional",
+        "for": "choosing the matching documentation",
+        "example": "not declared"
+      },
+      {
+        "what": "the base URL of the app",
+        "type": "an environment variable",
+        "required": "required",
+        "for": "setup",
+        "example": "https://example.com"
+      },
+      {
+        "what": "the database to use",
+        "type": "a database instance or an ORM adapter",
+        "required": "conditional",
+        "for": "most features, which need a database",
+        "example": "drizzleAdapter(db, ...)"
+      },
+      {
+        "what": "the project's framework",
+        "type": "the framework the route handler is created for",
+        "required": "required",
+        "for": "creating the route handler",
+        "example": "not declared"
+      },
+      {
+        "what": "OAuth client credentials",
+        "type": "clientId and clientSecret per provider in the config",
+        "required": "conditional",
+        "for": "social sign-in",
+        "example": "{ google: { clientId, clientSecret }, ... }"
+      }
+    ],
+    "when_input_is_missing": [
+      {
+        "case": "the user names no version",
+        "behaviour": "the resolved better-auth version in the lockfile is used, or the package manifest when there is no lockfile"
+      },
+      {
+        "case": "the project version cannot be determined",
+        "behaviour": "the latest documentation is used"
+      },
+      {
+        "case": "the Better Auth MCP is not available",
+        "behaviour": "lookup starts at better-auth.com/llms.txt and follows the matching version index"
+      },
+      {
+        "case": "BETTER_AUTH_URL or BETTER_AUTH_SECRET is not set",
+        "behaviour": "baseURL or secret is defined in the config instead"
+      },
+      {
+        "case": "auth.ts is not in ./, ./lib, ./utils or under ./src",
+        "behaviour": "the CLI is given the path with --config"
+      }
+    ],
+    "exclusions": "not declared",
+    "adoption": [
+      {
+        "registry": "skills.sh",
+        "installs": "131.6K",
+        "first_seen": "2026-01-19",
+        "counts": "the skill",
+        "read": "2026-11-11"
+      },
+      {
+        "registry": "GitHub",
+        "stars": 229,
+        "forks": 37,
+        "counts": "the better-auth/skills repository, which holds 6 skills",
+        "read": "2026-11-11"
+      }
+    ]
+  },
+  "what_it_needs": {
+    "compatibility": {
+      "harnesses": "not declared",
+      "models": "not declared",
+      "capabilities": "not declared",
+      "fits": {
+        "Agent Skills specification": "does not fit, the name does not match the folder name best-practices",
+        "Codex": "does not fit, SKILL.md is 8,231 bytes, 231 over the 8,000 byte cut on the injected file, and 7,891 bytes if only the body counts",
+        "Claude Code": "fits, 192 lines, listing text 284 characters",
+        "ClawHub": "fits, folder 8,231 bytes"
+      }
+    },
+    "software_dependencies": [
+      {
+        "name": "better-auth",
+        "kind": "package",
+        "version": "not declared",
+        "for": "install"
+      },
+      {
+        "name": "auth CLI, run as npx auth@latest",
+        "kind": "package",
+        "version": "latest",
+        "for": "run"
+      },
+      {
+        "name": "npm and npx",
+        "kind": "runtime",
+        "version": "not declared",
+        "for": "run"
+      },
+      {
+        "name": "drizzle-kit",
+        "kind": "package",
+        "version": "not declared",
+        "for": "example"
+      },
+      {
+        "name": "prisma",
+        "kind": "package",
+        "version": "not declared",
+        "for": "example"
+      },
+      {
+        "name": "pg, mysql2, better-sqlite3, postgres or @neondatabase/serverless, as alternatives",
+        "kind": "package",
+        "version": "not declared",
+        "for": "example"
+      },
+      {
+        "name": "openssl",
+        "kind": "binary",
+        "version": "not declared",
+        "for": "example"
+      }
+    ],
+    "credentials": [
+      {
+        "kind": "other",
+        "name": "BETTER_AUTH_SECRET",
+        "used_for": "encryption secret of Better Auth, min 32 chars",
+        "from": "environment variable",
+        "goes_to": "stays on the machine"
+      },
+      {
+        "kind": "other",
+        "name": "clientSecret",
+        "used_for": "OAuth sign-in through socialProviders",
+        "from": "file",
+        "goes_to": "the OAuth provider, host not named in the files"
+      },
+      {
+        "kind": "other",
+        "name": "DB credentials",
+        "used_for": "drizzle-kit commands reaching the database",
+        "from": "file",
+        "goes_to": "the database server, host not named in the files"
+      }
+    ],
+    "cost": {
+      "context_tokens": {
+        "discovery": 71,
+        "load": 2058,
+        "on_demand": 0,
+        "on_demand_files": "none"
+      },
+      "run_tokens": "not examined",
+      "services": "none"
+    }
+  },
+  "what_it_touches": {
+    "side_effects": {
+      "install": "read only",
+      "run": "changes state",
+      "changes": [
+        {
+          "what": "installs the better-auth package with npm install",
+          "affects": "software environment",
+          "confirmation": "not declared",
+          "reversible": "not declared"
+        },
+        {
+          "what": "creates auth.ts, a route handler and generated schema files",
+          "affects": "workspace",
+          "confirmation": "not declared",
+          "reversible": "not declared"
+        },
+        {
+          "what": "applies schema migrations to the database",
+          "affects": "external service",
+          "confirmation": "not declared",
+          "reversible": "not declared"
+        },
+        {
+          "what": "sets BETTER_AUTH_SECRET and BETTER_AUTH_URL",
+          "affects": "shell environment",
+          "confirmation": "not declared",
+          "reversible": "not declared"
+        },
+        {
+          "what": "adds the Better Auth MCP to AI tools with npx auth@latest mcp --cursor",
+          "affects": "software environment",
+          "confirmation": "not declared",
+          "reversible": "not declared"
+        }
+      ]
+    },
+    "network_access": [
+      {
+        "host": "better-auth.com",
+        "purpose": "data source",
+        "when": "when the Better Auth MCP is not available, to read llms.txt and the version index",
+        "sends": [
+          "none"
+        ],
+        "receives": "documentation and version indices"
+      },
+      {
+        "host": "the Better Auth MCP, host not named in the files",
+        "purpose": "data source",
+        "when": "when the MCP is available, through get_doc and search_docs",
+        "sends": [
+          "query text"
+        ],
+        "receives": "documentation identifiers and pages"
+      },
+      {
+        "host": "the npm registry, not named in the files",
+        "purpose": "install",
+        "when": "on npm install better-auth and on each npx auth@latest, drizzle-kit or prisma call",
+        "sends": [
+          "none"
+        ],
+        "receives": "the packages"
+      },
+      {
+        "host": "the project's database, host not named in the files",
+        "purpose": "other",
+        "when": "when migrations are run",
+        "sends": [
+          "credential",
+          "file content"
+        ],
+        "receives": "the migration result"
+      }
+    ],
+    "tools_and_permissions": {
+      "allowed_tools": "none",
+      "tools": [
+        {
+          "tool": "Better Auth MCP with get_doc and search_docs",
+          "kind": "external server",
+          "for": "resolving the version and searching the documentation",
+          "origin": "third party"
+        },
+        {
+          "tool": "npm install",
+          "kind": "shell command",
+          "for": "installing better-auth",
+          "origin": "third party"
+        },
+        {
+          "tool": "npx auth@latest migrate, generate and mcp",
+          "kind": "shell command",
+          "for": "applying or generating the schema and adding the MCP to AI tools",
+          "origin": "third party"
+        },
+        {
+          "tool": "npx drizzle-kit push, generate and migrate, npx prisma migrate dev",
+          "kind": "shell command",
+          "for": "migrations with Drizzle or Prisma",
+          "origin": "third party"
+        },
+        {
+          "tool": "openssl rand -base64 32",
+          "kind": "shell command",
+          "for": "generating BETTER_AUTH_SECRET",
+          "origin": "third party"
+        },
+        {
+          "tool": "shell and file tools of the agent",
+          "kind": "agent tool",
+          "for": "running the commands and writing auth.ts and the route handler",
+          "origin": "built in"
+        }
+      ]
+    },
+    "machine_access": {
+      "paths": [
+        {
+          "path": "the lockfile and the package manifest",
+          "operation": "read",
+          "scope": "workspace"
+        },
+        {
+          "path": "auth.ts in ./, ./lib, ./utils or under ./src",
+          "operation": "write",
+          "scope": "workspace"
+        },
+        {
+          "path": "src/db/auth-schema.ts or prisma/schema.prisma",
+          "operation": "write",
+          "scope": "workspace"
+        },
+        {
+          "path": "drizzle.config.ts",
+          "operation": "read",
+          "scope": "workspace"
+        },
+        {
+          "path": "the route handler at a path the agent chooses",
+          "operation": "write",
+          "scope": "unknown"
+        }
+      ],
+      "settings": [
+        {
+          "name": "BETTER_AUTH_URL",
+          "access": "set",
+          "reason": "base URL of the app"
+        },
+        {
+          "name": "MCP configuration of AI tools such as Cursor",
+          "access": "set",
+          "reason": "add MCP to AI tools"
+        }
+      ]
+    }
+  },
+  "what_is_known": {
+    "checks": [
+      {
+        "id": "C1",
+        "tool": "Snyk, skills.sh audit, version not stated",
+        "date": "2026-09-14",
+        "scope": "unknown",
+        "result": "warn, risk level MEDIUM, 1 issue, W011 third-party content exposure, indirect prompt injection risk, scored low risk 0.10",
+        "report": "https://skills.sh/better-auth/skills/better-auth-best-practices/security/snyk"
+      },
+      {
+        "id": "C2",
+        "tool": "Gen Agent Trust Hub, skills.sh audit, version not stated",
+        "date": "2026-09-14",
+        "scope": "SKILL.md, as cited in its analysis",
+        "result": "pass, risk level SAFE, external downloads, command execution and indirect prompt injection described, content from better-auth.com/llms.txt reaches the agent without boundary markers or sanitisation",
+        "report": "https://skills.sh/better-auth/skills/better-auth-best-practices/security/agent-trust-hub"
+      },
+      {
+        "id": "C3",
+        "tool": "Socket, skills.sh audit, version not stated",
+        "date": "2026-09-14",
+        "scope": "the skill package, hash 2ca64e870d2b84b9f769fad6b322ac5e1eb3765db26a01f98f3fdb0b2a22cb56",
+        "result": "pass, checks for malicious behaviour, credential exposure, obfuscated code and suspicious patterns",
+        "report": "https://skills.sh/better-auth/skills/better-auth-best-practices/security/socket"
+      }
+    ],
+    "vulnerabilities": [
+      {
+        "finding": "Third-party content exposure, indirect prompt injection risk, W011",
+        "check": "C1",
+        "severity": "MEDIUM",
+        "location": "not stated",
+        "status": "open",
+        "fix": "not stated"
+      }
+    ],
+    "risks": [
+      {
+        "risk": "Instructions placed in fetched documentation reach the agent, since content from better-auth.com/llms.txt and the MCP is read without boundary markers or sanitisation.",
+        "source": "check C1, check C2",
+        "severity": "MEDIUM by C1, SAFE overall by C2",
+        "mitigation": "none in the files, C2 notes that no boundary markers or sanitisation are defined",
+        "taxonomy": "https://www.ibm.com/docs/en/watsonx/saas?topic=ai-risk-atlas"
+      },
+      {
+        "risk": "A changed or compromised release of the auth CLI runs with the agent's privileges, since npx auth@latest fetches and runs the latest version unpinned.",
+        "source": "check C2",
+        "severity": "none",
+        "mitigation": "none stated",
+        "taxonomy": "not examined"
+      },
+      {
+        "risk": "Setting disableCSRFCheck or disableOriginCheck in advanced removes CSRF or origin protection from the auth endpoints.",
+        "source": "author",
+        "severity": "none",
+        "mitigation": "both options are marked as a security risk",
+        "taxonomy": "not examined"
+      },
+      {
+        "risk": "The auth secret ends up in source control when it is set as secret in auth.ts, which the config allows when BETTER_AUTH_SECRET is not set.",
+        "source": "model",
+        "severity": "none",
+        "mitigation": "env vars are named as the first place for the secret, as guidance only",
+        "taxonomy": "not examined"
+      }
+    ],
+    "limitations": [
+      "APIs and plugin names can differ across maintained release lines, so documentation must match the installed version.",
+      "Custom session fields are not cached in the cookie cache and are always re-fetched.",
+      "In stateless mode with no database the session lives only in the cookie, and the user is logged out when the cache expires.",
+      "Email verification works only when emailVerification.sendVerificationEmail is defined.",
+      "With secondaryStorage defined, sessions go there and not to the database by default."
+    ],
+    "known_problems": [
+      {
+        "problem": "model vs table name",
+        "workaround": "use the ORM model name in the config, not the database table name"
+      },
+      {
+        "problem": "plugin schema missing after adding plugins",
+        "workaround": "re-run the CLI after adding or changing plugins"
+      },
+      {
+        "problem": "Drizzle: db not initialized",
+        "workaround": "pass a db instance from drizzle() to drizzleAdapter, see the create-auth skill"
+      },
+      {
+        "problem": "Drizzle: missing drizzle.config.ts",
+        "workaround": "add a drizzle.config.ts pointing to the generated schema file and DB credentials"
+      },
+      {
+        "problem": "sessions not stored in the database when secondaryStorage is set",
+        "workaround": "set session.storeSessionInDatabase: true"
+      }
+    ],
+    "evaluations": "none"
+  },
+  "who_stands_behind_it": {
+    "authorship": {
+      "author": "not declared",
+      "publisher": "the better-auth organisation on GitHub",
+      "signer": "none",
+      "contact": "not declared"
+    },
+    "license": {
+      "frontmatter": "not declared",
+      "license_file": "none",
+      "registry": "not declared",
+      "repository": "none"
+    },
+    "maintenance": {
+      "last_change": "2026-09-01",
+      "registry_update": "not declared",
+      "deprecated": "not declared",
+      "first_seen": "2026-01-14",
+      "content_changes": 11,
+      "releases": 0,
+      "last_release": "none"
+    }
+  },
+  "which_files": {
+    "version": {
+      "hash": "sha256:7bfd18c412988ff45696bb656a14b2b2422fe5a2aa20a6f090f969d45fba358e",
+      "left_out": "none",
+      "author_version": "not declared",
+      "registry_version": "not declared",
+      "commit": "20c9e88a"
+    },
+    "source": {
+      "kind": "repository",
+      "location": "GitHub better-auth/skills, path better-auth/best-practices",
+      "commit": "20c9e88a",
+      "retrieved": "2026-11-11",
+      "also_listed_on": "skills.sh, https://skills.sh/better-auth/skills/better-auth-best-practices",
+      "homepage": "not declared",
+      "produced_by": "none"
+    },
+    "files": [
+      {
+        "path": "SKILL.md",
+        "bytes": 8231,
+        "sha256": "a5337f186300d187fea2c8f7af339e091afdd130d36c070d0a2dcb8ca04dd413",
+        "kind": "document",
+        "in_hash": true,
+        "executable": false
+      }
+    ],
+    "counts": {
+      "script": 0,
+      "document": 1,
+      "data": 0,
+      "binary": 0
+    },
+    "composition": "instructions only"
+  },
+  "about_this_card": {
+    "schema": "Skill Card v1.2",
+    "date": "2026-11-11",
+    "by": "Claude Opus 5.5, claude-opus-5-5, by hand from the skill files, the skills.sh listing and audits, and GitHub metadata, with the hash, file list, sizes, harness limits and repository figures computed by script",
+    "skill_run": false,
+    "scripts_analysed": false,
+    "security_check_run": false,
+    "external_service_contacted": false,
+    "registry_read": true,
+    "empty_values": 52
+  }
+}

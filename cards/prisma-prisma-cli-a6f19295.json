@@ -1,0 +1,905 @@
+{
+  "schema": "Skill Card v1.2",
+  "skill": "prisma-cli",
+  "version": "prisma/skills at a6f19295",
+  "what_it_does": {
+    "name": "prisma-cli",
+    "summary": "Command reference for the Prisma ORM 7 CLI, made of an overview in SKILL.md and 20 reference files, one per command or topic. It covers prisma init, generate, validate, format, dev, db pull, push, seed and execute, the migrate commands, studio, mcp, complete and debug, with their options, examples and workflows. Destructive commands go through an AI safety checkpoint that needs the user's explicit consent. Use it in existing Prisma 7 applications or explicitly selected Prisma 7 workflows, not for setup, connection repair or Prisma 8.",
+    "tasks": [
+      "initialize a Prisma 7 project with prisma init",
+      "generate Prisma Client with prisma generate",
+      "create, apply, check, diff and resolve migrations",
+      "introspect, push, seed and run raw SQL against a database",
+      "run a local Prisma Postgres database with prisma dev",
+      "validate and format the Prisma schema",
+      "open Prisma Studio, start the MCP server, print debug info and shell completions"
+    ],
+    "author_description": "Prisma ORM 7 CLI reference for existing Prisma 7 applications or explicitly selected Prisma 7 workflows. Covers prisma init, generate, migrate, db, dev, studio, and mcp. For setup, connection repair, or Prisma 8, use prisma-orm-setup; not the Prisma Platform CLI.",
+    "outputs": [
+      {
+        "what": "project files prisma/schema.prisma, prisma.config.ts and .env, and an updated .gitignore",
+        "kind": "information",
+        "form": "schema, TypeScript and environment files",
+        "destination": "the current directory"
+      },
+      {
+        "what": "generated Prisma Client",
+        "kind": "information",
+        "form": "TypeScript files such as client.ts, browser.ts, enums.ts and models.ts",
+        "destination": "the output path of the generator block, for instance ../generated"
+      },
+      {
+        "what": "migration files",
+        "kind": "information",
+        "form": "one migration.sql per migration folder and migration_lock.toml",
+        "destination": "prisma/migrations/"
+      },
+      {
+        "what": "a schema file rewritten by db pull or format",
+        "kind": "information",
+        "form": "Prisma schema file",
+        "destination": "prisma/schema.prisma, changed in place"
+      },
+      {
+        "what": "schema changes, migrations, seed data and raw SQL applied to the database",
+        "kind": "action",
+        "form": "changes to tables, data and the _prisma_migrations table",
+        "destination": "the configured database"
+      },
+      {
+        "what": "a local Prisma Postgres instance",
+        "kind": "action",
+        "form": "local database server, in the terminal or in the background",
+        "destination": "the user's machine, ports 51213, 51214 and 51215 by default"
+      },
+      {
+        "what": "a managed Prisma Postgres database",
+        "kind": "action",
+        "form": "cloud database instance",
+        "destination": "the Prisma Data Platform"
+      },
+      {
+        "what": "Prisma Studio, a database GUI for viewing and editing records",
+        "kind": "information",
+        "form": "web page",
+        "destination": "http://localhost:5555"
+      },
+      {
+        "what": "the Prisma MCP server exposing schema and database context",
+        "kind": "information",
+        "form": "MCP server",
+        "destination": "compatible AI tools"
+      },
+      {
+        "what": "migration status, diff summaries or SQL, debug info and completion scripts",
+        "kind": "information",
+        "form": "terminal text",
+        "destination": "the terminal"
+      }
+    ],
+    "sample_output": "Database schema is up to date!",
+    "inputs": [
+      {
+        "what": "a Prisma 7 project with its config and schema",
+        "type": "prisma.config.ts and prisma/schema.prisma",
+        "required": "required",
+        "for": "every command except init and complete",
+        "example": "schema: 'prisma/schema.prisma'"
+      },
+      {
+        "what": "a database connection URL",
+        "type": "the DATABASE_URL environment variable read in prisma.config.ts, or the --url option",
+        "required": "required",
+        "for": "every command that connects to a database",
+        "example": "url: env('DATABASE_URL')"
+      },
+      {
+        "what": "a migration name",
+        "type": "the --name option",
+        "required": "optional",
+        "for": "prisma migrate dev",
+        "example": "prisma migrate dev --name add_users_table"
+      },
+      {
+        "what": "a SQL script",
+        "type": "a file path with --file, or standard input with --stdin",
+        "required": "conditional",
+        "for": "prisma db execute",
+        "example": "prisma db execute --file ./script.sql"
+      },
+      {
+        "what": "the user's exact consent message",
+        "type": "text in PRISMA_USER_CONSENT_FOR_DANGEROUS_AI_ACTION",
+        "required": "conditional",
+        "for": "migrate reset, db push --force-reset and db push --accept-data-loss run by an agent",
+        "example": "PRISMA_USER_CONSENT_FOR_DANGEROUS_AI_ACTION='<exact user consent message>' prisma migrate reset --force"
+      },
+      {
+        "what": "a shadow database URL",
+        "type": "the SHADOW_DATABASE_URL environment variable",
+        "required": "conditional",
+        "for": "prisma migrate dev outside local Prisma Postgres",
+        "example": "shadowDatabaseUrl: env('SHADOW_DATABASE_URL')"
+      },
+      {
+        "what": "the migration to mark",
+        "type": "exactly one of --applied or --rolled-back with a migration name",
+        "required": "conditional",
+        "for": "prisma migrate resolve",
+        "example": "prisma migrate resolve --applied 20240101000000_initial_migration"
+      },
+      {
+        "what": "a shell name",
+        "type": "a positional argument",
+        "required": "conditional",
+        "for": "prisma complete",
+        "example": "prisma complete zsh"
+      }
+    ],
+    "when_input_is_missing": [
+      {
+        "case": "an agent runs migrate reset, db push --force-reset or db push --accept-data-loss without the user's explicit consent",
+        "behaviour": "Prisma blocks the command until the user gives explicit consent"
+      },
+      {
+        "case": "prisma migrate dev runs on a changed schema without --name",
+        "behaviour": "it prompts for a migration name"
+      },
+      {
+        "case": "prisma db push would cause data loss",
+        "behaviour": "it stops with an error and asks for --accept-data-loss"
+      },
+      {
+        "case": "prisma migrate reset runs in an interactive terminal",
+        "behaviour": "it prompts for confirmation unless --force is given"
+      }
+    ],
+    "exclusions": [
+      "not for setup, connection repair or Prisma 8, use prisma-orm-setup",
+      "not the Prisma Platform CLI, the @prisma/cli package with binary prisma-cli",
+      "not for Compute apps and workspace auth, use prisma-compute",
+      "not for Platform projects and databases, use prisma-postgres-setup",
+      "prisma db push not for production, team collaboration or when rollback is needed",
+      "prisma migrate dev not for production, CI/CD pipelines or MongoDB",
+      "Prisma Studio not for production use"
+    ],
+    "adoption": [
+      {
+        "registry": "skills.sh",
+        "installs": "419.5K",
+        "first_seen": "2026-02-04",
+        "counts": "the skill",
+        "read": "2026-11-11"
+      },
+      {
+        "registry": "GitHub",
+        "stars": 80,
+        "forks": 8,
+        "counts": "the prisma/skills repository, which holds 11 skills",
+        "read": "2026-11-11"
+      }
+    ]
+  },
+  "what_it_needs": {
+    "compatibility": {
+      "harnesses": "not declared",
+      "models": "not declared",
+      "capabilities": "not declared",
+      "fits": {
+        "Agent Skills specification": "fits, name 10 characters, description 263 characters, body 259 lines and about 1,787 tokens",
+        "Codex": "fits, SKILL.md is 7,508 bytes, under the 8,000 byte cut",
+        "Claude Code": "fits, 267 lines, listing text 263 characters",
+        "ClawHub": "fits, folder 50,075 bytes"
+      }
+    },
+    "software_dependencies": [
+      {
+        "name": "prisma, the project's version-matched CLI",
+        "kind": "package",
+        "version": "Prisma ORM 7",
+        "for": "run"
+      },
+      {
+        "name": "Node.js",
+        "kind": "runtime",
+        "version": "not declared",
+        "for": "run"
+      },
+      {
+        "name": "Bun, as an alternative runtime through bunx --bun",
+        "kind": "runtime",
+        "version": "not declared",
+        "for": "run"
+      },
+      {
+        "name": "dotenv",
+        "kind": "package",
+        "version": "not declared",
+        "for": "example"
+      },
+      {
+        "name": "tsx, or ts-node as an alternative, for the seed script",
+        "kind": "package",
+        "version": "not declared",
+        "for": "example"
+      },
+      {
+        "name": "zod-prisma-types",
+        "kind": "package",
+        "version": "not declared",
+        "for": "example"
+      }
+    ],
+    "credentials": [
+      {
+        "kind": "other",
+        "name": "DATABASE_URL",
+        "used_for": "connecting to the database",
+        "from": "environment variable",
+        "goes_to": "the database host in the URL"
+      },
+      {
+        "kind": "other",
+        "name": "SHADOW_DATABASE_URL",
+        "used_for": "connecting to the shadow database for prisma migrate dev",
+        "from": "environment variable",
+        "goes_to": "the database host in the URL"
+      },
+      {
+        "kind": "other",
+        "name": "PROD_DB_URL",
+        "used_for": "comparing the production database with the local schema in prisma migrate diff",
+        "from": "environment variable",
+        "goes_to": "the database host in the URL"
+      },
+      {
+        "kind": "password",
+        "name": "the password in a --url connection string",
+        "used_for": "connecting to a database given on the command line",
+        "from": "command argument",
+        "goes_to": "the database host in the URL"
+      },
+      {
+        "kind": "other",
+        "name": "the Prisma Data Platform login",
+        "used_for": "provisioning a Prisma Postgres database with prisma init --db",
+        "from": "prompt to the user",
+        "goes_to": "the Prisma Data Platform, host not named in the files"
+      }
+    ],
+    "cost": {
+      "context_tokens": {
+        "discovery": 66,
+        "load": 1877,
+        "on_demand": 10644,
+        "on_demand_files": [
+          "references/init.md",
+          "references/generate.md",
+          "references/dev.md",
+          "references/db-pull.md",
+          "references/db-push.md",
+          "references/db-seed.md",
+          "references/db-execute.md",
+          "references/migrate-dev.md",
+          "references/migrate-deploy.md",
+          "references/migrate-reset.md",
+          "references/migrate-status.md",
+          "references/migrate-resolve.md",
+          "references/migrate-diff.md",
+          "references/studio.md",
+          "references/mcp.md",
+          "references/complete.md",
+          "references/agent-safety.md",
+          "references/validate.md",
+          "references/format.md",
+          "references/debug.md"
+        ]
+      },
+      "run_tokens": "not examined",
+      "services": [
+        {
+          "name": "Prisma Postgres on the Prisma Data Platform",
+          "needs": "account",
+          "price": "not declared",
+          "quota": "not declared",
+          "calls_per_use": "not declared"
+        }
+      ]
+    }
+  },
+  "what_it_touches": {
+    "side_effects": {
+      "install": "read only",
+      "run": "changes state",
+      "changes": [
+        {
+          "what": "creates prisma/schema.prisma, prisma.config.ts and .env, and appends to .gitignore",
+          "affects": "workspace",
+          "confirmation": "not declared",
+          "reversible": "not declared"
+        },
+        {
+          "what": "attempts to install prisma/skills for detected agents during prisma init, skipped with --no-skills",
+          "affects": "software environment",
+          "confirmation": "not declared",
+          "reversible": "not declared"
+        },
+        {
+          "what": "writes generated client files and migration files",
+          "affects": "workspace",
+          "confirmation": "not declared",
+          "reversible": "not declared"
+        },
+        {
+          "what": "overwrites prisma/schema.prisma with db pull and changes it in place with format",
+          "affects": "workspace",
+          "confirmation": "not declared",
+          "reversible": "not declared"
+        },
+        {
+          "what": "applies migrations, seed data and raw SQL to the database",
+          "affects": "external service",
+          "confirmation": "not declared",
+          "reversible": "not declared"
+        },
+        {
+          "what": "pushes schema changes with db push without migration history",
+          "affects": "external service",
+          "confirmation": "not declared",
+          "reversible": "no"
+        },
+        {
+          "what": "drops or resets the database and deletes all data with migrate reset, db push --force-reset or --accept-data-loss",
+          "affects": "external service",
+          "confirmation": "yes",
+          "reversible": "no"
+        },
+        {
+          "what": "marks migrations as applied or rolled back in the _prisma_migrations table",
+          "affects": "external service",
+          "confirmation": "not declared",
+          "reversible": "not declared"
+        },
+        {
+          "what": "creates, updates and deletes records in Prisma Studio, deletes with confirmation",
+          "affects": "external service",
+          "confirmation": "yes",
+          "reversible": "not declared"
+        },
+        {
+          "what": "starts, stops and removes local Prisma Postgres instances and their data",
+          "affects": "system",
+          "confirmation": "not declared",
+          "reversible": "not declared"
+        },
+        {
+          "what": "provisions a cloud Prisma Postgres database with prisma init --db",
+          "affects": "external service",
+          "confirmation": "not declared",
+          "reversible": "not declared"
+        }
+      ]
+    },
+    "network_access": [
+      {
+        "host": "the database host in DATABASE_URL, --url or --from-url, formed at run time",
+        "purpose": "data source",
+        "when": "every command that connects to a database",
+        "sends": [
+          "credential",
+          "file content",
+          "query text"
+        ],
+        "receives": "the database schema, migration state and command results"
+      },
+      {
+        "host": "the Prisma Data Platform, not named in the files",
+        "purpose": "other",
+        "when": "prisma init --db, after browser authentication",
+        "sends": [
+          "credential"
+        ],
+        "receives": "a managed Prisma Postgres database"
+      },
+      {
+        "host": "the source of prisma/skills, not named in the files",
+        "purpose": "install",
+        "when": "prisma init without --no-skills",
+        "sends": [
+          "none"
+        ],
+        "receives": "the Prisma agent skills"
+      },
+      {
+        "host": "localhost:5555",
+        "purpose": "other",
+        "when": "prisma studio",
+        "sends": [
+          "none"
+        ],
+        "receives": "the Prisma Studio GUI"
+      },
+      {
+        "host": "the MCP-aware AI tool the user connects, such as ChatGPT or Claude, not named as a host",
+        "purpose": "model call",
+        "when": "prisma mcp is connected to an AI tool",
+        "sends": [
+          "file content"
+        ],
+        "receives": "requests for schema, migration and Studio tooling"
+      }
+    ],
+    "tools_and_permissions": {
+      "allowed_tools": "none",
+      "tools": [
+        {
+          "tool": "prisma",
+          "kind": "program",
+          "for": "every documented command",
+          "origin": "third party"
+        },
+        {
+          "tool": "bunx --bun prisma",
+          "kind": "shell command",
+          "for": "running Prisma with the Bun runtime",
+          "origin": "third party"
+        },
+        {
+          "tool": "npx prisma",
+          "kind": "shell command",
+          "for": "CI, Docker and validation examples",
+          "origin": "third party"
+        },
+        {
+          "tool": "tsx, ts-node or node",
+          "kind": "program",
+          "for": "running the seed script",
+          "origin": "third party"
+        },
+        {
+          "tool": "git add and git commit",
+          "kind": "shell command",
+          "for": "committing migration files before deploy",
+          "origin": "third party"
+        },
+        {
+          "tool": "Prisma MCP server",
+          "kind": "external server",
+          "for": "exposing migrate-status, migrate-dev and Prisma Studio tooling to AI tools",
+          "origin": "third party"
+        },
+        {
+          "tool": "explicit user consent for migrate reset, db push --force-reset and db push --accept-data-loss",
+          "kind": "permission",
+          "for": "unblocking destructive commands for a detected AI agent",
+          "origin": "third party"
+        },
+        {
+          "tool": "shell tool of the agent",
+          "kind": "agent tool",
+          "for": "running the prisma commands",
+          "origin": "built in"
+        }
+      ]
+    },
+    "machine_access": {
+      "paths": [
+        {
+          "path": "prisma/schema.prisma",
+          "operation": "write",
+          "scope": "workspace"
+        },
+        {
+          "path": "prisma.config.ts",
+          "operation": "write",
+          "scope": "workspace"
+        },
+        {
+          "path": ".env",
+          "operation": "write",
+          "scope": "workspace"
+        },
+        {
+          "path": ".gitignore",
+          "operation": "write",
+          "scope": "workspace"
+        },
+        {
+          "path": "prisma/migrations/",
+          "operation": "write",
+          "scope": "workspace"
+        },
+        {
+          "path": "the generator output directory, for instance generated/",
+          "operation": "write",
+          "scope": "workspace"
+        },
+        {
+          "path": "prisma/seed.ts, run as the seed script",
+          "operation": "read",
+          "scope": "workspace"
+        },
+        {
+          "path": "SQL script files such as ./script.sql",
+          "operation": "read",
+          "scope": "workspace"
+        },
+        {
+          "path": "local Prisma Postgres instance data",
+          "operation": "delete",
+          "scope": "unknown"
+        },
+        {
+          "path": "agent skill folders where prisma init installs prisma/skills",
+          "operation": "write",
+          "scope": "unknown"
+        }
+      ],
+      "settings": [
+        {
+          "name": "PRISMA_USER_CONSENT_FOR_DANGEROUS_AI_ACTION",
+          "access": "set",
+          "reason": "passes the user's exact consent for a destructive command run by an agent"
+        },
+        {
+          "name": "agent-detection environment variables, not named in the files",
+          "access": "read",
+          "reason": "Prisma detects AI-agent environments to block destructive commands"
+        },
+        {
+          "name": "BROWSER",
+          "access": "set",
+          "reason": "BROWSER=none keeps Prisma Studio from opening a browser on remote servers"
+        },
+        {
+          "name": "NODE_ENV",
+          "access": "read",
+          "reason": "picks environment-specific seed data in the example seed script"
+        }
+      ]
+    }
+  },
+  "what_is_known": {
+    "checks": [
+      {
+        "id": "C1",
+        "tool": "Snyk, skills.sh audit, version not stated",
+        "date": "2026-09-29",
+        "scope": "unknown",
+        "result": "pass, risk level LOW, no issues detected",
+        "report": "https://skills.sh/prisma/skills/prisma-cli/security/snyk"
+      },
+      {
+        "id": "C2",
+        "tool": "Gen Agent Trust Hub, skills.sh audit, version not stated",
+        "date": "2026-09-29",
+        "scope": "the documented commands and references/agent-safety.md, as cited in its analysis",
+        "result": "pass, risk level SAFE, command execution, dynamic execution and indirect prompt injection surfaces described, with a consent checkpoint for destructive actions",
+        "report": "https://skills.sh/prisma/skills/prisma-cli/security/agent-trust-hub"
+      },
+      {
+        "id": "C3",
+        "tool": "Socket, skills.sh audit, version not stated",
+        "date": "2026-09-29",
+        "scope": "the skill package, hash 72ac4caf80efe5a1843b0b3b9a6d956a52702f81e716f3a41f1447231660e3d4",
+        "result": "pass, checks for malicious behaviour, security concerns, code obfuscation and suspicious patterns",
+        "report": "https://skills.sh/prisma/skills/prisma-cli/security/socket"
+      }
+    ],
+    "vulnerabilities": "none",
+    "risks": [
+      {
+        "risk": "Instructions placed in a remote database schema or a SQL file can reach the agent when it introspects a database with prisma db pull or reads schemas with prisma migrate diff.",
+        "source": "check C2",
+        "severity": "SAFE overall by C2",
+        "mitigation": "consent checkpoint for destructive commands in place, no sanitisation of ingested content stated",
+        "taxonomy": "https://www.ibm.com/docs/en/watsonx/saas?topic=ai-risk-atlas"
+      },
+      {
+        "risk": "All data in the database is lost when prisma migrate reset, prisma db push --force-reset or prisma db push --accept-data-loss runs against it.",
+        "source": "author",
+        "severity": "none",
+        "mitigation": "Prisma blocks these commands for a detected AI agent until the user gives explicit consent, in place",
+        "taxonomy": "not examined"
+      },
+      {
+        "risk": "Running prisma migrate dev against a production database can end in a reset prompt on drift, and a reset deletes all data.",
+        "source": "author",
+        "severity": "none",
+        "mitigation": "use prisma migrate deploy in production, not enforced",
+        "taxonomy": "not examined"
+      },
+      {
+        "risk": "Manual customizations of the schema file are lost when prisma db pull overwrites it.",
+        "source": "author",
+        "severity": "none",
+        "mitigation": "commit the schema first and preview with --print, not enforced",
+        "taxonomy": "not examined"
+      },
+      {
+        "risk": "Anyone who reaches Prisma Studio gets direct database access when it runs on a public network.",
+        "source": "author",
+        "severity": "none",
+        "mitigation": "run only on local machines or secure internal networks, not enforced",
+        "taxonomy": "not examined"
+      },
+      {
+        "risk": "A database password passed in a --url connection string on the command line stays in shell history or logs.",
+        "source": "model",
+        "severity": "none",
+        "mitigation": "none stated",
+        "taxonomy": "not examined"
+      },
+      {
+        "risk": "Schema and database context leave the machine when prisma mcp is connected to a hosted AI tool such as ChatGPT or Claude.",
+        "source": "model",
+        "severity": "none",
+        "mitigation": "none stated",
+        "taxonomy": "not examined"
+      }
+    ],
+    "limitations": [
+      "The commands and examples apply to Prisma ORM 7 only.",
+      "prisma db execute reports success or failure, not query results, is primarily for SQL databases and is not supported on MongoDB.",
+      "MongoDB does not support migrations, so db push is the only schema workflow there.",
+      "MongoDB introspection samples documents and may need manual refinement.",
+      "prisma migrate dev requires a shadow database, handled automatically only for local Prisma Postgres.",
+      "prisma migrate status exits 0 with pending migrations, so detecting them needs parsing the output or migrate diff --exit-code.",
+      "Prisma Studio is a development tool limited to the configured database and in Prisma 7 targets PostgreSQL, MySQL and SQLite first.",
+      "Under Bun, Prisma falls back to Node.js without the --bun flag because of the CLI shebang.",
+      "npx and bunx do not provide shell completion."
+    ],
+    "known_problems": [
+      {
+        "problem": "a migration fails in prisma migrate deploy",
+        "workaround": "fix the issue, mark it with prisma migrate resolve --applied and rerun prisma migrate deploy"
+      },
+      {
+        "problem": "db push or migrate dev warns of data loss",
+        "workaround": "decide whether data loss is acceptable, then use --accept-data-loss with the user's explicit consent"
+      },
+      {
+        "problem": "migrate dev detects schema drift",
+        "workaround": "reset the database with prisma migrate reset after consent, or check with migrate status"
+      },
+      {
+        "problem": "a seed script fails on its second run",
+        "workaround": "use upsert to make seeds re-runnable"
+      },
+      {
+        "problem": "version mismatches between Prisma packages",
+        "workaround": "check with prisma debug"
+      }
+    ],
+    "evaluations": "none"
+  },
+  "who_stands_behind_it": {
+    "authorship": {
+      "author": "prisma, from the metadata author field of SKILL.md",
+      "publisher": "the prisma organisation on GitHub",
+      "signer": "none",
+      "contact": "not declared"
+    },
+    "license": {
+      "frontmatter": "MIT",
+      "license_file": "none",
+      "registry": "not declared",
+      "repository": "MIT, as GitHub detects it"
+    },
+    "maintenance": {
+      "last_change": "2026-09-29",
+      "registry_update": "not declared",
+      "deprecated": "not declared",
+      "first_seen": "2026-01-23",
+      "content_changes": 10,
+      "releases": 0,
+      "last_release": "none"
+    }
+  },
+  "which_files": {
+    "version": {
+      "hash": "sha256:0463adf3a29fee7bc30f9620a24bae42cd473ec964254e28d480e686ea18f3a9",
+      "left_out": "none",
+      "author_version": "7.9.1",
+      "registry_version": "not declared",
+      "commit": "a6f19295"
+    },
+    "source": {
+      "kind": "repository",
+      "location": "GitHub prisma/skills, path prisma-cli",
+      "commit": "a6f19295",
+      "retrieved": "2026-11-11",
+      "also_listed_on": "skills.sh, https://skills.sh/prisma/skills/prisma-cli",
+      "homepage": "not declared",
+      "produced_by": "none"
+    },
+    "files": [
+      {
+        "path": "SKILL.md",
+        "bytes": 7508,
+        "sha256": "e20d1a307dd836ede8c3ac5f8cdd4f91d77cc6f09ee9b0621bd2efde295ae229",
+        "kind": "document",
+        "in_hash": true,
+        "executable": false
+      },
+      {
+        "path": "references/agent-safety.md",
+        "bytes": 1084,
+        "sha256": "66f06b408c2d4a7d0e950a4dd23565c0227f58acd80751f18d7dfbffc9685526",
+        "kind": "document",
+        "in_hash": true,
+        "executable": false
+      },
+      {
+        "path": "references/complete.md",
+        "bytes": 652,
+        "sha256": "75c24fbd44500c356998d57215ebdf4ba593a5cb90c2df6fea8c688a4901a056",
+        "kind": "document",
+        "in_hash": true,
+        "executable": false
+      },
+      {
+        "path": "references/db-execute.md",
+        "bytes": 1836,
+        "sha256": "2cd76d47f204a71c635154400617bc94bf014e588e8ff506f2a095f9f6b0e253",
+        "kind": "document",
+        "in_hash": true,
+        "executable": false
+      },
+      {
+        "path": "references/db-pull.md",
+        "bytes": 3574,
+        "sha256": "3c446ef9f3e76ee471ab2384cde7998fdaff86b8efa42378ef8cc585deddedd9",
+        "kind": "document",
+        "in_hash": true,
+        "executable": false
+      },
+      {
+        "path": "references/db-push.md",
+        "bytes": 2990,
+        "sha256": "51d5b4afa8f79107e4e893c3de571d23645c8a4a012d78971cb16e316fb40db5",
+        "kind": "document",
+        "in_hash": true,
+        "executable": false
+      },
+      {
+        "path": "references/db-seed.md",
+        "bytes": 3323,
+        "sha256": "c86060e141749e46a490b42f8bf6cb6f3abfb1394b71e72d1581b4735f0102bb",
+        "kind": "document",
+        "in_hash": true,
+        "executable": false
+      },
+      {
+        "path": "references/debug.md",
+        "bytes": 1062,
+        "sha256": "14f7d956ebd86b874f9bea051c07f828bab8ac1020cd440eb8ec89cf64dffdd6",
+        "kind": "document",
+        "in_hash": true,
+        "executable": false
+      },
+      {
+        "path": "references/dev.md",
+        "bytes": 2662,
+        "sha256": "dbb420492bbd8276ce21ce88cb080f05f9a6591dedbed3db0956e7f095710f96",
+        "kind": "document",
+        "in_hash": true,
+        "executable": false
+      },
+      {
+        "path": "references/format.md",
+        "bytes": 1061,
+        "sha256": "9943b440cf4d576b552e1732e296482d761e2c0ae1e7456b97630add2918a05f",
+        "kind": "document",
+        "in_hash": true,
+        "executable": false
+      },
+      {
+        "path": "references/generate.md",
+        "bytes": 3508,
+        "sha256": "85c801290339e9ad1aa110cc9879abbfab31e998536c14ae8c810ab4cfdf6b9b",
+        "kind": "document",
+        "in_hash": true,
+        "executable": false
+      },
+      {
+        "path": "references/init.md",
+        "bytes": 3245,
+        "sha256": "edd87b6701170e55a62490418d0423104d0600af1ffd285d506ca68ae1549d7e",
+        "kind": "document",
+        "in_hash": true,
+        "executable": false
+      },
+      {
+        "path": "references/mcp.md",
+        "bytes": 1236,
+        "sha256": "97e8339e7451bd62c5a0b69b3d4c04fbc46d3c2677be5a99577a3250aa55ef69",
+        "kind": "document",
+        "in_hash": true,
+        "executable": false
+      },
+      {
+        "path": "references/migrate-deploy.md",
+        "bytes": 2636,
+        "sha256": "2d6d669383b0742ab2dc30c4aee1579856f908647ea8b5789a54c3c16ace713f",
+        "kind": "document",
+        "in_hash": true,
+        "executable": false
+      },
+      {
+        "path": "references/migrate-dev.md",
+        "bytes": 3136,
+        "sha256": "804fe7e60e3b315376bf70293ef2fb0be46a250f6187fb3f19ed00a91dd28fb2",
+        "kind": "document",
+        "in_hash": true,
+        "executable": false
+      },
+      {
+        "path": "references/migrate-diff.md",
+        "bytes": 2088,
+        "sha256": "daf77c34fdac2d578c0de12d385468255878fd7f0b473473de8ee0e4cff0991c",
+        "kind": "document",
+        "in_hash": true,
+        "executable": false
+      },
+      {
+        "path": "references/migrate-reset.md",
+        "bytes": 1732,
+        "sha256": "ae05eff0b9ac4531af88a5e0d69bee81a1d9ffcd67d3fb49800d8491a8b93a24",
+        "kind": "document",
+        "in_hash": true,
+        "executable": false
+      },
+      {
+        "path": "references/migrate-resolve.md",
+        "bytes": 1671,
+        "sha256": "9fc77c20ce9954ee7dfc9a2b4dc0c0c53d0bb6212b0d4c10e8f3f22c3ab0e9e1",
+        "kind": "document",
+        "in_hash": true,
+        "executable": false
+      },
+      {
+        "path": "references/migrate-status.md",
+        "bytes": 1520,
+        "sha256": "bacd09ee8be1957e66c1d56c07f4eca4a08533bed9c37994ffd00ec6c5a88730",
+        "kind": "document",
+        "in_hash": true,
+        "executable": false
+      },
+      {
+        "path": "references/studio.md",
+        "bytes": 2668,
+        "sha256": "2354f79d63c0734e13170ae3e59b47da1d8f5a363ff2af2194cda2da0b5b39d2",
+        "kind": "document",
+        "in_hash": true,
+        "executable": false
+      },
+      {
+        "path": "references/validate.md",
+        "bytes": 883,
+        "sha256": "27d9262345daad8c07293927a524c11bb0b9bf9dd58cd94728c7c38c65e7726f",
+        "kind": "document",
+        "in_hash": true,
+        "executable": false
+      }
+    ],
+    "counts": {
+      "script": 0,
+      "document": 21,
+      "data": 0,
+      "binary": 0
+    },
+    "composition": "instructions only"
+  },
+  "about_this_card": {
+    "schema": "Skill Card v1.2",
+    "date": "2026-11-11",
+    "by": "Claude Opus 5.5, claude-opus-5-5, by hand from the skill files, the skills.sh listing and audits, and GitHub metadata, with the hash, file list, sizes, harness limits and repository figures computed by script",
+    "skill_run": false,
+    "scripts_analysed": false,
+    "security_check_run": false,
+    "external_service_contacted": false,
+    "registry_read": true,
+    "empty_values": 61
+  }
+}

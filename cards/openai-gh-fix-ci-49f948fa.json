@@ -1,0 +1,525 @@
+{
+  "schema": "Skill Card v1.2",
+  "skill": "gh-fix-ci",
+  "version": "openai/skills at 49f948fa",
+  "what_it_does": {
+    "name": "gh-fix-ci",
+    "summary": "Instructions and one Python script for debugging failing GitHub pull request checks that run in GitHub Actions. With the gh CLI it locates the failing checks, fetches the Actions logs and extracts a failure snippet, then summarizes the failures for the user. It drafts a fix plan and implements it only after explicit approval, while checks from external providers such as Buildkite are reported by their details URL only. Use it when a user asks to debug or fix failing GitHub PR checks.",
+    "tasks": [
+      "verify gh authentication for the repo host",
+      "resolve the PR from the current branch or a given number or URL",
+      "inspect failing checks and fetch GitHub Actions logs",
+      "extract and summarize a failure snippet per failing check",
+      "draft a fix plan and implement it after explicit approval",
+      "recheck status with gh pr checks after changes"
+    ],
+    "author_description": "Use when a user asks to debug or fix failing GitHub PR checks that run in GitHub Actions; use `gh` to inspect checks and logs, summarize failure context, draft a fix plan, and implement only after explicit approval. Treat external providers (for example Buildkite) as out of scope and report only the details URL.",
+    "outputs": [
+      {
+        "what": "failure report per failing check, with check name, details URL, run and job id, status, workflow, branch and SHA, and a failure snippet",
+        "kind": "information",
+        "form": "terminal text, or JSON with --json",
+        "destination": "the terminal and the agent's context"
+      },
+      {
+        "what": "summary of failures for the user, with check name, run URL and a concise log snippet, missing logs called out",
+        "kind": "information",
+        "form": "text in the conversation",
+        "destination": "the user"
+      },
+      {
+        "what": "fix plan with a request for approval",
+        "kind": "recommendation",
+        "form": "a concise plan, through the create-plan skill or inline",
+        "destination": "the user"
+      },
+      {
+        "what": "code changes that apply the approved plan, with a summary of diffs and tests",
+        "kind": "information",
+        "form": "changed files and text in the conversation",
+        "destination": "the repository"
+      },
+      {
+        "what": "job log fetched through the GitHub API when the run log is still in progress",
+        "kind": "information",
+        "form": "log file",
+        "destination": "a path the agent chooses"
+      },
+      {
+        "what": "exit status, non-zero when failures remain",
+        "kind": "information",
+        "form": "process exit code",
+        "destination": "the calling shell or automation"
+      }
+    ],
+    "sample_output": "PR #{pr_value}: no failing checks detected.",
+    "inputs": [
+      {
+        "what": "a path inside the repository",
+        "type": "the --repo argument, default .",
+        "required": "optional",
+        "for": "every task",
+        "example": "python \"<path-to-skill>/scripts/inspect_pr_checks.py\" --repo \".\" --pr \"123\""
+      },
+      {
+        "what": "the pull request",
+        "type": "PR number or URL in the --pr argument",
+        "required": "optional",
+        "for": "every task, defaults to the current branch PR",
+        "example": "--pr \"https://github.com/org/repo/pull/123\""
+      },
+      {
+        "what": "gh authentication for the repo host",
+        "type": "a logged-in GitHub CLI, repo and workflow scopes typically required",
+        "required": "required",
+        "for": "every task",
+        "example": "gh auth login"
+      },
+      {
+        "what": "snippet size",
+        "type": "the --max-lines and --context arguments, defaults 160 and 30",
+        "required": "optional",
+        "for": "extracting a failure snippet",
+        "example": "--max-lines 200 --context 40"
+      },
+      {
+        "what": "output format",
+        "type": "the --json flag",
+        "required": "optional",
+        "for": "machine-friendly output for summarization",
+        "example": "--json"
+      },
+      {
+        "what": "approval of the fix plan",
+        "type": "explicit approval from the user",
+        "required": "conditional",
+        "for": "implementing a fix",
+        "example": "not declared"
+      }
+    ],
+    "when_input_is_missing": [
+      {
+        "case": "gh is unauthenticated",
+        "behaviour": "the user is asked to run gh auth login with repo and workflow scopes before proceeding, and the script prints gh's message or Error: gh not authenticated. and stops"
+      },
+      {
+        "case": "no PR number or URL is given",
+        "behaviour": "the current branch PR is used through gh pr view, and the script prints an error and stops when none is found"
+      },
+      {
+        "case": "the --repo path is not inside a Git repository",
+        "behaviour": "the script prints Error: not inside a Git repository. and stops"
+      },
+      {
+        "case": "gh is not installed",
+        "behaviour": "the script prints Error: gh is not installed or not on PATH. and stops"
+      },
+      {
+        "case": "gh pr checks rejects a field",
+        "behaviour": "the command is rerun with the available fields reported by gh"
+      },
+      {
+        "case": "logs are missing",
+        "behaviour": "the summary calls out missing logs explicitly"
+      }
+    ],
+    "exclusions": [
+      "checks from external providers such as Buildkite, only the details URL is reported",
+      "checks that are not GitHub Actions runs"
+    ],
+    "adoption": [
+      {
+        "registry": "skills.sh",
+        "installs": "11.9K",
+        "first_seen": "2026-01-20",
+        "counts": "the skill",
+        "read": "2026-11-11"
+      },
+      {
+        "registry": "GitHub",
+        "stars": 28680,
+        "forks": 2000,
+        "counts": "the openai/skills repository, which holds 43 skills",
+        "read": "2026-11-11"
+      }
+    ]
+  },
+  "what_it_needs": {
+    "compatibility": {
+      "harnesses": "not declared",
+      "models": "not declared",
+      "capabilities": "not declared",
+      "fits": {
+        "Agent Skills specification": "fits, name 9 characters, description 313 characters, body 65 lines and about 824 tokens",
+        "Codex": "fits, SKILL.md is 3,651 bytes, under the 8,000 byte cut",
+        "Claude Code": "fits, 69 lines, listing text 313 characters",
+        "ClawHub": "fits, folder 32,642 bytes"
+      }
+    },
+    "software_dependencies": [
+      {
+        "name": "gh, the GitHub CLI",
+        "kind": "binary",
+        "version": "not declared",
+        "for": "run"
+      },
+      {
+        "name": "git",
+        "kind": "binary",
+        "version": "not declared",
+        "for": "run"
+      },
+      {
+        "name": "Python 3",
+        "kind": "runtime",
+        "version": "not declared",
+        "for": "run"
+      }
+    ],
+    "credentials": [
+      {
+        "kind": "token",
+        "name": "gh authentication for the repo host",
+        "used_for": "reading PR checks, run metadata and Actions logs through gh and the GitHub API",
+        "from": "unknown",
+        "goes_to": "the repo host, github.com in the examples"
+      }
+    ],
+    "cost": {
+      "context_tokens": {
+        "discovery": 78,
+        "load": 913,
+        "on_demand": 0,
+        "on_demand_files": "none"
+      },
+      "run_tokens": "not examined",
+      "services": [
+        {
+          "name": "GitHub, through gh and the GitHub API",
+          "needs": "account",
+          "price": "not declared",
+          "quota": "not declared",
+          "calls_per_use": "not declared"
+        }
+      ]
+    }
+  },
+  "what_it_touches": {
+    "side_effects": {
+      "install": "changes state",
+      "run": "changes state",
+      "changes": [
+        {
+          "what": "authenticates the GitHub CLI once with gh auth login",
+          "affects": "user home",
+          "confirmation": "not declared",
+          "reversible": "not declared"
+        },
+        {
+          "what": "applies the approved fix plan to the repository files",
+          "affects": "workspace",
+          "confirmation": "yes",
+          "reversible": "not declared"
+        },
+        {
+          "what": "writes a job log to a path with gh api and a shell redirect",
+          "affects": "workspace",
+          "confirmation": "not declared",
+          "reversible": "not declared"
+        },
+        {
+          "what": "opens a pull request after asking the user",
+          "affects": "external service",
+          "confirmation": "yes",
+          "reversible": "not declared"
+        }
+      ]
+    },
+    "network_access": [
+      {
+        "host": "the repo host, github.com in the examples, reached through gh and the GitHub API",
+        "purpose": "data source",
+        "when": "every run, to check auth, resolve the PR and fetch checks, run metadata and logs",
+        "sends": [
+          "credential",
+          "query text"
+        ],
+        "receives": "auth status, PR number, check states, run metadata and Actions logs"
+      },
+      {
+        "host": "the repo host, github.com in the examples",
+        "purpose": "publish",
+        "when": "when the user agrees to open a PR after the fix",
+        "sends": [
+          "credential",
+          "file content"
+        ],
+        "receives": "not declared"
+      }
+    ],
+    "tools_and_permissions": {
+      "allowed_tools": "none",
+      "tools": [
+        {
+          "tool": "python with scripts/inspect_pr_checks.py",
+          "kind": "program",
+          "for": "fetching failing checks, pulling Actions logs and extracting a failure snippet",
+          "origin": "skill"
+        },
+        {
+          "tool": "gh auth status, gh pr view, gh pr checks, gh run view, gh api, gh repo view",
+          "kind": "shell command",
+          "for": "auth check, PR resolution, checks, run metadata, run and job logs",
+          "origin": "third party"
+        },
+        {
+          "tool": "git rev-parse --show-toplevel",
+          "kind": "shell command",
+          "for": "finding the repository root",
+          "origin": "third party"
+        },
+        {
+          "tool": "create-plan skill, if available",
+          "kind": "agent tool",
+          "for": "drafting a concise plan and requesting approval",
+          "origin": "third party"
+        },
+        {
+          "tool": "repo and workflow scopes of the gh login",
+          "kind": "permission",
+          "for": "access to the repository and its workflow runs",
+          "origin": "third party"
+        },
+        {
+          "tool": "shell and file tools of the agent",
+          "kind": "agent tool",
+          "for": "running the commands and editing files to apply the fix",
+          "origin": "built in"
+        }
+      ]
+    },
+    "machine_access": {
+      "paths": [
+        {
+          "path": "the repository given by --repo, default .",
+          "operation": "read",
+          "scope": "workspace"
+        },
+        {
+          "path": "repository files changed by the approved fix",
+          "operation": "write",
+          "scope": "workspace"
+        },
+        {
+          "path": "\"<path>\" for a job log fetched with gh api",
+          "operation": "write",
+          "scope": "unknown"
+        },
+        {
+          "path": "<path-to-skill>/scripts/inspect_pr_checks.py, run from the skill folder",
+          "operation": "read",
+          "scope": "skill folder"
+        }
+      ],
+      "settings": [
+        {
+          "name": "PATH",
+          "access": "read",
+          "reason": "finding the gh program"
+        }
+      ]
+    }
+  },
+  "what_is_known": {
+    "checks": [
+      {
+        "id": "C1",
+        "tool": "Snyk, skills.sh audit, version not stated",
+        "date": "2026-09-15",
+        "scope": "unknown",
+        "result": "warn, risk level MEDIUM, 1 issue, W011 third-party content exposure, indirect prompt injection risk, scored medium risk 0.30",
+        "report": "https://skills.sh/openai/skills/gh-fix-ci/security/snyk"
+      },
+      {
+        "id": "C2",
+        "tool": "Gen Agent Trust Hub, skills.sh audit, version not stated",
+        "date": "2026-09-15",
+        "scope": "scripts/inspect_pr_checks.py and the workflow, as cited in its analysis",
+        "result": "pass, risk level SAFE, two surfaces described, command execution through subprocess.run with list arguments, and Actions logs ingested without boundary markers or sanitisation",
+        "report": "https://skills.sh/openai/skills/gh-fix-ci/security/agent-trust-hub"
+      },
+      {
+        "id": "C3",
+        "tool": "Socket, skills.sh audit, version not stated",
+        "date": "2026-09-15",
+        "scope": "the skill package, hash 25e7c47d9a997aa1cb3dd4e5805b9f4a33c4dc6534ab1a1ceb76bc3887e2453d",
+        "result": "pass, checks for malicious behaviour, credential exposure, obfuscated code and suspicious patterns",
+        "report": "https://skills.sh/openai/skills/gh-fix-ci/security/socket"
+      }
+    ],
+    "vulnerabilities": [
+      {
+        "finding": "Third-party content exposure, indirect prompt injection risk, W011",
+        "check": "C1",
+        "severity": "MEDIUM, scored 0.30",
+        "location": "not stated",
+        "status": "open",
+        "fix": "not stated"
+      }
+    ],
+    "risks": [
+      {
+        "risk": "Instructions planted by outsiders in CI logs, PR comments or code changes reach the agent, since log content is handed over without delimiters or sanitisation and the agent can run commands and write files.",
+        "source": "check C1, check C2",
+        "severity": "MEDIUM by C1, SAFE overall by C2",
+        "mitigation": "implementation waits for explicit approval of the plan, in place in the workflow, C2 notes that no boundary markers are used",
+        "taxonomy": "https://www.ibm.com/docs/en/watsonx/saas?topic=ai-risk-atlas"
+      },
+      {
+        "risk": "A gh login with repo and workflow scopes lets any gh command the agent runs change the repository or its workflows, not only read checks and logs.",
+        "source": "model",
+        "severity": "none",
+        "mitigation": "none stated",
+        "taxonomy": "not examined"
+      },
+      {
+        "risk": "A job log written with a shell redirect to \"<path>\" replaces any file already at that path.",
+        "source": "model",
+        "severity": "none",
+        "mitigation": "none stated",
+        "taxonomy": "not examined"
+      }
+    ],
+    "limitations": [
+      "Only GitHub Actions checks are inspected, checks from other providers are labelled external and reported by URL only.",
+      "Logs are not available while a run is still in progress, and the check is then reported as log_pending.",
+      "Job logs returned as a zip archive cannot be parsed.",
+      "The failure snippet is taken around the last line with a failure marker such as error, fail or traceback, otherwise from the end of the log.",
+      "No dependency carries a version."
+    ],
+    "known_problems": [
+      {
+        "problem": "gh pr checks rejects a field",
+        "workaround": "rerun with the available fields reported by gh, which the bundled script does on its own"
+      },
+      {
+        "problem": "the run log says it is still in progress",
+        "workaround": "fetch job logs directly with gh api"
+      },
+      {
+        "problem": "gh is unauthenticated",
+        "workaround": "run gh auth login with repo and workflow scopes, then confirm with gh auth status"
+      }
+    ],
+    "evaluations": "none"
+  },
+  "who_stands_behind_it": {
+    "authorship": {
+      "author": "not declared",
+      "publisher": "the openai organisation on GitHub",
+      "signer": "none",
+      "contact": "not declared"
+    },
+    "license": {
+      "frontmatter": "not declared",
+      "license_file": "LICENSE.txt, Apache License, Version 2.0, January 2004, with the copyright line left as the template placeholder",
+      "registry": "not declared",
+      "repository": "none"
+    },
+    "maintenance": {
+      "last_change": "2026-02-02",
+      "registry_update": "not declared",
+      "deprecated": "not declared",
+      "first_seen": "2025-12-19",
+      "content_changes": 7,
+      "releases": 0,
+      "last_release": "none"
+    }
+  },
+  "which_files": {
+    "version": {
+      "hash": "sha256:9221a5541793085f10f5fd2b3c04e70e7d63067fe86d3dd34d32fc0fc81d09b3",
+      "left_out": "none",
+      "author_version": "not declared",
+      "registry_version": "not declared",
+      "commit": "49f948fa"
+    },
+    "source": {
+      "kind": "repository",
+      "location": "GitHub openai/skills, path skills/.curated/gh-fix-ci",
+      "commit": "49f948fa",
+      "retrieved": "2026-11-11",
+      "also_listed_on": "skills.sh, https://skills.sh/openai/skills/gh-fix-ci",
+      "homepage": "not declared",
+      "produced_by": "none"
+    },
+    "files": [
+      {
+        "path": "LICENSE.txt",
+        "bytes": 10776,
+        "sha256": "4dd13869245e356246a5b770723247bbb80a8f07a181d1d3d873a1734297cdb9",
+        "kind": "document",
+        "in_hash": true,
+        "executable": false
+      },
+      {
+        "path": "SKILL.md",
+        "bytes": 3651,
+        "sha256": "7b326b4a2f0f5f85122144628ec02077e48841e0e0e82efce88b3415bcfb7c26",
+        "kind": "document",
+        "in_hash": true,
+        "executable": false
+      },
+      {
+        "path": "agents/openai.yaml",
+        "bytes": 302,
+        "sha256": "36f73b9450504983d1647c960689596f59bf9147c14b1b43162912ed7ada9af6",
+        "kind": "data",
+        "in_hash": true,
+        "executable": false
+      },
+      {
+        "path": "assets/github-small.svg",
+        "bytes": 853,
+        "sha256": "ee05e92d373d4d84f4612af3c1090ef67698d421bbe30896a4ed5a00cb86a069",
+        "kind": "data",
+        "in_hash": true,
+        "executable": false
+      },
+      {
+        "path": "assets/github.png",
+        "bytes": 1838,
+        "sha256": "d55a9baa41798d8b5108e3058df3a5bda09914ea9fd73b49929cc38a8832424f",
+        "kind": "binary",
+        "in_hash": true,
+        "executable": false
+      },
+      {
+        "path": "scripts/inspect_pr_checks.py",
+        "bytes": 15222,
+        "sha256": "9459e5b03f86785d184a83e5cd8d621b832e918ec04158a2962d867785812c6c",
+        "kind": "script",
+        "in_hash": true,
+        "executable": true
+      }
+    ],
+    "counts": {
+      "script": 1,
+      "document": 2,
+      "data": 2,
+      "binary": 1
+    },
+    "composition": "instructions with scripts"
+  },
+  "about_this_card": {
+    "schema": "Skill Card v1.2",
+    "date": "2026-11-11",
+    "by": "Claude Opus 5.5, claude-opus-5-5, by hand from the skill files, the skills.sh listing and audits, and GitHub metadata, with the hash, file list, sizes, harness limits and repository figures computed by script",
+    "skill_run": false,
+    "scripts_analysed": false,
+    "security_check_run": false,
+    "external_service_contacted": false,
+    "registry_read": true,
+    "empty_values": 42
+  }
+}

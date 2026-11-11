@@ -1,0 +1,658 @@
+{
+  "schema": "Skill Card v1.2",
+  "skill": "semgrep",
+  "version": "trailofbits/skills at e4dd0bb5",
+  "what_it_does": {
+    "name": "semgrep",
+    "summary": "Instructions, a shell scan runner and a Python SARIF merger for running a Semgrep security scan over a codebase. The agent detects languages and frameworks, selects official and third-party rulesets, presents the scan plan for explicit approval, then runs scripts/run-scans.sh, which clones the third-party rule repositories and runs semgrep with --metrics=off in batches. Out come per-scan JSON and SARIF files, a scans.json record of what ran, failed or was skipped, one merged results.sarif and a report by severity and category. Use it to scan code for vulnerabilities, run a security audit with Semgrep or do first-pass static analysis.",
+    "tasks": [
+      "detect languages, frameworks and Semgrep Pro availability",
+      "select official and required third-party rulesets per language",
+      "present the scan plan and wait for explicit approval",
+      "run semgrep scans in parallel batches with metrics off",
+      "filter to important-only security findings at medium-to-high confidence and impact",
+      "merge all results into one deduplicated SARIF file",
+      "report findings and every scan that failed, was skipped or covered nothing"
+    ],
+    "author_description": "Runs a Semgrep security scan over a codebase: detects languages, selects rulesets, presents the plan for explicit approval, then runs every approved ruleset through scripts/run-scans.sh, which batches the semgrep processes and writes scans.json, and merges the output to SARIF. Supports two scan modes, \"run all\" for full ruleset coverage and \"important only\" for security findings at medium-to-high confidence and impact. Uses Semgrep Pro for cross-file taint analysis when it is available. Use when asked to scan code for vulnerabilities, run a security audit with Semgrep, find bugs, or perform static analysis. For the same scan without the approval gate, use the /static-analysis:semgrep-scan workflow.",
+    "outputs": [
+      {
+        "what": "the scan plan with target, engine, mode, detected languages and every ruleset",
+        "kind": "recommendation",
+        "form": "a message to the user",
+        "destination": "the conversation, approved or edited by the user at Step 3"
+      },
+      {
+        "what": "the approved plan and the record of what ran, failed, was skipped, partial, oversized or covered nothing",
+        "kind": "information",
+        "form": "JSON files",
+        "destination": "$OUTPUT_DIR/rulesets.json and $OUTPUT_DIR/scans.json"
+      },
+      {
+        "what": "raw per-scan results, unfiltered, and the important-only filtered copies",
+        "kind": "information",
+        "form": "JSON and SARIF files named <language>-<ruleset> or all-<ruleset>, plus *-important.json",
+        "destination": "$OUTPUT_DIR/raw/"
+      },
+      {
+        "what": "merged and deduplicated findings",
+        "kind": "information",
+        "form": "SARIF file",
+        "destination": "$OUTPUT_DIR/results/results.sarif"
+      },
+      {
+        "what": "the scan report with files scanned, rulesets used, findings by severity and category, and scans that did not run",
+        "kind": "information",
+        "form": "a message to the user",
+        "destination": "the conversation"
+      }
+    ],
+    "sample_output": "Total findings: 156",
+    "inputs": [
+      {
+        "what": "the codebase to scan",
+        "type": "an absolute directory path",
+        "required": "required",
+        "for": "every task",
+        "example": "/static-analysis:semgrep-scan {\"target\": \"/abs/path\", \"mode\": \"run-all\"}"
+      },
+      {
+        "what": "an output directory",
+        "type": "a directory path in the user's prompt",
+        "required": "optional",
+        "for": "every task",
+        "example": "./static_analysis_semgrep_1"
+      },
+      {
+        "what": "the scan mode",
+        "type": "a choice of run all or important only",
+        "required": "required",
+        "for": "every task",
+        "example": "Run all (Recommended)"
+      },
+      {
+        "what": "approval of the scan plan",
+        "type": "an explicit reply from the user",
+        "required": "required",
+        "for": "every task before scanning",
+        "example": "\"yes\", \"proceed\", \"approved\", \"go ahead\", \"looks good\", \"run it\""
+      },
+      {
+        "what": "the approved rulesets",
+        "type": "a rulesets.json file with baseline, one key per language and third_party URLs",
+        "required": "required",
+        "for": "running scripts/run-scans.sh",
+        "example": "--rulesets \"$OUTPUT_DIR/rulesets.json\""
+      },
+      {
+        "what": "scanner options for the Pro engine, parallel jobs and the file size limit",
+        "type": "flagged arguments of run-scans.sh",
+        "required": "optional",
+        "for": "running scripts/run-scans.sh",
+        "example": "`--jobs N` sets how many semgrep processes run at once (default 4)"
+      }
+    ],
+    "when_input_is_missing": [
+      {
+        "case": "the user names no output directory",
+        "behaviour": "./static_analysis_semgrep_1 is used, incremented to _2, _3 and so on if it exists"
+      },
+      {
+        "case": "the target is unset or not a directory",
+        "behaviour": "the workflow prints ERROR: TARGET is unset or not a directory and stops"
+      },
+      {
+        "case": "semgrep is not installed",
+        "behaviour": "the workflow prints an error with the install page and stops"
+      },
+      {
+        "case": "the user has not explicitly approved the plan",
+        "behaviour": "no scan runs, the agent asks again with AskUserQuestion, and the original request does not count as approval"
+      },
+      {
+        "case": "run-scans.sh gets a relative path, an unknown mode, or a missing or invalid rulesets file",
+        "behaviour": "the script prints the reason and exits without scanning"
+      }
+    ],
+    "exclusions": [
+      "binary analysis, use binary analysis tools",
+      "a codebase that already has Semgrep CI configured, use the existing pipeline",
+      "cross-file analysis without a Pro license, consider CodeQL",
+      "creating custom Semgrep rules, use the semgrep-rule-creator skill",
+      "porting existing rules to other languages, use the semgrep-rule-variant-creator skill"
+    ],
+    "adoption": [
+      {
+        "registry": "skills.sh",
+        "installs": "10.3K",
+        "first_seen": "2026-01-19",
+        "counts": "the skill",
+        "read": "2026-11-11"
+      },
+      {
+        "registry": "GitHub",
+        "stars": 8129,
+        "forks": 694,
+        "counts": "the trailofbits/skills repository, which holds 98 skills",
+        "read": "2026-11-11"
+      }
+    ]
+  },
+  "what_it_needs": {
+    "compatibility": {
+      "harnesses": "not declared",
+      "models": "not declared",
+      "capabilities": "not declared",
+      "fits": {
+        "Agent Skills specification": "fits, name 7 characters, description 707 characters, body 258 lines and about 3,709 tokens",
+        "Codex": "does not fit, SKILL.md is 15,678 bytes, 7,678 over the 8,000 byte cut on the injected file",
+        "Claude Code": "fits, 273 lines, listing text 707 characters",
+        "ClawHub": "fits, folder 131,399 bytes"
+      }
+    },
+    "software_dependencies": [
+      {
+        "name": "Semgrep CLI, semgrep",
+        "kind": "binary",
+        "version": "not declared, the script comments name semgrep 1.173 as verified",
+        "for": "run"
+      },
+      {
+        "name": "Semgrep Pro engine, optional",
+        "kind": "binary",
+        "version": "not declared",
+        "for": "run"
+      },
+      {
+        "name": "jq",
+        "kind": "binary",
+        "version": "not declared",
+        "for": "run"
+      },
+      {
+        "name": "git",
+        "kind": "binary",
+        "version": "not declared",
+        "for": "run"
+      },
+      {
+        "name": "bash",
+        "kind": "runtime",
+        "version": "runs on 3.2 as shipped with macOS",
+        "for": "run"
+      },
+      {
+        "name": "Python",
+        "kind": "runtime",
+        "version": ">=3.11",
+        "for": "run"
+      },
+      {
+        "name": "uv",
+        "kind": "binary",
+        "version": "not declared",
+        "for": "run"
+      },
+      {
+        "name": "pytest, for scripts/test_merge_sarif.py only",
+        "kind": "package",
+        "version": ">=8",
+        "for": "run"
+      }
+    ],
+    "credentials": "none",
+    "cost": {
+      "context_tokens": {
+        "discovery": 177,
+        "load": 3920,
+        "on_demand": 10260,
+        "on_demand_files": [
+          "workflows/scan-workflow.md",
+          "references/rulesets.md",
+          "references/scan-modes.md"
+        ]
+      },
+      "run_tokens": "not examined",
+      "services": [
+        {
+          "name": "Semgrep Pro",
+          "needs": "subscription",
+          "price": "not declared",
+          "quota": "not declared",
+          "calls_per_use": "not declared"
+        }
+      ]
+    }
+  },
+  "what_it_touches": {
+    "side_effects": {
+      "install": "read only",
+      "run": "changes state",
+      "changes": [
+        {
+          "what": "creates the output directory with raw/ and results/ at Step 1, before the approval gate",
+          "affects": "workspace",
+          "confirmation": "no",
+          "reversible": "not declared"
+        },
+        {
+          "what": "writes rulesets.json, scans.json, per-scan JSON and SARIF files and results.sarif",
+          "affects": "workspace",
+          "confirmation": "yes",
+          "reversible": "not declared"
+        },
+        {
+          "what": "clones third-party rule repositories into $OUTPUT_DIR/repos/ and deletes non-rule and join-mode YAML files from the clones",
+          "affects": "workspace",
+          "confirmation": "yes",
+          "reversible": "yes"
+        },
+        {
+          "what": "deletes and recreates $OUTPUT_DIR/raw at the start of each run",
+          "affects": "workspace",
+          "confirmation": "not declared",
+          "reversible": "not declared"
+        },
+        {
+          "what": "creates a temporary work directory under TMPDIR and removes it on exit",
+          "affects": "system",
+          "confirmation": "not declared",
+          "reversible": "yes"
+        }
+      ]
+    },
+    "network_access": [
+      {
+        "host": "github.com and the other hosts of approved third-party rule repositories",
+        "purpose": "data source",
+        "when": "at Step 4, once per approved third_party URL, with git clone --depth 1",
+        "sends": [
+          "none"
+        ],
+        "receives": "the rule repositories, for example https://github.com/trailofbits/semgrep-rules"
+      },
+      {
+        "host": "the Semgrep registry, host not named in the files",
+        "purpose": "data source",
+        "when": "at the Pro check against p/default and at every scan with a p/ or r/ ruleset",
+        "sends": [
+          "query text"
+        ],
+        "receives": "the registry rulesets and the Pro validation result"
+      }
+    ],
+    "tools_and_permissions": {
+      "allowed_tools": "Bash Read Glob AskUserQuestion TaskCreate TaskList TaskUpdate",
+      "tools": [
+        {
+          "tool": "Bash, Read, Glob",
+          "kind": "agent tool",
+          "for": "running the scripts, detecting languages with Glob and reading framework markers",
+          "origin": "built in"
+        },
+        {
+          "tool": "AskUserQuestion",
+          "kind": "agent tool",
+          "for": "choosing the scan mode and getting approval of the plan",
+          "origin": "built in"
+        },
+        {
+          "tool": "TaskCreate, TaskList, TaskUpdate",
+          "kind": "agent tool",
+          "for": "five step tasks with blockedBy dependencies and the hard gate at Step 3",
+          "origin": "built in"
+        },
+        {
+          "tool": "scripts/run-scans.sh",
+          "kind": "program",
+          "for": "cloning rule repositories, building and running every semgrep command, writing scans.json",
+          "origin": "skill"
+        },
+        {
+          "tool": "scripts/merge_sarif.py through uv run --no-project",
+          "kind": "program",
+          "for": "merging and deduplicating SARIF, filtering to important-only findings",
+          "origin": "skill"
+        },
+        {
+          "tool": "semgrep",
+          "kind": "program",
+          "for": "the scans and the Pro availability check",
+          "origin": "third party"
+        },
+        {
+          "tool": "git clone",
+          "kind": "shell command",
+          "for": "fetching third-party rule repositories",
+          "origin": "third party"
+        },
+        {
+          "tool": "jq",
+          "kind": "shell command",
+          "for": "the important-only post-filter and reading scans.json",
+          "origin": "third party"
+        },
+        {
+          "tool": "mkdir -p, rm -rf, python -c",
+          "kind": "shell command",
+          "for": "creating the output directory, deleting repos/, checking that results.sarif is valid JSON",
+          "origin": "third party"
+        }
+      ]
+    },
+    "machine_access": {
+      "paths": [
+        {
+          "path": "the target directory the user names",
+          "operation": "read",
+          "scope": "unknown"
+        },
+        {
+          "path": "$OUTPUT_DIR, by default ./static_analysis_semgrep_N, with raw/, results/, rulesets.json and scans.json",
+          "operation": "write",
+          "scope": "workspace"
+        },
+        {
+          "path": "$OUTPUT_DIR/repos/ with the cloned rule repositories",
+          "operation": "write",
+          "scope": "workspace"
+        },
+        {
+          "path": "$OUTPUT_DIR/repos/ after the merge, and $OUTPUT_DIR/raw at the start of a run",
+          "operation": "delete",
+          "scope": "workspace"
+        },
+        {
+          "path": "${TMPDIR:-/tmp}/run-scans.XXXXXX",
+          "operation": "write",
+          "scope": "system"
+        },
+        {
+          "path": "{baseDir}/scripts/, scripts run from the skill folder",
+          "operation": "read",
+          "scope": "skill folder"
+        }
+      ],
+      "settings": [
+        {
+          "name": "TMPDIR",
+          "access": "read",
+          "reason": "where run-scans.sh puts its temporary work directory"
+        },
+        {
+          "name": "OUTPUT_DIR and TARGET",
+          "access": "set",
+          "reason": "resolved once to absolute paths at Step 1 and passed to Step 4 unchanged"
+        },
+        {
+          "name": ".semgrepignore in the target root",
+          "access": "read",
+          "reason": "decides whether the report shows the Default Ignore note"
+        },
+        {
+          "name": "--metrics=off",
+          "access": "set",
+          "reason": "on every semgrep command to stop telemetry"
+        }
+      ]
+    }
+  },
+  "what_is_known": {
+    "checks": [
+      {
+        "id": "C1",
+        "tool": "Snyk, skills.sh audit, version not stated",
+        "date": "2026-10-24",
+        "scope": "unknown",
+        "result": "warn, risk level MEDIUM, 1 issue, W011 third-party content exposure, indirect prompt injection risk, scored medium risk 0.30",
+        "report": "https://skills.sh/trailofbits/skills/semgrep/security/snyk"
+      },
+      {
+        "id": "C2",
+        "tool": "Gen Agent Trust Hub, skills.sh audit, version not stated",
+        "date": "2026-10-24",
+        "scope": "the workflow, its Bash, Glob and Read use and scripts/test_merge_sarif.py, as cited in its analysis",
+        "result": "pass, risk level SAFE, four categories described, external downloads, command execution, indirect prompt injection and dynamic execution in the test script",
+        "report": "https://skills.sh/trailofbits/skills/semgrep/security/agent-trust-hub"
+      },
+      {
+        "id": "C3",
+        "tool": "Socket, skills.sh audit, version not stated",
+        "date": "2026-10-24",
+        "scope": "the skill package, hash 3bf8beb29d73d73d98e0dd182ae957ad6b8dfa0479c9fe4b31549e7ca360bac2",
+        "result": "pass, checks for malicious behaviour, security concerns, code obfuscation and suspicious patterns",
+        "report": "https://skills.sh/trailofbits/skills/semgrep/security/socket"
+      }
+    ],
+    "vulnerabilities": [
+      {
+        "finding": "Third-party content exposure, indirect prompt injection risk, W011",
+        "check": "C1",
+        "severity": "MEDIUM, scored 0.30",
+        "location": "not stated",
+        "status": "open",
+        "fix": "not stated"
+      }
+    ],
+    "risks": [
+      {
+        "risk": "Instructions planted in a cloned third-party rule repository reach the agent, since the workflow clones outsider-authored rule repositories and scans with them.",
+        "source": "check C1, check C2",
+        "severity": "MEDIUM by C1, SAFE overall by C2",
+        "mitigation": "each repository must be in the approved plan and clones are pruned to rule files, no sanitisation stated",
+        "taxonomy": "https://www.ibm.com/docs/en/watsonx/saas?topic=ai-risk-atlas"
+      },
+      {
+        "risk": "Content in the scanned codebase could steer the agent's reading of the results, since files of the target are read with Glob and Read.",
+        "source": "check C2",
+        "severity": "SAFE overall by C2",
+        "mitigation": "the approval gate and the rulesets.json and scans.json files, in place as C2 notes",
+        "taxonomy": "https://www.ibm.com/docs/en/watsonx/saas?topic=ai-risk-atlas"
+      },
+      {
+        "risk": "Data leaks to Semgrep during a security audit when a semgrep command runs without --metrics=off, since Semgrep sends telemetry by default.",
+        "source": "author",
+        "severity": "none",
+        "mitigation": "run-scans.sh puts --metrics=off on every command it generates, in place",
+        "taxonomy": "not examined"
+      },
+      {
+        "risk": "A partial scan read as a complete one hides vulnerabilities when failed, skipped, partial, oversized or covered-nothing scans go unreported.",
+        "source": "author",
+        "severity": "none",
+        "mitigation": "scans.json records each case and the report must list them, in place",
+        "taxonomy": "not examined"
+      },
+      {
+        "risk": "Cloned rule repositories pollute the user's workspace and accumulate across runs when cleanup is skipped.",
+        "source": "author",
+        "severity": "none",
+        "mitigation": "Step 5 deletes $OUTPUT_DIR/repos after the merge, in place",
+        "taxonomy": "not examined"
+      },
+      {
+        "risk": "Results of an earlier run are lost when an output directory is reused, since run-scans.sh deletes $OUTPUT_DIR/raw with rm -rf without asking.",
+        "source": "model",
+        "severity": "none",
+        "mitigation": "none stated, the default output directory is incremented when it exists",
+        "taxonomy": "not examined"
+      }
+    ],
+    "limitations": [
+      "OSS mode cannot track data flow across files.",
+      "Pro mode uses -j 1 for cross-file analysis, which is slower per ruleset.",
+      "semgrep skips files larger than --max-target-bytes, 20,000,000 bytes by default, and records nothing about them in its JSON output.",
+      "Cross-language rulesets take no --include, so oversized cannot list their share of skipped files.",
+      "Important-only mode drops rules with CLI severity INFO at scan time, third-party rules included, before the metadata filter.",
+      ".mts, .cts, .C, Containerfile and Dockerfile.prod are not scanned, because semgrep does not parse them.",
+      "Without a repo .semgrepignore, semgrep's default skips vendored, minified, dist, build and test paths and records nothing about them.",
+      "An output directory inside the target is excluded by pattern from every scan, which also drops other directories of that name.",
+      "semgrep 1.173 crashes on mode: join rules, so these are pruned from cloned repositories and do not run.",
+      "Rules that fail to compile scan nothing, and their scan is marked partial."
+    ],
+    "known_problems": [
+      {
+        "problem": "semgrep is not installed",
+        "workaround": "install it from https://semgrep.dev/docs/getting-started/"
+      },
+      {
+        "problem": "run-scans.sh exits non-zero",
+        "workaround": "report that no scan ran and stop, without retrying with adjusted arguments"
+      },
+      {
+        "problem": "the jq post-filter run on a .sarif file exits with Cannot iterate over null",
+        "workaround": "filter the JSON files in raw/ and merge with merge_sarif.py --important"
+      },
+      {
+        "problem": "the post-filter fails on a file",
+        "workaround": "fix the named files before merging"
+      },
+      {
+        "problem": "a finding is missing in important-only mode",
+        "workaround": "check it against a run-all scan"
+      },
+      {
+        "problem": "semgrep's own GitHub URL handling fails on repos with non-standard YAML",
+        "workaround": "clone the repository first"
+      },
+      {
+        "problem": "the merged SARIF is not valid JSON",
+        "workaround": "investigate the merge output before reporting"
+      }
+    ],
+    "evaluations": "none"
+  },
+  "who_stands_behind_it": {
+    "authorship": {
+      "author": "not declared",
+      "publisher": "the trailofbits organisation on GitHub",
+      "signer": "none",
+      "contact": "not declared"
+    },
+    "license": {
+      "frontmatter": "not declared",
+      "license_file": "none",
+      "registry": "not declared",
+      "repository": "CC-BY-SA-4.0, as GitHub detects it"
+    },
+    "maintenance": {
+      "last_change": "2026-10-23",
+      "registry_update": "not declared",
+      "deprecated": "not declared",
+      "first_seen": "2026-01-15",
+      "content_changes": 12,
+      "releases": 0,
+      "last_release": "none"
+    }
+  },
+  "which_files": {
+    "version": {
+      "hash": "sha256:4b2c7c714835fd353525a377ded4bba8f2c43363e7b3f1859fa7905680020ad7",
+      "left_out": "none",
+      "author_version": "not declared",
+      "registry_version": "not declared",
+      "commit": "e4dd0bb5"
+    },
+    "source": {
+      "kind": "repository",
+      "location": "GitHub trailofbits/skills, path plugins/static-analysis/skills/semgrep",
+      "commit": "e4dd0bb5",
+      "retrieved": "2026-11-11",
+      "also_listed_on": "skills.sh, https://skills.sh/trailofbits/skills/semgrep",
+      "homepage": "not declared",
+      "produced_by": "none"
+    },
+    "files": [
+      {
+        "path": "SKILL.md",
+        "bytes": 15678,
+        "sha256": "52162605593f871cf45f48f9cf00b7c2d7e0759ccb7507981088442b7cc5d76c",
+        "kind": "document",
+        "in_hash": true,
+        "executable": false
+      },
+      {
+        "path": "agents/openai.yaml",
+        "bytes": 229,
+        "sha256": "b200a52900687f8176cb5d8230a29e5e80c8317337efcdcf87754e892129cd89",
+        "kind": "data",
+        "in_hash": true,
+        "executable": false
+      },
+      {
+        "path": "assets/trail-of-bits-mark.svg",
+        "bytes": 3084,
+        "sha256": "4bf74c789b38dcf6ad762c136b6832363d27ae19fbaa9a18ec18d66ecce6ca05",
+        "kind": "data",
+        "in_hash": true,
+        "executable": false
+      },
+      {
+        "path": "references/rulesets.md",
+        "bytes": 7695,
+        "sha256": "e641bf7b2f32cd81b2623759f72a560dd96f6747f1295157f2984fe8ebac3f74",
+        "kind": "document",
+        "in_hash": true,
+        "executable": false
+      },
+      {
+        "path": "references/scan-modes.md",
+        "bytes": 8713,
+        "sha256": "99ed0ffb9e9ee68bcb175da469f1310f28f96e356c69c65918a0afc430027d3d",
+        "kind": "document",
+        "in_hash": true,
+        "executable": false
+      },
+      {
+        "path": "scripts/merge_sarif.py",
+        "bytes": 14034,
+        "sha256": "8b6094e18a0e4d36250c72c81903edac914552df7eb2a7eebd1ac449d105f7ba",
+        "kind": "script",
+        "in_hash": true,
+        "executable": false
+      },
+      {
+        "path": "scripts/run-scans.sh",
+        "bytes": 34393,
+        "sha256": "ac3d815dbd5cdfa0419596411058378ab659bd243c7dc87495114e773aa40347",
+        "kind": "script",
+        "in_hash": true,
+        "executable": true
+      },
+      {
+        "path": "scripts/test_merge_sarif.py",
+        "bytes": 22943,
+        "sha256": "8f235bface6ff37f813c1a44b2a6c2edf273cd548b95b770c362f0a443473c75",
+        "kind": "script",
+        "in_hash": true,
+        "executable": false
+      },
+      {
+        "path": "workflows/scan-workflow.md",
+        "bytes": 24630,
+        "sha256": "ddb630d34a51a749157140d71fd05044b09301352126f2c169a3119d5eb1d1a4",
+        "kind": "document",
+        "in_hash": true,
+        "executable": false
+      }
+    ],
+    "counts": {
+      "script": 3,
+      "document": 4,
+      "data": 2,
+      "binary": 0
+    },
+    "composition": "instructions with scripts"
+  },
+  "about_this_card": {
+    "schema": "Skill Card v1.2",
+    "date": "2026-11-11",
+    "by": "Claude Opus 5.5, claude-opus-5-5, by hand from the skill files, the skills.sh listing and audits, and GitHub metadata, with the hash, file list, sizes, harness limits and repository figures computed by script",
+    "skill_run": false,
+    "scripts_analysed": false,
+    "security_check_run": false,
+    "external_service_contacted": false,
+    "registry_read": true,
+    "empty_values": 43
+  }
+}

@@ -1,0 +1,618 @@
+{
+  "schema": "Skill Card v1.2",
+  "skill": "stripe-best-practices",
+  "version": "stripe/ai at 8570d472",
+  "what_it_does": {
+    "name": "stripe-best-practices",
+    "summary": "Instructions and six reference documents for planning, building and reviewing Stripe integrations. A routing table sends each kind of integration, payments, Connect, billing, tax, Treasury or security, to a recommended API and a reference file, and critical rules set the latest API version 2026-10-28.endive, restricted API keys, dynamic payment methods and required webhooks. What comes out is advice and integration code, and with Stripe CLI or MCP access also checks run on the account, such as a test tax calculation. Use it when planning, building, modifying, testing or reviewing any Stripe integration.",
+    "tasks": [
+      "choose between Checkout Sessions, PaymentIntents and Setup Intents",
+      "set up Connect platforms and marketplaces with Accounts v2",
+      "plan subscriptions and usage-based billing with Billing APIs and Metronome",
+      "set up Stripe Tax registrations and automatic_tax",
+      "secure API keys, webhooks, OAuth flows and Dashboard access",
+      "migrate from deprecated Stripe APIs",
+      "use separate sandboxes for development and testing"
+    ],
+    "author_description": "Guides Stripe integration decisions across development and test environment planning (separate sandboxes vs the shared test mode sandbox), API selection (Checkout Sessions vs PaymentIntents), Connect platform setup (Accounts v2, controller properties), billing/subscriptions, tax and registrations (Stripe Tax, automatic_tax, product tax codes), Treasury financial accounts, integration options (Checkout, Payment Element), migrating from deprecated Stripe APIs, and security best practices (API key management, API key permissions, webhooks, OAuth). Use when planning, building, modifying, testing, or reviewing any Stripe integration, including choosing a development environment, accepting payments, building marketplaces, integrating Stripe, processing payments, setting up subscriptions, collecting sales tax, VAT, or GST, creating connected accounts, or implementing secure key handling.",
+    "outputs": [
+      {
+        "what": "recommended APIs, account configurations and remaining integration steps",
+        "kind": "recommendation",
+        "form": "answer text",
+        "destination": "the conversation"
+      },
+      {
+        "what": "integration code that instantiates a StripeClient and calls the recommended APIs",
+        "kind": "information",
+        "form": "source code",
+        "destination": "the user's project"
+      },
+      {
+        "what": "a brief Stripe Tax note at the end of every Billing setup or subscription answer",
+        "kind": "information",
+        "form": "answer text",
+        "destination": "the conversation"
+      },
+      {
+        "what": "results of a test Tax Calculation and threshold monitoring, reported with taxability_reason",
+        "kind": "information",
+        "form": "answer text",
+        "destination": "the conversation"
+      },
+      {
+        "what": "a sandbox test account with test API keys from stripe sandbox create",
+        "kind": "action",
+        "form": "Stripe sandbox",
+        "destination": "Stripe"
+      },
+      {
+        "what": "tax registrations created or expired after the user confirms",
+        "kind": "action",
+        "form": "registration through the Tax Registrations API",
+        "destination": "the user's Stripe account"
+      }
+    ],
+    "sample_output": "Stripe Tax doesn’t support that region yet",
+    "inputs": [
+      {
+        "what": "the integration the user is planning, building or reviewing",
+        "type": "a request in natural language or existing code",
+        "required": "required",
+        "for": "every task",
+        "example": "not declared"
+      },
+      {
+        "what": "the business model of a Connect platform",
+        "type": "a description of who owns the customer relationship",
+        "required": "conditional",
+        "for": "choosing a Connect charge pattern",
+        "example": "buyers purchase through our platform"
+      },
+      {
+        "what": "the jurisdictions where the business sells and is registered",
+        "type": "a list of jurisdictions confirmed by the user",
+        "required": "conditional",
+        "for": "Stripe Tax setup and registrations",
+        "example": "not declared"
+      },
+      {
+        "what": "a Stripe account with execution access",
+        "type": "MCP tools or the Stripe CLI with a valid token",
+        "required": "optional",
+        "for": "reading Tax Settings, running test calculations and threshold monitoring",
+        "example": "stripe whoami --format json"
+      },
+      {
+        "what": "an API version",
+        "type": "a version string",
+        "required": "optional",
+        "for": "every task",
+        "example": "2026-10-28.endive"
+      }
+    ],
+    "when_input_is_missing": [
+      {
+        "case": "the user has no Stripe account",
+        "behaviour": "the Stripe CLI creates a sandbox test account with test API keys through stripe sandbox create"
+      },
+      {
+        "case": "the user specifies no API version or SDK",
+        "behaviour": "the latest API version and SDK are used"
+      },
+      {
+        "case": "the jurisdictions are unknown",
+        "behaviour": "ask where the business sells, direct the user to their tax advisor, then record only confirmed registrations"
+      },
+      {
+        "case": "only read or advisory access to the account",
+        "behaviour": "do not claim the tax setup is verified and point the user to Testing Stripe Tax"
+      },
+      {
+        "case": "the metronome skill is not installed",
+        "behaviour": "read it from https://docs.stripe.com/.well-known/skills/metronome/SKILL.md before continuing"
+      },
+      {
+        "case": "the request does not clearly fit a single domain",
+        "behaviour": "consult Integration Options, API Tour and the Go Live Checklist"
+      }
+    ],
+    "exclusions": [
+      "not for Metronome implementation questions, which go to the metronome skill",
+      "not for deciding where a user must register for tax or whether they are legally obligated",
+      "unsupported tax types such as customs duties and excise taxes are out of scope"
+    ],
+    "adoption": [
+      {
+        "registry": "skills.sh",
+        "installs": "101.8K",
+        "first_seen": "2026-01-21",
+        "counts": "the skill",
+        "read": "2026-11-11"
+      },
+      {
+        "registry": "GitHub",
+        "stars": 2055,
+        "forks": 387,
+        "counts": "the stripe/ai repository, which holds 10 skills",
+        "read": "2026-11-11"
+      }
+    ]
+  },
+  "what_it_needs": {
+    "compatibility": {
+      "harnesses": "not declared",
+      "models": "not declared",
+      "capabilities": "not declared",
+      "fits": {
+        "Agent Skills specification": "fits, name 21 characters, description 893 characters, body 62 lines and about 1,319 tokens",
+        "Codex": "fits, SKILL.md is 6,247 bytes, under the 8,000 byte cut",
+        "Claude Code": "fits, 79 lines, listing text 893 characters",
+        "ClawHub": "fits, folder 71,355 bytes"
+      }
+    },
+    "software_dependencies": [
+      {
+        "name": "Stripe CLI, @stripe/cli",
+        "kind": "package",
+        "version": "not declared",
+        "for": "run"
+      },
+      {
+        "name": "npm",
+        "kind": "binary",
+        "version": "not declared",
+        "for": "install"
+      },
+      {
+        "name": "Stripe SDKs for Ruby, Python, Node.js, PHP, Java, Go and .NET",
+        "kind": "package",
+        "version": "latest versions Ruby 20.0.0, Python 16.0.0, Node.js 23.0.0, PHP 22.0.0, Java 34.0.0, Go 87.0.0, .NET 53.0.0",
+        "for": "example"
+      }
+    ],
+    "credentials": [
+      {
+        "kind": "API key",
+        "name": "restricted API key (RAK) with rk_ prefix, or secret key with sk_ prefix",
+        "used_for": "calling the Stripe API from the integration and the CLI",
+        "from": "unknown",
+        "goes_to": "Stripe, host not named in the files"
+      },
+      {
+        "kind": "token",
+        "name": "a valid token of the Stripe CLI",
+        "used_for": "execution access to the account through the CLI",
+        "from": "unknown",
+        "goes_to": "Stripe, host not named in the files"
+      },
+      {
+        "kind": "other",
+        "name": "webhook signing secret",
+        "used_for": "verifying webhook signatures",
+        "from": "unknown",
+        "goes_to": "stays on the machine"
+      }
+    ],
+    "cost": {
+      "context_tokens": {
+        "discovery": 223,
+        "load": 1562,
+        "on_demand": 16277,
+        "on_demand_files": [
+          "references/payments.md",
+          "references/connect.md",
+          "references/billing.md",
+          "references/tax.md",
+          "references/treasury.md",
+          "references/security.md"
+        ]
+      },
+      "run_tokens": "not examined",
+      "services": [
+        {
+          "name": "Stripe",
+          "needs": "account",
+          "price": "not declared",
+          "quota": "not declared",
+          "calls_per_use": "not declared"
+        },
+        {
+          "name": "Stripe Tax with Tax Complete, for Register for me and automated filing",
+          "needs": "subscription",
+          "price": "not declared",
+          "quota": "not declared",
+          "calls_per_use": "not declared"
+        },
+        {
+          "name": "Taxually",
+          "needs": "subscription",
+          "price": "not declared",
+          "quota": "availability varies by country and plan",
+          "calls_per_use": "not declared"
+        }
+      ]
+    }
+  },
+  "what_it_touches": {
+    "side_effects": {
+      "install": "changes state",
+      "run": "changes state",
+      "changes": [
+        {
+          "what": "writes or changes integration code in the user's project",
+          "affects": "workspace",
+          "confirmation": "not declared",
+          "reversible": "not declared"
+        },
+        {
+          "what": "installs the Stripe CLI globally with npm i -g @stripe/cli",
+          "affects": "software environment",
+          "confirmation": "not declared",
+          "reversible": "not declared"
+        },
+        {
+          "what": "creates a sandbox test account and test API keys with stripe sandbox create",
+          "affects": "external service",
+          "confirmation": "not declared",
+          "reversible": "not declared"
+        },
+        {
+          "what": "runs a test Tax Calculation on the account",
+          "affects": "external service",
+          "confirmation": "not declared",
+          "reversible": "not declared"
+        },
+        {
+          "what": "sets a head office address in Tax Settings and passes automatic_tax on objects",
+          "affects": "external service",
+          "confirmation": "not declared",
+          "reversible": "not declared"
+        },
+        {
+          "what": "creates a tax registration, prepared and confirmed by the user",
+          "affects": "external service",
+          "confirmation": "yes",
+          "reversible": "not declared"
+        },
+        {
+          "what": "expires a tax registration, prepared and confirmed by the user",
+          "affects": "external service",
+          "confirmation": "yes",
+          "reversible": "no"
+        },
+        {
+          "what": "sets up a pre-commit hook that catches keys in source code",
+          "affects": "workspace",
+          "confirmation": "not declared",
+          "reversible": "not declared"
+        }
+      ]
+    },
+    "network_access": [
+      {
+        "host": "Stripe API, host not named in the files",
+        "purpose": "data source",
+        "when": "with execution access through MCP tools or the Stripe CLI",
+        "sends": [
+          "credential",
+          "user content"
+        ],
+        "receives": "account data, Tax Settings, tax calculations, threshold monitoring results and test API keys"
+      },
+      {
+        "host": "docs.stripe.com",
+        "purpose": "data source",
+        "when": "when the metronome skill is not installed, or a request does not fit a single domain",
+        "sends": [
+          "none"
+        ],
+        "receives": "the metronome skill's SKILL.md and Stripe documentation pages"
+      },
+      {
+        "host": "npm registry, not named in the files",
+        "purpose": "install",
+        "when": "once, when the Stripe CLI is installed",
+        "sends": [
+          "none"
+        ],
+        "receives": "the @stripe/cli package"
+      }
+    ],
+    "tools_and_permissions": {
+      "allowed_tools": "none",
+      "tools": [
+        {
+          "tool": "stripe sandbox create, stripe sandbox claim, stripe whoami --format json, stripe logs tail",
+          "kind": "shell command",
+          "for": "creating and claiming a sandbox, auth checks and watching logs",
+          "origin": "third party"
+        },
+        {
+          "tool": "get_tax_threshold_monitoring CLI tool",
+          "kind": "shell command",
+          "for": "retrieving threshold monitoring results",
+          "origin": "third party"
+        },
+        {
+          "tool": "npm i -g @stripe/cli",
+          "kind": "shell command",
+          "for": "installing the Stripe CLI",
+          "origin": "third party"
+        },
+        {
+          "tool": "Stripe MCP tools, including the GetTaxThresholdMonitoring dynamic tool",
+          "kind": "external server",
+          "for": "execution access to the account and threshold monitoring",
+          "origin": "third party"
+        },
+        {
+          "tool": "metronome skill",
+          "kind": "other",
+          "for": "Metronome implementation questions and code",
+          "origin": "third party"
+        },
+        {
+          "tool": "shell and file tools of the agent",
+          "kind": "agent tool",
+          "for": "running the CLI and reading and writing integration code",
+          "origin": "built in"
+        }
+      ]
+    },
+    "machine_access": {
+      "paths": [
+        {
+          "path": "references/*.md in the skill folder",
+          "operation": "read",
+          "scope": "skill folder"
+        },
+        {
+          "path": "the user's integration source code",
+          "operation": "read",
+          "scope": "workspace"
+        },
+        {
+          "path": "integration source files the agent writes or changes",
+          "operation": "write",
+          "scope": "workspace"
+        },
+        {
+          "path": "a pre-commit hook in the repository under version control",
+          "operation": "write",
+          "scope": "workspace"
+        }
+      ],
+      "settings": "none"
+    }
+  },
+  "what_is_known": {
+    "checks": [
+      {
+        "id": "C1",
+        "tool": "Snyk, skills.sh audit, version not stated",
+        "date": "2026-10-30",
+        "scope": "unknown",
+        "result": "pass, risk level LOW, no issues detected",
+        "report": "https://skills.sh/stripe/ai/stripe-best-practices/security/snyk"
+      },
+      {
+        "id": "C2",
+        "tool": "Gen Agent Trust Hub, skills.sh audit, version not stated",
+        "date": "2026-10-30",
+        "scope": "unknown",
+        "result": "pass, risk level SAFE, only official Stripe domains and cloud secret managers referenced, warns against hardcoded keys, standard Stripe CLI and SDK tooling",
+        "report": "https://skills.sh/stripe/ai/stripe-best-practices/security/agent-trust-hub"
+      },
+      {
+        "id": "C3",
+        "tool": "Socket, skills.sh audit, version not stated",
+        "date": "2026-10-30",
+        "scope": "the skill package, hash 7ea7861a310af85029fda32154d777cf9cca79f425f00f697db76c82bc95d0d3",
+        "result": "pass, checks for malicious behaviour, credential exposure, obfuscated code and suspicious patterns",
+        "report": "https://skills.sh/stripe/ai/stripe-best-practices/security/socket"
+      }
+    ],
+    "vulnerabilities": "none",
+    "risks": [
+      {
+        "risk": "Stripe collects no tax while the user believes tax is on, when automatic_tax is enabled without an active registration.",
+        "source": "author",
+        "severity": "none",
+        "mitigation": "confirm an active registration first, in the instructions",
+        "taxonomy": "not examined"
+      },
+      {
+        "risk": "A Stripe API key committed to a source code repository can be taken over and seriously harm the user's business.",
+        "source": "author",
+        "severity": "none",
+        "mitigation": "secrets vault, restricted keys, pre-commit hook and key rolling, in the instructions",
+        "taxonomy": "not examined"
+      },
+      {
+        "risk": "Orders are silently dropped when fulfillment logic runs only on the success page and the customer never reaches it.",
+        "source": "author",
+        "severity": "none",
+        "mitigation": "webhook handler for checkout.session.completed and checkout.session.async_payment_succeeded, in the instructions",
+        "taxonomy": "not examined"
+      },
+      {
+        "risk": "Platform operators bear financial liability for fraud and disputes on Express and Custom connected accounts.",
+        "source": "author",
+        "severity": "none",
+        "mitigation": "Standard named as the safer default, in the instructions",
+        "taxonomy": "not examined"
+      },
+      {
+        "risk": "Instructions read at run time from docs.stripe.com/.well-known/skills/metronome/SKILL.md steer the agent without being part of the files this card describes.",
+        "source": "model",
+        "severity": "none",
+        "mitigation": "none stated",
+        "taxonomy": "not examined"
+      },
+      {
+        "risk": "With execution access through MCP tools or a CLI token, the agent changes Tax Settings and runs calls on a live Stripe account.",
+        "source": "model",
+        "severity": "none",
+        "mitigation": "user confirmation is required for registrations only, existing head office address and tax code are not to be overwritten",
+        "taxonomy": "not examined"
+      }
+    ],
+    "limitations": [
+      "Stripe Tax does not process payments outside Stripe, automatically file every tax return, or support every jurisdiction.",
+      "Threshold monitoring only processes live-mode transactions and does not cover physical-presence obligations.",
+      "Threshold notifications are not real time and arrive within 1 or 2 days after a threshold is crossed.",
+      "The taxability_reason not_collecting cannot tell a missing registration from a Nontaxable product tax code.",
+      "Tax registrations and Tax Settings in a sandbox are scoped to that sandbox and do not appear in live mode.",
+      "Metronome does not support usage prices that must work with Connect, Adaptive Pricing or Workflows."
+    ],
+    "known_problems": [
+      {
+        "problem": "automatic_tax collects zero tax",
+        "workaround": "check the product tax code, add a registration, then run a test transaction"
+      },
+      {
+        "problem": "customer_tax_location_invalid",
+        "workaround": "correct the invalid higher-priority address"
+      },
+      {
+        "problem": "invalid_request_error when adding a registration",
+        "workaround": "set a head office address in Tax Settings first"
+      },
+      {
+        "problem": "enabling automatic_tax is rejected while manual tax_rates remain",
+        "workaround": "clear all tax_rates first, or use the Tax migration tool"
+      },
+      {
+        "problem": "403 errors when testing a restricted API key",
+        "workaround": "add the missing permissions to the RAK"
+      },
+      {
+        "problem": "MCP used after sandbox creation",
+        "workaround": "run stripe sandbox claim first"
+      },
+      {
+        "problem": "an API key is exposed or compromised",
+        "workaround": "roll the key immediately, check activity logs and contact Stripe support"
+      }
+    ],
+    "evaluations": "none"
+  },
+  "who_stands_behind_it": {
+    "authorship": {
+      "author": "not declared",
+      "publisher": "the stripe organisation on GitHub",
+      "signer": "none",
+      "contact": "not declared"
+    },
+    "license": {
+      "frontmatter": "not declared",
+      "license_file": "none",
+      "registry": "not declared",
+      "repository": "MIT, as GitHub detects it"
+    },
+    "maintenance": {
+      "last_change": "2026-10-30",
+      "registry_update": "not declared",
+      "deprecated": "not declared",
+      "first_seen": "2026-01-20",
+      "content_changes": 58,
+      "releases": 0,
+      "last_release": "none"
+    }
+  },
+  "which_files": {
+    "version": {
+      "hash": "sha256:fd9066ab19b3cd371c7860dd36dd296f042bed872df2fea75901aae9c637e105",
+      "left_out": "none",
+      "author_version": "not declared",
+      "registry_version": "not declared",
+      "commit": "8570d472"
+    },
+    "source": {
+      "kind": "repository",
+      "location": "GitHub stripe/ai, path skills/stripe-best-practices",
+      "commit": "8570d472",
+      "retrieved": "2026-11-11",
+      "also_listed_on": "skills.sh, https://skills.sh/stripe/ai/stripe-best-practices",
+      "homepage": "not declared",
+      "produced_by": "none"
+    },
+    "files": [
+      {
+        "path": "SKILL.md",
+        "bytes": 6247,
+        "sha256": "53bd670efa3d4c14f4e44d72e2bd183eb1acd49f93a10059f1be4ff794b90cd4",
+        "kind": "document",
+        "in_hash": true,
+        "executable": false
+      },
+      {
+        "path": "references/billing.md",
+        "bytes": 10134,
+        "sha256": "fa6860475188e1fb77b14af132c5292b5cf4c1ee682bdd5446b2e0a60f196896",
+        "kind": "document",
+        "in_hash": true,
+        "executable": false
+      },
+      {
+        "path": "references/connect.md",
+        "bytes": 11017,
+        "sha256": "49e05ae44fefc1d920d8f31f13444af37dbcf7a730c7d95bba8d3ce1cc85315a",
+        "kind": "document",
+        "in_hash": true,
+        "executable": false
+      },
+      {
+        "path": "references/payments.md",
+        "bytes": 9072,
+        "sha256": "8b5c5d971f9c48652e421fbe38e733a8780744dd5b5d9b7d24655b1ffcf9a535",
+        "kind": "document",
+        "in_hash": true,
+        "executable": false
+      },
+      {
+        "path": "references/security.md",
+        "bytes": 10056,
+        "sha256": "45d31cbb73b8eb0812c35354c56c6cf23440c5d5538db657268cb5873f76bec2",
+        "kind": "document",
+        "in_hash": true,
+        "executable": false
+      },
+      {
+        "path": "references/tax.md",
+        "bytes": 24036,
+        "sha256": "ccc083b0001c6634053dad4ddef25d356d44b9d17591752dd74e602595fd2ddb",
+        "kind": "document",
+        "in_hash": true,
+        "executable": false
+      },
+      {
+        "path": "references/treasury.md",
+        "bytes": 793,
+        "sha256": "ccd38ef29a654b2c59bde4d56e5537af6a89f10a7297ed0b87c3b9e9f2bb8ffa",
+        "kind": "document",
+        "in_hash": true,
+        "executable": false
+      }
+    ],
+    "counts": {
+      "script": 0,
+      "document": 7,
+      "data": 0,
+      "binary": 0
+    },
+    "composition": "instructions only"
+  },
+  "about_this_card": {
+    "schema": "Skill Card v1.2",
+    "date": "2026-11-11",
+    "by": "Claude Opus 5.5, claude-opus-5-5, by hand from the skill files, the skills.sh listing and audits, and GitHub metadata, with the hash, file list, sizes, harness limits and repository figures computed by script",
+    "skill_run": false,
+    "scripts_analysed": false,
+    "security_check_run": false,
+    "external_service_contacted": false,
+    "registry_read": true,
+    "empty_values": 66
+  }
+}

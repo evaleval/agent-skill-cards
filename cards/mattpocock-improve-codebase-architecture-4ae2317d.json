@@ -1,0 +1,471 @@
+{
+  "schema": "Skill Card v1.2",
+  "skill": "improve-codebase-architecture",
+  "version": "mattpocock/skills at 4ae2317d",
+  "what_it_does": {
+    "name": "improve-codebase-architecture",
+    "summary": "Instructions for an architecture review of a codebase in a fixed vocabulary of module, interface, depth, seam, adapter, leverage and locality. It scopes the scan to a direction the user names or to hot spots in the commit history, has a sub-agent walk the code, and writes deepening candidates with before and after diagrams to a self-contained HTML report in the OS temp directory. Once the user picks a candidate, it grills the decision tree with them and keeps GLOSSARY.md and ADRs current. The user invokes it, the model does not.",
+    "tasks": [
+      "find hot spots in the commit history",
+      "find shallow modules and seams that leak",
+      "render deepening candidates as an HTML report with before and after diagrams",
+      "name a top recommendation",
+      "grill the decision tree of the candidate the user picks",
+      "add terms to GLOSSARY.md and offer ADRs for rejected candidates"
+    ],
+    "author_description": "Scan a codebase for deepening opportunities, present them as a visual HTML report, then grill through whichever one you pick.",
+    "outputs": [
+      {
+        "what": "architecture review with one card per deepening candidate, a recommendation strength badge and a top recommendation",
+        "kind": "recommendation",
+        "form": "self-contained HTML file",
+        "destination": "<tmpdir>/architecture-review-<timestamp>.html, opened in the user's browser"
+      },
+      {
+        "what": "the absolute path of the report and the question which candidate to explore",
+        "kind": "information",
+        "form": "message to the user",
+        "destination": "the conversation"
+      },
+      {
+        "what": "new or sharpened domain terms",
+        "kind": "information",
+        "form": "entries in a Markdown file",
+        "destination": "GLOSSARY.md in the project"
+      },
+      {
+        "what": "a record of a rejected candidate with its reason",
+        "kind": "information",
+        "form": "ADR document",
+        "destination": "docs/adr/ in the project"
+      }
+    ],
+    "sample_output": "Which of these would you like to explore?",
+    "inputs": [
+      {
+        "what": "the codebase and its commit history",
+        "type": "a git repository",
+        "required": "required",
+        "for": "every task",
+        "example": "git log --oneline"
+      },
+      {
+        "what": "a direction to look in, a module, a subsystem or a pain point",
+        "type": "a request in natural language",
+        "required": "optional",
+        "for": "scoping the scan",
+        "example": "not declared"
+      },
+      {
+        "what": "the project's domain glossary",
+        "type": "a Markdown file",
+        "required": "optional",
+        "for": "naming domain concepts in the report",
+        "example": "GLOSSARY.md"
+      },
+      {
+        "what": "architecture decision records",
+        "type": "files in a folder",
+        "required": "optional",
+        "for": "decisions the review should not re-litigate",
+        "example": "docs/adr/"
+      },
+      {
+        "what": "the candidate the user picks",
+        "type": "a reply in natural language",
+        "required": "conditional",
+        "for": "the grilling loop",
+        "example": "not declared"
+      }
+    ],
+    "when_input_is_missing": [
+      {
+        "case": "the user names no direction",
+        "behaviour": "the commit history is walked back to find hot spots, which get attention first"
+      },
+      {
+        "case": "the changes are scattered with no clear hot spot",
+        "behaviour": "the net is widened"
+      },
+      {
+        "case": "GLOSSARY.md does not exist when a new term is named",
+        "behaviour": "the file is created lazily"
+      }
+    ],
+    "exclusions": "not declared",
+    "adoption": [
+      {
+        "registry": "skills.sh",
+        "installs": "1.3M",
+        "first_seen": "2026-03-13",
+        "counts": "the skill",
+        "read": "2026-11-11"
+      },
+      {
+        "registry": "GitHub",
+        "stars": 321456,
+        "forks": 26945,
+        "counts": "the mattpocock/skills repository, which holds 39 skills",
+        "read": "2026-11-11"
+      }
+    ]
+  },
+  "what_it_needs": {
+    "compatibility": {
+      "harnesses": "not declared",
+      "models": "not declared",
+      "capabilities": "tool calling",
+      "fits": {
+        "Agent Skills specification": "fits, name 29 characters, description 125 characters, body 66 lines and about 1,453 tokens, frontmatter fields the specification does not define, disable-model-invocation",
+        "Codex": "fits, SKILL.md is 6,028 bytes, under the 8,000 byte cut",
+        "Claude Code": "fits, 71 lines, listing text 125 characters",
+        "ClawHub": "fits, folder 12,835 bytes"
+      }
+    },
+    "software_dependencies": [
+      {
+        "name": "git",
+        "kind": "binary",
+        "version": "not declared",
+        "for": "run"
+      },
+      {
+        "name": "xdg-open, open or start",
+        "kind": "binary",
+        "version": "not declared",
+        "for": "run"
+      },
+      {
+        "name": "Tailwind CSS from cdn.tailwindcss.com",
+        "kind": "package",
+        "version": "not declared",
+        "for": "run"
+      },
+      {
+        "name": "mermaid from cdn.jsdelivr.net",
+        "kind": "package",
+        "version": "11",
+        "for": "run"
+      }
+    ],
+    "credentials": "none",
+    "cost": {
+      "context_tokens": {
+        "discovery": 31,
+        "load": 1507,
+        "on_demand": 1660,
+        "on_demand_files": [
+          "HTML-REPORT.md"
+        ]
+      },
+      "run_tokens": "not examined",
+      "services": "none"
+    }
+  },
+  "what_it_touches": {
+    "side_effects": {
+      "install": "read only",
+      "run": "changes state",
+      "changes": [
+        {
+          "what": "writes an HTML report to the OS temp directory, a fresh file per run",
+          "affects": "system",
+          "confirmation": "not declared",
+          "reversible": "not declared"
+        },
+        {
+          "what": "opens the report in the user's default browser",
+          "affects": "system",
+          "confirmation": "not declared",
+          "reversible": "not declared"
+        },
+        {
+          "what": "adds or updates terms in GLOSSARY.md, creating the file if it does not exist",
+          "affects": "workspace",
+          "confirmation": "not declared",
+          "reversible": "not declared"
+        },
+        {
+          "what": "records an ADR for a rejected candidate",
+          "affects": "workspace",
+          "confirmation": "yes",
+          "reversible": "not declared"
+        }
+      ]
+    },
+    "network_access": [
+      {
+        "host": "cdn.tailwindcss.com",
+        "purpose": "other",
+        "when": "each time the report is opened in a browser",
+        "sends": [
+          "none"
+        ],
+        "receives": "the Tailwind CSS script"
+      },
+      {
+        "host": "cdn.jsdelivr.net",
+        "purpose": "other",
+        "when": "each time the report is opened in a browser",
+        "sends": [
+          "none"
+        ],
+        "receives": "the Mermaid ESM module, mermaid@11"
+      }
+    ],
+    "tools_and_permissions": {
+      "allowed_tools": "none",
+      "tools": [
+        {
+          "tool": "Skill tool with \"codebase-design\", \"grilling\" and \"domain-modeling\"",
+          "kind": "agent tool",
+          "for": "the architecture vocabulary, the grilling loop, keeping the domain model current",
+          "origin": "built in"
+        },
+        {
+          "tool": "a sub-agent with a fresh context window",
+          "kind": "agent tool",
+          "for": "walking the codebase",
+          "origin": "built in"
+        },
+        {
+          "tool": "git log --oneline",
+          "kind": "shell command",
+          "for": "finding hot spots in the commit history",
+          "origin": "third party"
+        },
+        {
+          "tool": "xdg-open, open, start",
+          "kind": "shell command",
+          "for": "opening the report on Linux, macOS or Windows",
+          "origin": "third party"
+        },
+        {
+          "tool": "shell and file tools of the agent",
+          "kind": "agent tool",
+          "for": "running the commands, writing the report, GLOSSARY.md and ADRs",
+          "origin": "built in"
+        }
+      ]
+    },
+    "machine_access": {
+      "paths": [
+        {
+          "path": "the source files and git history of the project",
+          "operation": "read",
+          "scope": "workspace"
+        },
+        {
+          "path": "GLOSSARY.md",
+          "operation": "read",
+          "scope": "workspace"
+        },
+        {
+          "path": "GLOSSARY.md, created or updated",
+          "operation": "write",
+          "scope": "workspace"
+        },
+        {
+          "path": "docs/adr/",
+          "operation": "read",
+          "scope": "workspace"
+        },
+        {
+          "path": "docs/adr/, a new ADR",
+          "operation": "write",
+          "scope": "workspace"
+        },
+        {
+          "path": "<tmpdir>/architecture-review-<timestamp>.html",
+          "operation": "write",
+          "scope": "system"
+        },
+        {
+          "path": "HTML-REPORT.md",
+          "operation": "read",
+          "scope": "skill folder"
+        }
+      ],
+      "settings": [
+        {
+          "name": "TMPDIR",
+          "access": "read",
+          "reason": "to resolve the temp directory, falling back to /tmp"
+        },
+        {
+          "name": "TEMP",
+          "access": "read",
+          "reason": "to resolve the temp directory on Windows"
+        }
+      ]
+    }
+  },
+  "what_is_known": {
+    "checks": [
+      {
+        "id": "C1",
+        "tool": "Snyk, skills.sh audit, version not stated",
+        "date": "2026-10-29",
+        "scope": "unknown",
+        "result": "warn, risk level MEDIUM, 1 issue, W012 unverifiable external dependency, Tailwind CSS and Mermaid JS loaded from external CDNs at runtime, scored 0.30",
+        "report": "https://skills.sh/mattpocock/skills/improve-codebase-architecture/security/snyk"
+      },
+      {
+        "id": "C2",
+        "tool": "Gen Agent Trust Hub, skills.sh audit, version not stated",
+        "date": "2026-10-29",
+        "scope": "SKILL.md and HTML-REPORT.md, as cited in its analysis",
+        "result": "pass, risk level SAFE, four surfaces described, indirect prompt injection, command execution, external downloads, and dynamic execution through Mermaid securityLevel loose",
+        "report": "https://skills.sh/mattpocock/skills/improve-codebase-architecture/security/agent-trust-hub"
+      },
+      {
+        "id": "C3",
+        "tool": "Socket, skills.sh audit, version not stated",
+        "date": "2026-10-29",
+        "scope": "the skill package, hash bb2b46f09aa3640009ec4a4a6fd9a03c8a03b752d30f924b5bb5bbeb8a732d2e",
+        "result": "pass, checks for malicious behaviour, credential exposure, obfuscated code and suspicious patterns",
+        "report": "https://skills.sh/mattpocock/skills/improve-codebase-architecture/security/socket"
+      }
+    ],
+    "vulnerabilities": [
+      {
+        "finding": "Unverifiable external dependency detected, runtime URL that controls agent, W012",
+        "check": "C1",
+        "severity": "MEDIUM, scored 0.30",
+        "location": "not stated",
+        "status": "open",
+        "fix": "not stated"
+      }
+    ],
+    "risks": [
+      {
+        "risk": "Instructions planted in source files, commit messages, GLOSSARY.md or ADRs reach the agent, since the codebase is read without delimiters or sanitisation.",
+        "source": "check C2",
+        "severity": "SAFE overall by C2",
+        "mitigation": "none in the files, C2 notes that boundary markers and sanitisation are absent",
+        "taxonomy": "https://www.ibm.com/docs/en/watsonx/saas?topic=ai-risk-atlas"
+      },
+      {
+        "risk": "Script from cdn.tailwindcss.com and cdn.jsdelivr.net runs in the browser when the report opens, so a changed or compromised CDN file controls the page.",
+        "source": "check C1, check C2",
+        "severity": "MEDIUM by C1",
+        "mitigation": "none stated",
+        "taxonomy": "not examined"
+      },
+      {
+        "risk": "With Mermaid securityLevel loose, file names or comments from the codebase copied into a diagram can run as script in the report.",
+        "source": "check C2",
+        "severity": "SAFE overall by C2",
+        "mitigation": "none stated",
+        "taxonomy": "not examined"
+      },
+      {
+        "risk": "On a shared machine, the report on the codebase's architecture lands in /tmp, where other users may be able to read it.",
+        "source": "model",
+        "severity": "none",
+        "mitigation": "none stated",
+        "taxonomy": "not examined"
+      },
+      {
+        "risk": "GLOSSARY.md in the project is changed inline as decisions crystallize, with no confirmation step stated.",
+        "source": "model",
+        "severity": "none",
+        "mitigation": "none stated",
+        "taxonomy": "not examined"
+      }
+    ],
+    "limitations": "not declared",
+    "known_problems": [
+      {
+        "problem": "Mermaid's layout fights the diagram, or cannot give a deep module the right weight",
+        "workaround": "draw modules as divs with inline SVG arrows positioned over a relative container"
+      }
+    ],
+    "evaluations": "none"
+  },
+  "who_stands_behind_it": {
+    "authorship": {
+      "author": "not declared",
+      "publisher": "the mattpocock account on GitHub",
+      "signer": "none",
+      "contact": "not declared"
+    },
+    "license": {
+      "frontmatter": "not declared",
+      "license_file": "none",
+      "registry": "not declared",
+      "repository": "MIT, as GitHub detects it"
+    },
+    "maintenance": {
+      "last_change": "2026-10-29",
+      "registry_update": "not declared",
+      "deprecated": "not declared",
+      "first_seen": "2026-04-28",
+      "content_changes": 16,
+      "releases": 10,
+      "last_release": "2026-10-29"
+    }
+  },
+  "which_files": {
+    "version": {
+      "hash": "sha256:c16bd7629780da17d40d0bfb1844c259c828aef8cbc1c3366664857b3225471c",
+      "left_out": "none",
+      "author_version": "not declared",
+      "registry_version": "not declared",
+      "commit": "4ae2317d"
+    },
+    "source": {
+      "kind": "repository",
+      "location": "GitHub mattpocock/skills, path skills/engineering/improve-codebase-architecture",
+      "commit": "4ae2317d",
+      "retrieved": "2026-11-11",
+      "also_listed_on": "skills.sh, https://skills.sh/mattpocock/skills/improve-codebase-architecture",
+      "homepage": "not declared",
+      "produced_by": "none"
+    },
+    "files": [
+      {
+        "path": "HTML-REPORT.md",
+        "bytes": 6641,
+        "sha256": "581e8bb5a521e46bbda8ca7e19b15948bed882187108092ebb90c62513b77528",
+        "kind": "document",
+        "in_hash": true,
+        "executable": false
+      },
+      {
+        "path": "SKILL.md",
+        "bytes": 6028,
+        "sha256": "35b03a3db61e0f5aa333ea59b54963e45a3d2ace6649b2ef4f9576603e2582a6",
+        "kind": "document",
+        "in_hash": true,
+        "executable": false
+      },
+      {
+        "path": "agents/openai.yaml",
+        "bytes": 166,
+        "sha256": "c8cb20f68ebf0edb4e497bc11ae5fcaa196004e661cd189015b04f4109ced7f1",
+        "kind": "data",
+        "in_hash": true,
+        "executable": false
+      }
+    ],
+    "counts": {
+      "script": 0,
+      "document": 2,
+      "data": 1,
+      "binary": 0
+    },
+    "composition": "instructions only"
+  },
+  "about_this_card": {
+    "schema": "Skill Card v1.2",
+    "date": "2026-11-11",
+    "by": "Claude Opus 5.5, claude-opus-5-5, by hand from the skill files, the skills.sh listing and audits, and GitHub metadata, with the hash, file list, sizes, harness limits and repository figures computed by script",
+    "skill_run": false,
+    "scripts_analysed": false,
+    "security_check_run": false,
+    "external_service_contacted": false,
+    "registry_read": true,
+    "empty_values": 43
+  }
+}

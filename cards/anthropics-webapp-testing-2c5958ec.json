@@ -1,0 +1,504 @@
+{
+  "schema": "Skill Card v1.2",
+  "skill": "webapp-testing",
+  "version": "anthropics/skills at 2c5958ec",
+  "what_it_does": {
+    "name": "webapp-testing",
+    "summary": "Instructions, one helper script and three example scripts for testing local web applications with native Python Playwright scripts. The helper with_server.py starts one or more servers, waits until their ports answer, runs an automation command and then stops the servers. The automation navigates to the app, waits for networkidle, takes screenshots or inspects the rendered DOM to find selectors, and then acts with those selectors, with examples for element discovery, static HTML through file:// URLs and console log capture. Use it to verify frontend functionality, debug UI behavior, capture browser screenshots and view browser logs.",
+    "tasks": [
+      "start one or more local servers, run an automation command, then stop them",
+      "inspect the rendered DOM and take screenshots to find selectors",
+      "click, fill and submit forms with Playwright",
+      "automate static HTML files through file:// URLs",
+      "capture browser console logs",
+      "works on local web applications"
+    ],
+    "author_description": "Toolkit for interacting with and testing local web applications using Playwright. Supports verifying frontend functionality, debugging UI behavior, capturing browser screenshots, and viewing browser logs.",
+    "outputs": [
+      {
+        "what": "Playwright automation scripts written for the task",
+        "kind": "information",
+        "form": "Python file",
+        "destination": "a path the agent chooses, for instance your_automation.py"
+      },
+      {
+        "what": "screenshots of the page, full page",
+        "kind": "information",
+        "form": "PNG file",
+        "destination": "/tmp/inspect.png, /tmp/page_discovery.png or /mnt/user-data/outputs/static_page.png"
+      },
+      {
+        "what": "browser console messages",
+        "kind": "information",
+        "form": "text file and terminal text",
+        "destination": "/mnt/user-data/outputs/console.log and the terminal"
+      },
+      {
+        "what": "lists of buttons, links and input fields found on the page",
+        "kind": "information",
+        "form": "terminal text",
+        "destination": "the terminal the agent runs the script in"
+      },
+      {
+        "what": "server start, readiness and stop messages",
+        "kind": "information",
+        "form": "terminal text",
+        "destination": "the terminal the agent runs the script in"
+      },
+      {
+        "what": "clicks, form entries and form submissions in the app under test",
+        "kind": "action",
+        "form": "browser interaction",
+        "destination": "the web application under test"
+      }
+    ],
+    "sample_output": "Screenshot saved to /tmp/page_discovery.png",
+    "inputs": [
+      {
+        "what": "the address of a running local web application",
+        "type": "a localhost URL",
+        "required": "conditional",
+        "for": "testing a dynamic webapp",
+        "example": "page.goto('http://localhost:5173')"
+      },
+      {
+        "what": "a static HTML file",
+        "type": "a path turned into a file:// URL",
+        "required": "conditional",
+        "for": "testing static HTML",
+        "example": "html_file_path = os.path.abspath('path/to/your/file.html')"
+      },
+      {
+        "what": "a command that starts a server",
+        "type": "a --server argument, repeatable",
+        "required": "conditional",
+        "for": "a server that is not already running",
+        "example": "--server \"cd backend && python server.py\""
+      },
+      {
+        "what": "the port of each server",
+        "type": "a --port argument, an integer, one per --server",
+        "required": "conditional",
+        "for": "a server that is not already running",
+        "example": "--port 5173"
+      },
+      {
+        "what": "the command to run once the servers are ready",
+        "type": "arguments after --",
+        "required": "conditional",
+        "for": "a server that is not already running",
+        "example": "-- python your_automation.py"
+      },
+      {
+        "what": "a timeout per server in seconds",
+        "type": "a --timeout argument, an integer, default 30",
+        "required": "optional",
+        "for": "a server that starts slowly",
+        "example": "not declared"
+      }
+    ],
+    "when_input_is_missing": [
+      {
+        "case": "no command follows the server arguments",
+        "behaviour": "with_server.py prints Error: No command specified to run and exits"
+      },
+      {
+        "case": "the counts of --server and --port arguments differ",
+        "behaviour": "with_server.py prints Error: Number of --server and --port arguments must match and exits"
+      },
+      {
+        "case": "a server does not open its port within the timeout",
+        "behaviour": "with_server.py raises Server failed to start on port and stops the servers it started"
+      },
+      {
+        "case": "reading a static HTML file fails or is incomplete",
+        "behaviour": "the app is treated as dynamic"
+      }
+    ],
+    "exclusions": "not declared",
+    "adoption": [
+      {
+        "registry": "skills.sh",
+        "installs": "202.4K",
+        "first_seen": "2026-01-19",
+        "counts": "the skill",
+        "read": "2026-11-11"
+      },
+      {
+        "registry": "GitHub",
+        "stars": 192784,
+        "forks": 22682,
+        "counts": "the anthropics/skills repository, which holds 20 skills",
+        "read": "2026-11-11"
+      }
+    ]
+  },
+  "what_it_needs": {
+    "compatibility": {
+      "harnesses": "not declared",
+      "models": "not declared",
+      "capabilities": "not declared",
+      "fits": {
+        "Agent Skills specification": "fits, name 14 characters, description 204 characters, body 91 lines and about 907 tokens",
+        "Codex": "fits, SKILL.md is 3,913 bytes, under the 8,000 byte cut",
+        "Claude Code": "fits, 96 lines, listing text 204 characters",
+        "ClawHub": "fits, folder 22,394 bytes"
+      }
+    },
+    "software_dependencies": [
+      {
+        "name": "Python",
+        "kind": "runtime",
+        "version": "not declared",
+        "for": "run"
+      },
+      {
+        "name": "playwright, sync_api",
+        "kind": "package",
+        "version": "not declared",
+        "for": "run"
+      },
+      {
+        "name": "Chromium, launched headless through Playwright",
+        "kind": "binary",
+        "version": "not declared",
+        "for": "run"
+      },
+      {
+        "name": "npm",
+        "kind": "binary",
+        "version": "not declared",
+        "for": "example"
+      }
+    ],
+    "credentials": "none",
+    "cost": {
+      "context_tokens": {
+        "discovery": 51,
+        "load": 978,
+        "on_demand": 861,
+        "on_demand_files": [
+          "examples/element_discovery.py",
+          "examples/static_html_automation.py",
+          "examples/console_logging.py"
+        ]
+      },
+      "run_tokens": "not examined",
+      "services": "none"
+    }
+  },
+  "what_it_touches": {
+    "side_effects": {
+      "install": "read only",
+      "run": "changes state",
+      "changes": [
+        {
+          "what": "starts server processes from shell commands and stops them after the run",
+          "affects": "system",
+          "confirmation": "not declared",
+          "reversible": "yes"
+        },
+        {
+          "what": "writes screenshots to /tmp",
+          "affects": "system",
+          "confirmation": "not declared",
+          "reversible": "not declared"
+        },
+        {
+          "what": "writes screenshots and console.log to /mnt/user-data/outputs",
+          "affects": "system",
+          "confirmation": "not declared",
+          "reversible": "not declared"
+        },
+        {
+          "what": "creates Playwright automation scripts",
+          "affects": "workspace",
+          "confirmation": "not declared",
+          "reversible": "not declared"
+        },
+        {
+          "what": "clicks, fills and submits forms in the app under test",
+          "affects": "other",
+          "confirmation": "not declared",
+          "reversible": "not declared"
+        }
+      ]
+    },
+    "network_access": [
+      {
+        "host": "localhost, on the ports given, for instance 5173 and 3000",
+        "purpose": "other",
+        "when": "every run, for the readiness check and the browser session",
+        "sends": [
+          "user content"
+        ],
+        "receives": "the rendered pages and console messages of the app under test"
+      }
+    ],
+    "tools_and_permissions": {
+      "allowed_tools": "none",
+      "tools": [
+        {
+          "tool": "python scripts/with_server.py",
+          "kind": "program",
+          "for": "starting servers, waiting for their ports, running the automation, stopping the servers",
+          "origin": "skill"
+        },
+        {
+          "tool": "Playwright with headless Chromium",
+          "kind": "program",
+          "for": "navigating, inspecting, screenshotting and acting on pages",
+          "origin": "third party"
+        },
+        {
+          "tool": "server commands such as npm run dev or python server.py",
+          "kind": "shell command",
+          "for": "starting the app under test, run through the shell",
+          "origin": "third party"
+        },
+        {
+          "tool": "shell and file tools of the agent",
+          "kind": "agent tool",
+          "for": "running the scripts and writing the automation scripts",
+          "origin": "built in"
+        }
+      ]
+    },
+    "machine_access": {
+      "paths": [
+        {
+          "path": "scripts/with_server.py, run from the skill folder",
+          "operation": "read",
+          "scope": "skill folder"
+        },
+        {
+          "path": "local HTML files the user names, such as path/to/your/file.html",
+          "operation": "read",
+          "scope": "workspace"
+        },
+        {
+          "path": "automation scripts such as your_automation.py",
+          "operation": "write",
+          "scope": "workspace"
+        },
+        {
+          "path": "/tmp/inspect.png and /tmp/page_discovery.png",
+          "operation": "write",
+          "scope": "system"
+        },
+        {
+          "path": "/mnt/user-data/outputs/, console.log, static_page.png and after_submit.png",
+          "operation": "write",
+          "scope": "system"
+        }
+      ],
+      "settings": "none"
+    }
+  },
+  "what_is_known": {
+    "checks": [
+      {
+        "id": "C1",
+        "tool": "Snyk, skills.sh audit, version not stated",
+        "date": "2026-09-14",
+        "scope": "unknown",
+        "result": "warn, risk level MEDIUM, 1 issue, W011 third-party content exposure, indirect prompt injection risk, scored low risk 0.10",
+        "report": "https://skills.sh/anthropics/skills/webapp-testing/security/snyk"
+      },
+      {
+        "id": "C2",
+        "tool": "Gen Agent Trust Hub, skills.sh audit, version not stated",
+        "date": "2026-09-14",
+        "scope": "scripts/with_server.py, examples/element_discovery.py and examples/console_logging.py, as cited in its analysis",
+        "result": "pass, risk level SAFE, two surfaces described, with_server.py runs shell commands with shell=True, and web content reaches the agent without delimiters or sanitisation",
+        "report": "https://skills.sh/anthropics/skills/webapp-testing/security/agent-trust-hub"
+      },
+      {
+        "id": "C3",
+        "tool": "Socket, skills.sh audit, version not stated",
+        "date": "2026-09-14",
+        "scope": "the skill package, hash cfb23ef0c399c36e9247142a7ab5ac0e03c03e1c9f047b0f7502232a2c50b564",
+        "result": "warn, 1 alert, Anomaly LOW in scripts/with_server.py, shell=True with command strings from the command line, confidence 60%, severity 55%",
+        "report": "https://skills.sh/anthropics/skills/webapp-testing/security/socket"
+      }
+    ],
+    "vulnerabilities": [
+      {
+        "finding": "Third-party content exposure, indirect prompt injection risk, W011",
+        "check": "C1",
+        "severity": "MEDIUM",
+        "location": "not stated",
+        "status": "open",
+        "fix": "not stated"
+      },
+      {
+        "finding": "Anomaly, subprocess.Popen with shell=True on command strings from the command line",
+        "check": "C3",
+        "severity": "LOW, confidence 60%, severity 55%",
+        "location": "scripts/with_server.py",
+        "status": "open",
+        "fix": "not stated"
+      }
+    ],
+    "risks": [
+      {
+        "risk": "Instructions hidden in a tested page reach the agent, since DOM content and console logs are read into its context without delimiters or sanitisation.",
+        "source": "check C1, check C2",
+        "severity": "MEDIUM by C1, SAFE overall by C2",
+        "mitigation": "none in the files, C2 notes that no boundary markers or filtering are used",
+        "taxonomy": "https://www.ibm.com/docs/en/watsonx/saas?topic=ai-risk-atlas"
+      },
+      {
+        "risk": "A --server command built from untrusted input runs arbitrary code with the agent's privileges, since with_server.py passes it to the shell with shell=True.",
+        "source": "check C3, check C2",
+        "severity": "LOW by C3, SAFE overall by C2",
+        "mitigation": "none stated",
+        "taxonomy": "not examined"
+      },
+      {
+        "risk": "Running the automation against an app connected to real data can change that data, since the examples click buttons and submit forms without asking.",
+        "source": "model",
+        "severity": "none",
+        "mitigation": "none stated",
+        "taxonomy": "not examined"
+      },
+      {
+        "risk": "Screenshots and logs written to /tmp and /mnt/user-data/outputs can hold data shown by the app and stay there after the run.",
+        "source": "model",
+        "severity": "none",
+        "mitigation": "none stated",
+        "taxonomy": "not examined"
+      }
+    ],
+    "limitations": [
+      "The bundled scripts can be very large, and reading their source fills the context window, so they are run as black boxes with --help first.",
+      "with_server.py checks readiness only by polling the given port on localhost, 30 seconds per server by default.",
+      "Inspecting the DOM of a dynamic app before networkidle gives an incomplete picture of the page.",
+      "No dependency carries a version."
+    ],
+    "known_problems": [
+      {
+        "problem": "DOM inspected before a dynamic app finished loading",
+        "workaround": "wait for page.wait_for_load_state('networkidle') before inspection"
+      },
+      {
+        "problem": "selectors from a static HTML file fail or are incomplete",
+        "workaround": "treat the app as dynamic and use reconnaissance-then-action"
+      },
+      {
+        "problem": "a server fails to start on its port within the timeout",
+        "workaround": "raise the limit with --timeout"
+      }
+    ],
+    "evaluations": "none"
+  },
+  "who_stands_behind_it": {
+    "authorship": {
+      "author": "Anthropic, PBC, from the license file",
+      "publisher": "the anthropics organisation on GitHub",
+      "signer": "none",
+      "contact": "not declared"
+    },
+    "license": {
+      "frontmatter": "Complete terms in LICENSE.txt",
+      "license_file": "LICENSE.txt, Apache License Version 2.0, January 2004, copyright 2026 Anthropic, PBC",
+      "registry": "not declared",
+      "repository": "none"
+    },
+    "maintenance": {
+      "last_change": "2026-04-20",
+      "registry_update": "not declared",
+      "deprecated": "not declared",
+      "first_seen": "2025-12-01",
+      "content_changes": 1,
+      "releases": 0,
+      "last_release": "none"
+    }
+  },
+  "which_files": {
+    "version": {
+      "hash": "sha256:31ebb48bce8e86083126a45fe62f42d1352259f07a410807d07f038bb1c954a3",
+      "left_out": "none",
+      "author_version": "not declared",
+      "registry_version": "not declared",
+      "commit": "2c5958ec"
+    },
+    "source": {
+      "kind": "repository",
+      "location": "GitHub anthropics/skills, path skills/webapp-testing",
+      "commit": "2c5958ec",
+      "retrieved": "2026-11-11",
+      "also_listed_on": "skills.sh, https://skills.sh/anthropics/skills/webapp-testing",
+      "homepage": "not declared",
+      "produced_by": "none"
+    },
+    "files": [
+      {
+        "path": "LICENSE.txt",
+        "bytes": 11345,
+        "sha256": "bc6b3af2f331cbc7fb0da1344efb2cbe5877a31498b4d70dbc7000f3405a1362",
+        "kind": "document",
+        "in_hash": true,
+        "executable": false
+      },
+      {
+        "path": "SKILL.md",
+        "bytes": 3913,
+        "sha256": "51b7349e77ec63b7744a6f63647e7566a0b4d2e301121cc10e8c2113af6556a2",
+        "kind": "document",
+        "in_hash": true,
+        "executable": false
+      },
+      {
+        "path": "examples/console_logging.py",
+        "bytes": 1027,
+        "sha256": "ea46877289acb82da7e7ce59d0bc37c8977cd57e2a006d0c88d7a1c625bf95da",
+        "kind": "script",
+        "in_hash": true,
+        "executable": false
+      },
+      {
+        "path": "examples/element_discovery.py",
+        "bytes": 1463,
+        "sha256": "d63c89604a22f8845d724e95dda45db49b1bf57c25ce0a83afbb7b8da3d402f0",
+        "kind": "script",
+        "in_hash": true,
+        "executable": false
+      },
+      {
+        "path": "examples/static_html_automation.py",
+        "bytes": 953,
+        "sha256": "9d533aafb875ee3ab8b8ebf8f5b9003ac8d999da3d09b285cce252e623140064",
+        "kind": "script",
+        "in_hash": true,
+        "executable": false
+      },
+      {
+        "path": "scripts/with_server.py",
+        "bytes": 3693,
+        "sha256": "b0dcf4918935b795f4eda9821579b9902119235ff4447f687a30286e7d0925fd",
+        "kind": "script",
+        "in_hash": true,
+        "executable": true
+      }
+    ],
+    "counts": {
+      "script": 4,
+      "document": 2,
+      "data": 0,
+      "binary": 0
+    },
+    "composition": "instructions with scripts"
+  },
+  "about_this_card": {
+    "schema": "Skill Card v1.2",
+    "date": "2026-11-11",
+    "by": "Claude Opus 5.5, claude-opus-5-5, by hand from the skill files, the skills.sh listing and audits, and GitHub metadata, with the hash, file list, sizes, harness limits and repository figures computed by script",
+    "skill_run": false,
+    "scripts_analysed": false,
+    "security_check_run": false,
+    "external_service_contacted": false,
+    "registry_read": true,
+    "empty_values": 42
+  }
+}

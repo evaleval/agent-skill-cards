@@ -1,0 +1,774 @@
+{
+  "schema": "Skill Card v1.2",
+  "skill": "skill-creator",
+  "version": "anthropics/skills at 2c5958ec",
+  "what_it_does": {
+    "name": "skill-creator",
+    "summary": "Instructions, three subagent prompts, a JSON schema reference and Python scripts for creating agent skills and improving them in a loop. The workflow captures what the skill should do, drafts a SKILL.md, runs test prompts with and without the skill in subagents, grades and aggregates the runs into a benchmark, and shows outputs and benchmark in a browser viewer where the user leaves feedback. A separate loop tests the description against realistic trigger queries through claude -p and proposes better descriptions, and a packager zips the finished skill into a .skill file. Use it to create a skill from scratch, edit or optimize an existing skill, run evals or improve triggering.",
+    "tasks": [
+      "capture intent and draft a new SKILL.md",
+      "run test prompts with and without the skill in subagents",
+      "grade runs and aggregate a benchmark with mean and stddev",
+      "review outputs and leave feedback in a browser eval viewer",
+      "compare two skill versions blind",
+      "optimize the description for triggering accuracy",
+      "package a skill as a .skill file"
+    ],
+    "author_description": "Create new skills, modify and improve existing skills, and measure skill performance. Use when users want to create a skill from scratch, edit, or optimize an existing skill, run evals to test a skill, benchmark skill performance with variance analysis, or optimize a skill's description for better triggering accuracy.",
+    "outputs": [
+      {
+        "what": "a new or edited skill folder with SKILL.md and bundled resources",
+        "kind": "information",
+        "form": "Markdown and bundled files",
+        "destination": "the skill directory"
+      },
+      {
+        "what": "per-run test results, eval_metadata.json, timing.json, grading.json and the outputs of each run",
+        "kind": "information",
+        "form": "JSON files and output files",
+        "destination": "<skill-name>-workspace/iteration-N/ next to the skill directory"
+      },
+      {
+        "what": "benchmark with pass rate, time and tokens per configuration and the delta",
+        "kind": "information",
+        "form": "benchmark.json and benchmark.md",
+        "destination": "the iteration directory"
+      },
+      {
+        "what": "eval viewer with an Outputs tab and a Benchmark tab",
+        "kind": "information",
+        "form": "HTML page served on a local server or written as a static file",
+        "destination": "http://localhost:3117 or the --static path"
+      },
+      {
+        "what": "improvement suggestions for evals and for a losing skill version",
+        "kind": "recommendation",
+        "form": "JSON file",
+        "destination": "grading.json, comparison.json and analysis.json"
+      },
+      {
+        "what": "an optimized description with train and test scores and an HTML report",
+        "kind": "recommendation",
+        "form": "JSON on the terminal and an HTML report",
+        "destination": "the terminal, the system temp directory or the --results-dir folder"
+      },
+      {
+        "what": "a packaged skill",
+        "kind": "information",
+        "form": ".skill zip file",
+        "destination": "the current directory or the output directory given"
+      }
+    ],
+    "sample_output": "Skill is valid!",
+    "inputs": [
+      {
+        "what": "what the skill should do, when it should trigger and its output format",
+        "type": "answers in natural language or a workflow in the conversation",
+        "required": "required",
+        "for": "creating a skill",
+        "example": "I want to make a skill for X"
+      },
+      {
+        "what": "an existing skill folder",
+        "type": "a path to a directory with SKILL.md",
+        "required": "conditional",
+        "for": "improving, evaluating or packaging an existing skill",
+        "example": "python -m scripts.package_skill <path/to/skill-folder>"
+      },
+      {
+        "what": "test prompts",
+        "type": "an evals/evals.json file with id, prompt, expected_output and files per eval",
+        "required": "conditional",
+        "for": "running test cases",
+        "example": "{\"id\": 1, \"prompt\": \"User's task prompt\", \"expected_output\": \"Description of expected result\", \"files\": []}"
+      },
+      {
+        "what": "a trigger eval set",
+        "type": "a JSON list of query and should_trigger",
+        "required": "conditional",
+        "for": "description optimization",
+        "example": "{\"query\": \"the user prompt\", \"should_trigger\": true}"
+      },
+      {
+        "what": "a model id",
+        "type": "a --model argument",
+        "required": "conditional",
+        "for": "description optimization with run_loop.py",
+        "example": "--model <model-id-powering-this-session>"
+      },
+      {
+        "what": "an iteration directory of the workspace",
+        "type": "a positional path argument",
+        "required": "conditional",
+        "for": "aggregating a benchmark and launching the viewer",
+        "example": "python -m scripts.aggregate_benchmark <workspace>/iteration-N --skill-name <name>"
+      },
+      {
+        "what": "the user's feedback on each run",
+        "type": "text in the viewer, saved as feedback.json",
+        "required": "optional",
+        "for": "reviewing results",
+        "example": "{\"run_id\": \"eval-0-with_skill\", \"feedback\": \"the chart is missing axis labels\", \"timestamp\": \"...\"}"
+      }
+    ],
+    "when_input_is_missing": [
+      {
+        "case": "the conversation already contains the workflow to capture",
+        "behaviour": "answers are taken from the conversation history, the user fills the gaps and confirms"
+      },
+      {
+        "case": "the user does not want to run evaluations",
+        "behaviour": "the evals are skipped and the skill is iterated by hand with the user"
+      },
+      {
+        "case": "no SKILL.md at the skill path",
+        "behaviour": "run_eval.py, run_loop.py and improve_description.py print Error: No SKILL.md found and exit"
+      },
+      {
+        "case": "package_skill.py is called without a path",
+        "behaviour": "it prints its usage line and exits"
+      },
+      {
+        "case": "a run directory has no grading.json",
+        "behaviour": "aggregate_benchmark.py prints a warning and skips the run"
+      },
+      {
+        "case": "the workspace holds no runs",
+        "behaviour": "generate_review.py prints No runs found and exits"
+      },
+      {
+        "case": "a run gets empty feedback",
+        "behaviour": "empty feedback is read as the user finding the output fine"
+      }
+    ],
+    "exclusions": [
+      "not for skills that contain malware, exploit code or content that could compromise system security",
+      "not for misleading skills or skills designed to facilitate unauthorized access or data exfiltration"
+    ],
+    "adoption": [
+      {
+        "registry": "skills.sh",
+        "installs": "429.4K",
+        "first_seen": "2026-01-19",
+        "counts": "the skill",
+        "read": "2026-11-11"
+      },
+      {
+        "registry": "GitHub",
+        "stars": 192784,
+        "forks": 22682,
+        "counts": "the anthropics/skills repository, which holds 20 skills",
+        "read": "2026-11-11"
+      }
+    ]
+  },
+  "what_it_needs": {
+    "compatibility": {
+      "harnesses": "Claude Code, Claude.ai and Cowork, with description optimization only where the claude CLI is available",
+      "models": "not declared",
+      "capabilities": "not declared",
+      "fits": {
+        "Agent Skills specification": "fits, name 13 characters, description 319 characters, body 481 lines and about 8,202 tokens, over the recommended 5,000 tokens",
+        "Codex": "does not fit, SKILL.md is 33,168 bytes, 25,168 over the 8,000 byte cut on the injected file",
+        "Claude Code": "fits, 485 lines, listing text 319 characters",
+        "ClawHub": "fits, folder 224,992 bytes"
+      }
+    },
+    "software_dependencies": [
+      {
+        "name": "Python",
+        "kind": "runtime",
+        "version": "not declared",
+        "for": "run"
+      },
+      {
+        "name": "PyYAML, imported as yaml",
+        "kind": "package",
+        "version": "not declared",
+        "for": "run"
+      },
+      {
+        "name": "claude CLI",
+        "kind": "binary",
+        "version": "not declared",
+        "for": "run"
+      },
+      {
+        "name": "lsof",
+        "kind": "binary",
+        "version": "not declared",
+        "for": "run"
+      },
+      {
+        "name": "a web browser",
+        "kind": "binary",
+        "version": "not declared",
+        "for": "run"
+      },
+      {
+        "name": "SheetJS xlsx",
+        "kind": "package",
+        "version": "0.20.3",
+        "for": "run"
+      }
+    ],
+    "credentials": [
+      {
+        "kind": "other",
+        "name": "the session's Claude Code auth",
+        "used_for": "claude -p calls for trigger evals and description improvement",
+        "from": "unknown",
+        "goes_to": "the service behind the claude CLI, host not named in the files"
+      }
+    ],
+    "cost": {
+      "context_tokens": {
+        "discovery": 80,
+        "load": 8292,
+        "on_demand": 9693,
+        "on_demand_files": [
+          "agents/grader.md",
+          "agents/comparator.md",
+          "agents/analyzer.md",
+          "references/schemas.md"
+        ]
+      },
+      "run_tokens": "not examined",
+      "services": [
+        {
+          "name": "Claude through claude -p",
+          "needs": "account",
+          "price": "not declared",
+          "quota": "not declared",
+          "calls_per_use": "not declared"
+        }
+      ]
+    }
+  },
+  "what_it_touches": {
+    "side_effects": {
+      "install": "read only",
+      "run": "changes state",
+      "changes": [
+        {
+          "what": "creates and edits skill folders, workspace directories and JSON, Markdown and HTML files",
+          "affects": "workspace",
+          "confirmation": "not declared",
+          "reversible": "not declared"
+        },
+        {
+          "what": "writes a temporary command file into .claude/commands/ of the nearest parent with a .claude folder and deletes it after each query",
+          "affects": "workspace",
+          "confirmation": "no",
+          "reversible": "not declared"
+        },
+        {
+          "what": "starts a local HTTP server on 127.0.0.1 port 3117 and opens a browser",
+          "affects": "system",
+          "confirmation": "not declared",
+          "reversible": "yes"
+        },
+        {
+          "what": "sends SIGTERM to any process already listening on the viewer port",
+          "affects": "system",
+          "confirmation": "no",
+          "reversible": "no"
+        },
+        {
+          "what": "writes HTML reports and review pages into the system temp directory and opens them",
+          "affects": "system",
+          "confirmation": "not declared",
+          "reversible": "not declared"
+        },
+        {
+          "what": "writes a .skill zip file into the current or output directory",
+          "affects": "workspace",
+          "confirmation": "not declared",
+          "reversible": "not declared"
+        }
+      ]
+    },
+    "network_access": [
+      {
+        "host": "the service behind the claude CLI, not named in the files",
+        "purpose": "model call",
+        "when": "during trigger evals and each description improvement",
+        "sends": [
+          "query text",
+          "file content",
+          "credential"
+        ],
+        "receives": "stream events showing whether the skill triggered, and new descriptions"
+      },
+      {
+        "host": "cdn.sheetjs.com",
+        "purpose": "other",
+        "when": "when the eval viewer page loads",
+        "sends": [
+          "none"
+        ],
+        "receives": "the SheetJS xlsx library 0.20.3"
+      },
+      {
+        "host": "fonts.googleapis.com and fonts.gstatic.com",
+        "purpose": "other",
+        "when": "when the viewer, eval review or report pages load",
+        "sends": [
+          "none"
+        ],
+        "receives": "the Poppins and Lora fonts"
+      },
+      {
+        "host": "127.0.0.1, the local review server",
+        "purpose": "other",
+        "when": "while the eval viewer runs",
+        "sends": [
+          "user content"
+        ],
+        "receives": "the viewer page and saved feedback"
+      }
+    ],
+    "tools_and_permissions": {
+      "allowed_tools": "none",
+      "tools": [
+        {
+          "tool": "python with the bundled scripts and eval-viewer/generate_review.py",
+          "kind": "program",
+          "for": "trigger evals, description loop, benchmark aggregation, reports, viewer, validation and packaging",
+          "origin": "skill"
+        },
+        {
+          "tool": "claude -p",
+          "kind": "program",
+          "for": "testing whether a description triggers and proposing new descriptions",
+          "origin": "third party"
+        },
+        {
+          "tool": "subagents of the harness",
+          "kind": "agent tool",
+          "for": "with-skill and baseline runs, grading, blind comparison and analysis",
+          "origin": "built in"
+        },
+        {
+          "tool": "present_files",
+          "kind": "agent tool",
+          "for": "presenting the packaged .skill file",
+          "origin": "built in"
+        },
+        {
+          "tool": "available MCPs",
+          "kind": "external server",
+          "for": "researching docs, similar skills and best practices",
+          "origin": "third party"
+        },
+        {
+          "tool": "nohup, kill, cp -r and open",
+          "kind": "shell command",
+          "for": "launching and stopping the viewer, snapshotting a skill, opening the eval review page",
+          "origin": "third party"
+        },
+        {
+          "tool": "lsof",
+          "kind": "program",
+          "for": "finding processes on the viewer port",
+          "origin": "third party"
+        },
+        {
+          "tool": "TodoList",
+          "kind": "agent tool",
+          "for": "tracking the steps of the loop",
+          "origin": "built in"
+        }
+      ]
+    },
+    "machine_access": {
+      "paths": [
+        {
+          "path": "the skill folder being created or edited",
+          "operation": "write",
+          "scope": "unknown"
+        },
+        {
+          "path": "<skill-name>-workspace/ next to the skill directory",
+          "operation": "write",
+          "scope": "workspace"
+        },
+        {
+          "path": "evals/evals.json in the skill directory",
+          "operation": "write",
+          "scope": "workspace"
+        },
+        {
+          "path": ".claude/commands/<skill-name>-skill-<id>.md in the nearest parent with a .claude folder",
+          "operation": "write",
+          "scope": "unknown"
+        },
+        {
+          "path": ".claude/commands/<skill-name>-skill-<id>.md after each query",
+          "operation": "delete",
+          "scope": "unknown"
+        },
+        {
+          "path": "~/Downloads/eval_set.json",
+          "operation": "read",
+          "scope": "user home"
+        },
+        {
+          "path": "/tmp/eval_review_<skill-name>.html and skill_description_report_*.html in the system temp directory",
+          "operation": "write",
+          "scope": "system"
+        },
+        {
+          "path": "/tmp/skill-name/, a copy of an installed skill for editing",
+          "operation": "write",
+          "scope": "system"
+        },
+        {
+          "path": "the skill-creator folder, agents, references, assets and eval-viewer/viewer.html",
+          "operation": "read",
+          "scope": "skill folder"
+        },
+        {
+          "path": "<skill-name>.skill in the current or output directory",
+          "operation": "write",
+          "scope": "unknown"
+        }
+      ],
+      "settings": [
+        {
+          "name": "CLAUDECODE",
+          "access": "set",
+          "reason": "removed from the environment of claude -p to allow nesting inside a Claude Code session"
+        },
+        {
+          "name": "VIEWER_PID",
+          "access": "set",
+          "reason": "to kill the viewer server when done"
+        }
+      ]
+    }
+  },
+  "what_is_known": {
+    "checks": [
+      {
+        "id": "C1",
+        "tool": "Snyk, skills.sh audit, version not stated",
+        "date": "2026-09-15",
+        "scope": "unknown",
+        "result": "pass, risk level LOW, no issues detected",
+        "report": "https://skills.sh/anthropics/skills/skill-creator/security/snyk"
+      },
+      {
+        "id": "C2",
+        "tool": "Gen Agent Trust Hub, skills.sh audit, version not stated",
+        "date": "2026-09-15",
+        "scope": "the scripts, the eval viewer and the instructions, as cited in its analysis",
+        "result": "pass, risk level SAFE, four surfaces described, claude CLI subprocess calls, a local server on 127.0.0.1, an indirect prompt injection surface and SheetJS loaded from a CDN",
+        "report": "https://skills.sh/anthropics/skills/skill-creator/security/agent-trust-hub"
+      },
+      {
+        "id": "C3",
+        "tool": "Socket, skills.sh audit, version not stated",
+        "date": "2026-09-15",
+        "scope": "the skill package, hash d3f99a0544bca333074f0e74289d3c44c049f49257fbcda36355c85bb314e268",
+        "result": "warn, 1 alert, Anomaly LOW in eval-viewer/viewer.html, DOM XSS potential and unsandboxed iframe data URIs, confidence 55%, severity 68%",
+        "report": "https://skills.sh/anthropics/skills/skill-creator/security/socket"
+      }
+    ],
+    "vulnerabilities": [
+      {
+        "finding": "Anomaly, DOM XSS potential through container.innerHTML fed from EMBEDDED_DATA and iframe.src set to file.data_uri without sandboxing",
+        "check": "C3",
+        "severity": "LOW, severity 68%, confidence 55%",
+        "location": "eval-viewer/viewer.html",
+        "status": "open",
+        "fix": "review for strict escaping, URI validation and safe rendering or sandboxing"
+      }
+    ],
+    "risks": [
+      {
+        "risk": "Instructions hidden in user inputs, run outputs or transcripts reach the agent, since the skill reads and grades content it did not write.",
+        "source": "check C2",
+        "severity": "SAFE overall by C2",
+        "mitigation": "the instructions forbid creating malicious skills, per C2, no delimiting of read content is stated",
+        "taxonomy": "https://www.ibm.com/docs/en/watsonx/saas?topic=ai-risk-atlas"
+      },
+      {
+        "risk": "A crafted output file or eval data shown in the eval viewer could run script in the browser, since innerHTML and iframe src take embedded data without full escaping or sandboxing.",
+        "source": "check C3",
+        "severity": "LOW by C3, severity 68%",
+        "mitigation": "none stated",
+        "taxonomy": "not examined"
+      },
+      {
+        "risk": "Trigger evals and description improvement start claude -p subprocesses with the user's environment and session auth, up to 10 in parallel by default.",
+        "source": "check C2",
+        "severity": "none",
+        "mitigation": "argument lists are used against command injection, per C2, in place",
+        "taxonomy": "not examined"
+      },
+      {
+        "risk": "A changed copy of SheetJS on the CDN would run in the viewer page.",
+        "source": "check C2",
+        "severity": "none",
+        "mitigation": "the script tag carries a sha384 integrity hash, in place",
+        "taxonomy": "not examined"
+      },
+      {
+        "risk": "Starting the viewer ends any other process already listening on port 3117, since generate_review.py sends it SIGTERM without asking.",
+        "source": "model",
+        "severity": "none",
+        "mitigation": "none stated, the --static option writes a file instead of starting a server",
+        "taxonomy": "not examined"
+      }
+    ],
+    "limitations": [
+      "Description optimization needs the claude CLI, which is only available in Claude Code, so it is skipped on Claude.ai.",
+      "Without subagents, as on Claude.ai, test cases run one at a time without baselines and quantitative benchmarking is skipped.",
+      "Blind comparison requires subagents.",
+      "Simple one-step queries may not trigger a skill even when the description matches, so trigger evals need substantive queries.",
+      "Timing data comes only through the task notification and is not persisted elsewhere.",
+      "Without a display the viewer cannot open a browser, so it is written as a static HTML file and feedback is downloaded as feedback.json.",
+      "Packaging and presenting happen only if the present_files tool is available.",
+      "The installed skill path may be read-only, so a copy is edited in /tmp/.",
+      "Descriptions over 1024 characters are truncated, and quick_validate.py rejects descriptions with angle brackets.",
+      "No dependency except SheetJS carries a version."
+    ],
+    "known_problems": [
+      {
+        "problem": "Cowork disinclines Claude from generating the eval viewer after running the tests",
+        "workaround": "generate the viewer with generate_review.py before evaluating outputs yourself"
+      },
+      {
+        "problem": "severe timeouts in Cowork",
+        "workaround": "run the test prompts in series rather than parallel"
+      },
+      {
+        "problem": "the viewer shows empty or zero values",
+        "workaround": "use the exact field names text, passed, evidence and configuration from references/schemas.md"
+      },
+      {
+        "problem": "the viewer port is still in use",
+        "workaround": "generate_review.py kills the process on the port or picks a free port"
+      },
+      {
+        "problem": "a proposed description is over 1024 characters",
+        "workaround": "one more call asks for a rewrite under the limit"
+      },
+      {
+        "problem": "direct writes may fail due to permissions when packaging",
+        "workaround": "stage in /tmp/ first, then copy to the output directory"
+      },
+      {
+        "problem": "several exported eval sets in Downloads",
+        "workaround": "use the most recent, for instance eval_set (1).json"
+      }
+    ],
+    "evaluations": "none"
+  },
+  "who_stands_behind_it": {
+    "authorship": {
+      "author": "Anthropic, PBC, from the license file",
+      "publisher": "the anthropics organisation on GitHub",
+      "signer": "none",
+      "contact": "not declared"
+    },
+    "license": {
+      "frontmatter": "not declared",
+      "license_file": "LICENSE.txt, Apache License, Version 2.0, January 2004, copyright 2026 Anthropic, PBC",
+      "registry": "not declared",
+      "repository": "none"
+    },
+    "maintenance": {
+      "last_change": "2026-04-20",
+      "registry_update": "not declared",
+      "deprecated": "not declared",
+      "first_seen": "2025-12-01",
+      "content_changes": 4,
+      "releases": 0,
+      "last_release": "none"
+    }
+  },
+  "which_files": {
+    "version": {
+      "hash": "sha256:f6e18a2581b8926895a5b07e968d7b69c1ea2798e7b176aa8de409869e08a394",
+      "left_out": "none",
+      "author_version": "not declared",
+      "registry_version": "not declared",
+      "commit": "2c5958ec"
+    },
+    "source": {
+      "kind": "repository",
+      "location": "GitHub anthropics/skills, path skills/skill-creator",
+      "commit": "2c5958ec",
+      "retrieved": "2026-11-11",
+      "also_listed_on": "skills.sh, https://skills.sh/anthropics/skills/skill-creator",
+      "homepage": "not declared",
+      "produced_by": "none"
+    },
+    "files": [
+      {
+        "path": "LICENSE.txt",
+        "bytes": 11345,
+        "sha256": "bc6b3af2f331cbc7fb0da1344efb2cbe5877a31498b4d70dbc7000f3405a1362",
+        "kind": "document",
+        "in_hash": true,
+        "executable": false
+      },
+      {
+        "path": "SKILL.md",
+        "bytes": 33168,
+        "sha256": "dcd4803e61e913e6fc27294184cd3a71f09f5e924ff20c8a9a20173e7b3c2bcf",
+        "kind": "document",
+        "in_hash": true,
+        "executable": false
+      },
+      {
+        "path": "agents/analyzer.md",
+        "bytes": 10376,
+        "sha256": "bf68f4cac5a56c673a928c2e6d619586c5b93ea364026ab37547772cb45a663a",
+        "kind": "document",
+        "in_hash": true,
+        "executable": false
+      },
+      {
+        "path": "agents/comparator.md",
+        "bytes": 7287,
+        "sha256": "fe1fc9787c495d864c5d6eada47396478572325fde1b33a96d78bf4b849b7a3e",
+        "kind": "document",
+        "in_hash": true,
+        "executable": false
+      },
+      {
+        "path": "agents/grader.md",
+        "bytes": 9049,
+        "sha256": "57134da0c1a4eea33fbd74a1c9c44aa814f07d6bc64de303edb586f941e5d21a",
+        "kind": "document",
+        "in_hash": true,
+        "executable": false
+      },
+      {
+        "path": "assets/eval_review.html",
+        "bytes": 7058,
+        "sha256": "ce477dcc74dc1c0d1d3352646a79167b5a63634e936b1019160025065974e452",
+        "kind": "document",
+        "in_hash": true,
+        "executable": false
+      },
+      {
+        "path": "eval-viewer/generate_review.py",
+        "bytes": 16365,
+        "sha256": "fc9d1b9243fe5ab6012ebd579bd76d0035de1b79fd3b969de114defab26478fb",
+        "kind": "script",
+        "in_hash": true,
+        "executable": false
+      },
+      {
+        "path": "eval-viewer/viewer.html",
+        "bytes": 44998,
+        "sha256": "a53213426ee1100441d701a3a0d49cda7a842f992d2c36463f4d3cc0258575fa",
+        "kind": "document",
+        "in_hash": true,
+        "executable": false
+      },
+      {
+        "path": "references/schemas.md",
+        "bytes": 12061,
+        "sha256": "8e8876180a8989b406a4d3edddf875b04cdfd5805cc8616686d552b11ce4455f",
+        "kind": "document",
+        "in_hash": true,
+        "executable": false
+      },
+      {
+        "path": "scripts/__init__.py",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "kind": "script",
+        "in_hash": true,
+        "executable": false
+      },
+      {
+        "path": "scripts/aggregate_benchmark.py",
+        "bytes": 14386,
+        "sha256": "123ef128ea5ccc01a4b1ac212ef5567f21e9c13d3d240609780beeb3200c49aa",
+        "kind": "script",
+        "in_hash": true,
+        "executable": true
+      },
+      {
+        "path": "scripts/generate_report.py",
+        "bytes": 12847,
+        "sha256": "13df7118a3c50c83c4c3250a606d5f2b20b25a3d44cbc392b3d669ec75281453",
+        "kind": "script",
+        "in_hash": true,
+        "executable": true
+      },
+      {
+        "path": "scripts/improve_description.py",
+        "bytes": 11116,
+        "sha256": "87d864570220b699fac52da309d2d6efdb060647bfebc74f768128e646accf80",
+        "kind": "script",
+        "in_hash": true,
+        "executable": true
+      },
+      {
+        "path": "scripts/package_skill.py",
+        "bytes": 4234,
+        "sha256": "1a33059b0db1ef73375d46d513e5ea81369d2e8838c970597b0d52ddef8d1c0f",
+        "kind": "script",
+        "in_hash": true,
+        "executable": true
+      },
+      {
+        "path": "scripts/quick_validate.py",
+        "bytes": 3972,
+        "sha256": "67cf5703402013936c8fb75ad6a1afecd8841d45cc5e606b634eb05825fde365",
+        "kind": "script",
+        "in_hash": true,
+        "executable": true
+      },
+      {
+        "path": "scripts/run_eval.py",
+        "bytes": 11464,
+        "sha256": "43e3b8f80dbf69c343967ba77e268fae991d9fa3ed68b32a0ff02532cd48657f",
+        "kind": "script",
+        "in_hash": true,
+        "executable": true
+      },
+      {
+        "path": "scripts/run_loop.py",
+        "bytes": 13605,
+        "sha256": "7bd6f674203168520517eec94c55f493c0d154339b061b4d7c0f0dad187d0f21",
+        "kind": "script",
+        "in_hash": true,
+        "executable": true
+      },
+      {
+        "path": "scripts/utils.py",
+        "bytes": 1661,
+        "sha256": "3af8ae62c40c73ab712207436a0d9a981e845f25c5a7040229eb189cc8e45bb1",
+        "kind": "script",
+        "in_hash": true,
+        "executable": false
+      }
+    ],
+    "counts": {
+      "script": 10,
+      "document": 8,
+      "data": 0,
+      "binary": 0
+    },
+    "composition": "instructions with scripts"
+  },
+  "about_this_card": {
+    "schema": "Skill Card v1.2",
+    "date": "2026-11-11",
+    "by": "Claude Opus 5.5, claude-opus-5-5, by hand from the skill files, the skills.sh listing and audits, and GitHub metadata, with the hash, file list, sizes, harness limits and repository figures computed by script",
+    "skill_run": false,
+    "scripts_analysed": false,
+    "security_check_run": false,
+    "external_service_contacted": false,
+    "registry_read": true,
+    "empty_values": 49
+  }
+}

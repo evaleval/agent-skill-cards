@@ -1,0 +1,372 @@
+{
+  "schema": "Skill Card v1.2",
+  "skill": "test-driven-development",
+  "version": "obra/superpowers at 22f0b463",
+  "what_it_does": {
+    "name": "test-driven-development",
+    "summary": "Instructions in two Markdown documents for test-driven development by an agent, with no scripts. Write the test first, watch it fail for the expected reason, write minimal code to pass, then refactor while the project's whole suite stays green, and delete any production code written before its test. A reference on writing good tests covers naming the break each test catches, asserting real behavior instead of mock behavior, and a mutation check. Use it when implementing any feature or bugfix, before writing implementation code.",
+    "tasks": [
+      "write one minimal failing test before any production code",
+      "verify the test fails because the feature is missing",
+      "write the simplest code to pass, then refactor while green",
+      "fix a bug by first writing a failing test that reproduces it",
+      "write tests that assert real behavior, not mock behavior",
+      "run the project's whole test suite before calling a change done",
+      "check every box of the verification checklist before marking work complete"
+    ],
+    "author_description": "Use when implementing any feature or bugfix, before writing implementation code",
+    "outputs": [
+      {
+        "what": "tests, one behavior each with a clear name",
+        "kind": "information",
+        "form": "test files in the project's language, for instance TypeScript",
+        "destination": "the project's test files, for instance path/to/test.test.ts"
+      },
+      {
+        "what": "minimal production code that makes the tests pass",
+        "kind": "information",
+        "form": "source code",
+        "destination": "the project's source files"
+      },
+      {
+        "what": "test runs, failing first and then passing",
+        "kind": "information",
+        "form": "terminal text from the project's test command",
+        "destination": "the terminal the agent runs the tests in"
+      },
+      {
+        "what": "a report naming every test failure the full suite run shows, including ones the agent did not cause",
+        "kind": "information",
+        "form": "a message",
+        "destination": "the agent's report to the user"
+      }
+    ],
+    "sample_output": "FAIL: expected 'Email required', got undefined",
+    "inputs": [
+      {
+        "what": "a feature or bug fix to implement",
+        "type": "a task in natural language",
+        "required": "required",
+        "for": "every task",
+        "example": "Bug: Empty email accepted"
+      },
+      {
+        "what": "the project's test command",
+        "type": "a shell command the repository uses",
+        "required": "required",
+        "for": "verifying red and green",
+        "example": "npm test path/to/test.test.ts"
+      },
+      {
+        "what": "the human partner's permission",
+        "type": "a decision by the user",
+        "required": "conditional",
+        "for": "skipping TDD for throwaway prototypes, generated code or configuration files",
+        "example": "not declared"
+      }
+    ],
+    "when_input_is_missing": [
+      {
+        "case": "the agent does not know how to test the feature",
+        "behaviour": "write the wished-for API, write the assertion first, ask your human partner"
+      },
+      {
+        "case": "a case looks like an exception to TDD",
+        "behaviour": "ask your human partner, no exceptions without their permission"
+      }
+    ],
+    "exclusions": [
+      "throwaway prototypes, after asking your human partner",
+      "generated code, after asking your human partner",
+      "configuration files, after asking your human partner"
+    ],
+    "adoption": [
+      {
+        "registry": "skills.sh",
+        "installs": "276.3K",
+        "first_seen": "2026-01-19",
+        "counts": "the skill",
+        "read": "2026-11-11"
+      },
+      {
+        "registry": "GitHub",
+        "stars": 315991,
+        "forks": 28109,
+        "counts": "the obra/superpowers repository, which holds 15 skills",
+        "read": "2026-11-11"
+      }
+    ]
+  },
+  "what_it_needs": {
+    "compatibility": {
+      "harnesses": "not declared",
+      "models": "not declared",
+      "capabilities": "not declared",
+      "fits": {
+        "Agent Skills specification": "fits, name 23 characters, description 79 characters, body 326 lines and about 2,362 tokens",
+        "Codex": "does not fit, SKILL.md is 9,578 bytes, 1,578 over the 8,000 byte cut on the injected file",
+        "Claude Code": "fits, 330 lines, listing text 79 characters",
+        "ClawHub": "fits, folder 17,846 bytes"
+      }
+    },
+    "software_dependencies": [
+      {
+        "name": "npm",
+        "kind": "binary",
+        "version": "not declared",
+        "for": "example"
+      },
+      {
+        "name": "jest",
+        "kind": "package",
+        "version": "not declared",
+        "for": "example"
+      },
+      {
+        "name": "pytest",
+        "kind": "binary",
+        "version": "not declared",
+        "for": "example"
+      },
+      {
+        "name": "cargo",
+        "kind": "binary",
+        "version": "not declared",
+        "for": "example"
+      }
+    ],
+    "credentials": "none",
+    "cost": {
+      "context_tokens": {
+        "discovery": 20,
+        "load": 2395,
+        "on_demand": 2067,
+        "on_demand_files": [
+          "writing-good-tests.md"
+        ]
+      },
+      "run_tokens": "not examined",
+      "services": "none"
+    }
+  },
+  "what_it_touches": {
+    "side_effects": {
+      "install": "read only",
+      "run": "changes state",
+      "changes": [
+        {
+          "what": "writes test files and production code",
+          "affects": "workspace",
+          "confirmation": "not declared",
+          "reversible": "not declared"
+        },
+        {
+          "what": "deletes production code written before its test, without keeping it as reference",
+          "affects": "workspace",
+          "confirmation": "not declared",
+          "reversible": "not declared"
+        }
+      ]
+    },
+    "network_access": "none",
+    "tools_and_permissions": {
+      "allowed_tools": "none",
+      "tools": [
+        {
+          "tool": "the project's test command, such as npm test, pytest or cargo test",
+          "kind": "shell command",
+          "for": "watching a test fail and pass, and running the whole suite",
+          "origin": "third party"
+        },
+        {
+          "tool": "shell and file tools of the agent",
+          "kind": "agent tool",
+          "for": "writing and deleting code and running the test command",
+          "origin": "built in"
+        }
+      ]
+    },
+    "machine_access": {
+      "paths": [
+        {
+          "path": "test files of the project, for instance path/to/test.test.ts",
+          "operation": "write",
+          "scope": "workspace"
+        },
+        {
+          "path": "production source files of the project",
+          "operation": "write",
+          "scope": "workspace"
+        },
+        {
+          "path": "production code written before its test",
+          "operation": "delete",
+          "scope": "workspace"
+        },
+        {
+          "path": "writing-good-tests.md in the skill folder",
+          "operation": "read",
+          "scope": "skill folder"
+        }
+      ],
+      "settings": "none"
+    }
+  },
+  "what_is_known": {
+    "checks": [
+      {
+        "id": "C1",
+        "tool": "Snyk, skills.sh audit, version not stated",
+        "date": "2026-09-19",
+        "scope": "unknown",
+        "result": "pass, risk level LOW, no issues detected",
+        "report": "https://skills.sh/obra/superpowers/test-driven-development/security/snyk"
+      },
+      {
+        "id": "C2",
+        "tool": "Gen Agent Trust Hub, skills.sh audit, version not stated",
+        "date": "2026-09-19",
+        "scope": "SKILL.md, as quoted in its analysis",
+        "result": "pass, risk level SAFE, PROMPT_INJECTION described, high-pressure imperative language and instructions to delete code that could lose work without user confirmation",
+        "report": "https://skills.sh/obra/superpowers/test-driven-development/security/agent-trust-hub"
+      },
+      {
+        "id": "C3",
+        "tool": "Socket, skills.sh audit, version not stated",
+        "date": "2026-09-19",
+        "scope": "the skill package, hash 8e8772822d25e4dfc9295cf4526c6251a10458c7417ac50c4b42e5d9fc91e0b0",
+        "result": "pass, checks for malicious behavior, security concerns, code obfuscation and suspicious patterns",
+        "report": "https://skills.sh/obra/superpowers/test-driven-development/security/socket"
+      }
+    ],
+    "vulnerabilities": "none",
+    "risks": [
+      {
+        "risk": "Code the user wanted to keep is lost when the agent applies the rule to delete code written before its test literally and without asking the user.",
+        "source": "check C2",
+        "severity": "SAFE overall by C2",
+        "mitigation": "none stated for the deletion, exceptions to TDD need the human partner's permission",
+        "taxonomy": "not examined"
+      },
+      {
+        "risk": "Absolute rules that label alternative reasoning as rationalization override the agent's usual procedure, so the agent may hold to the process where the situation called for another approach.",
+        "source": "check C2",
+        "severity": "SAFE overall by C2",
+        "mitigation": "exceptions are to be asked of the human partner, in place in the files",
+        "taxonomy": "not examined"
+      },
+      {
+        "risk": "Running the project's whole test suite, required even when the task names one test file, executes every test in the repository with the agent's privileges, including tests with side effects.",
+        "source": "model",
+        "severity": "none",
+        "mitigation": "none stated",
+        "taxonomy": "not examined"
+      }
+    ],
+    "limitations": "not declared",
+    "known_problems": [
+      {
+        "problem": "the new test passes immediately",
+        "workaround": "it tests existing behavior, fix the test"
+      },
+      {
+        "problem": "the new test errors instead of failing",
+        "workaround": "fix the error and re-run until it fails correctly"
+      },
+      {
+        "problem": "the test is too complicated",
+        "workaround": "simplify the interface"
+      },
+      {
+        "problem": "everything must be mocked",
+        "workaround": "the code is too coupled, use dependency injection"
+      },
+      {
+        "problem": "the test setup is huge",
+        "workaround": "extract helpers, and if still complex, simplify the design"
+      },
+      {
+        "problem": "mock setup outgrows the test logic",
+        "workaround": "switch to an integration test with real components"
+      }
+    ],
+    "evaluations": "none"
+  },
+  "who_stands_behind_it": {
+    "authorship": {
+      "author": "not declared",
+      "publisher": "the obra account on GitHub",
+      "signer": "none",
+      "contact": "not declared"
+    },
+    "license": {
+      "frontmatter": "not declared",
+      "license_file": "none",
+      "registry": "not declared",
+      "repository": "MIT, as GitHub detects it"
+    },
+    "maintenance": {
+      "last_change": "2026-09-19",
+      "registry_update": "not declared",
+      "deprecated": "not declared",
+      "first_seen": "2025-10-16",
+      "content_changes": 12,
+      "releases": 17,
+      "last_release": "2026-11-03"
+    }
+  },
+  "which_files": {
+    "version": {
+      "hash": "sha256:5f2300c235f200c5c728c64744725deacd66c2fc617638f50db147607e74632c",
+      "left_out": "none",
+      "author_version": "not declared",
+      "registry_version": "not declared",
+      "commit": "22f0b463"
+    },
+    "source": {
+      "kind": "repository",
+      "location": "GitHub obra/superpowers, path skills/test-driven-development",
+      "commit": "22f0b463",
+      "retrieved": "2026-11-11",
+      "also_listed_on": "skills.sh, https://skills.sh/obra/superpowers/test-driven-development",
+      "homepage": "not declared",
+      "produced_by": "none"
+    },
+    "files": [
+      {
+        "path": "SKILL.md",
+        "bytes": 9578,
+        "sha256": "64b03fce4aee5a97a93160cea8111f3ba13a17b7c001db4bd5836d67fd10705d",
+        "kind": "document",
+        "in_hash": true,
+        "executable": false
+      },
+      {
+        "path": "writing-good-tests.md",
+        "bytes": 8268,
+        "sha256": "51471c853306ff92ca8bb41dcaea05f31c0e46b03651f8f3c99754b7172f4ae1",
+        "kind": "document",
+        "in_hash": true,
+        "executable": false
+      }
+    ],
+    "counts": {
+      "script": 0,
+      "document": 2,
+      "data": 0,
+      "binary": 0
+    },
+    "composition": "instructions only"
+  },
+  "about_this_card": {
+    "schema": "Skill Card v1.2",
+    "date": "2026-11-11",
+    "by": "Claude Opus 5.5, claude-opus-5-5, by hand from the skill files, the skills.sh listing and audits, and GitHub metadata, with the hash, file list, sizes, harness limits and repository figures computed by script",
+    "skill_run": false,
+    "scripts_analysed": false,
+    "security_check_run": false,
+    "external_service_contacted": false,
+    "registry_read": true,
+    "empty_values": 39
+  }
+}

@@ -1,0 +1,657 @@
+{
+  "schema": "Skill Card v1.2",
+  "skill": "google-agents-cli-adk-code",
+  "version": "google/agents-cli at 896e4719",
+  "what_it_does": {
+    "name": "google-agents-cli-adk-code",
+    "summary": "Reference documents for writing agent code with ADK (Agent Development Kit) in Python and Go. Cheatsheets cover agent types, tools, callbacks, plugins, state, memory, artifacts, multi-agent orchestration, the graph Workflow API and live voice agents, and a topic index maps each capability to a recipe in google/adk-recipes to clone and study. The result is agent code written into a project already scaffolded with agents-cli. Use it when the user wants to write agent code, add a tool, create a callback or define an agent with ADK, not for scaffolding or deployment.",
+    "tasks": [
+      "write ADK agents, tools and callbacks in Python or Go",
+      "orchestrate multi-agent systems with sequential, parallel and loop agents",
+      "build graph workflows with routing, fan-out, fan-in and human-in-the-loop",
+      "build live voice and video agents with run_live",
+      "find and study the reference recipe for a capability",
+      "look up ADK docs through the llms.txt index or the installed package"
+    ],
+    "author_description": "This skill should be used when the user wants to \"write agent code\", \"build an agent with ADK\", \"add a tool\", \"create a callback\", \"define an agent\", \"use state management\" — in a project that needs ADK (Agent Development Kit) API patterns and code examples. It provides a quick reference for agent types, tool definitions, orchestration patterns, callbacks, state management, the graph Workflow API, and reference recipes to study. Do NOT use for scaffolding (use google-agents-cli-scaffold) or deployment (use google-agents-cli-deploy).",
+    "outputs": [
+      {
+        "what": "agent code, tools, callbacks and workflows",
+        "kind": "information",
+        "form": "Python or Go source files",
+        "destination": "the scaffolded project, for instance app/agent.py or app/agent.go"
+      },
+      {
+        "what": "integration tests rewritten for a Live agent",
+        "kind": "information",
+        "form": "Python test files",
+        "destination": "tests/integration/test_agent.py and tests/integration/test_server_e2e.py"
+      },
+      {
+        "what": "the recipe that implements a needed capability",
+        "kind": "recommendation",
+        "form": "text in the conversation",
+        "destination": "the conversation with the user"
+      },
+      {
+        "what": "a sparse clone of google/adk-recipes",
+        "kind": "information",
+        "form": "git checkout",
+        "destination": "/tmp/adk-recipes"
+      }
+    ],
+    "sample_output": "agent.py, Contains root_agent definition",
+    "inputs": [
+      {
+        "what": "a project scaffolded with agents-cli",
+        "type": "a project directory with agents-cli config",
+        "required": "required",
+        "for": "writing agent code",
+        "example": "agents-cli info"
+      },
+      {
+        "what": "the capability or question the user has",
+        "type": "a request in natural language",
+        "required": "required",
+        "for": "every task",
+        "example": "how do I build X"
+      },
+      {
+        "what": "a spec agreed with the user",
+        "type": "the spec of workflow Phase 0",
+        "required": "conditional",
+        "for": "a new project with no code yet",
+        "example": "not declared"
+      },
+      {
+        "what": "the language of the agent",
+        "type": "Python or Go",
+        "required": "required",
+        "for": "choosing the reference to read",
+        "example": "not declared"
+      }
+    ],
+    "when_input_is_missing": [
+      {
+        "case": "no project is scaffolded",
+        "behaviour": "no agent code is written, /google-agents-cli-workflow is loaded and the spec agreed with the user before scaffolding"
+      },
+      {
+        "case": "existing code without agents-cli config",
+        "behaviour": "agents-cli scaffold enhance . is run first"
+      },
+      {
+        "case": "no core recipe covers the capability",
+        "behaviour": "check contrib/ or build it yourself, without guessing at a recipe name"
+      }
+    ],
+    "exclusions": [
+      "not for scaffolding, use google-agents-cli-scaffold",
+      "not for deployment, use google-agents-cli-deploy",
+      "the Live reference is not for turn-based request and response agents, use a normal Agent with run_async"
+    ],
+    "adoption": [
+      {
+        "registry": "skills.sh",
+        "installs": "564.9K",
+        "first_seen": "2026-04-21",
+        "counts": "the skill",
+        "read": "2026-11-11"
+      },
+      {
+        "registry": "GitHub",
+        "stars": 6339,
+        "forks": 733,
+        "counts": "the google/agents-cli repository, which holds 9 skills",
+        "read": "2026-11-11"
+      }
+    ]
+  },
+  "what_it_needs": {
+    "compatibility": {
+      "harnesses": "not declared",
+      "models": "not declared",
+      "capabilities": "not declared",
+      "fits": {
+        "Agent Skills specification": "fits, name 26 characters, description 538 characters, body 52 lines and about 909 tokens",
+        "Codex": "fits, SKILL.md is 4,407 bytes, under the 8,000 byte cut",
+        "Claude Code": "fits, 73 lines, listing text 538 characters",
+        "ClawHub": "fits, folder 145,336 bytes"
+      }
+    },
+    "software_dependencies": [
+      {
+        "name": "agents-cli",
+        "kind": "binary",
+        "version": "not declared",
+        "for": "run"
+      },
+      {
+        "name": "google-agents-cli",
+        "kind": "package",
+        "version": "not declared",
+        "for": "install"
+      },
+      {
+        "name": "uv",
+        "kind": "binary",
+        "version": "not declared",
+        "for": "install"
+      },
+      {
+        "name": "git",
+        "kind": "binary",
+        "version": "not declared",
+        "for": "run"
+      },
+      {
+        "name": "curl",
+        "kind": "binary",
+        "version": "not declared",
+        "for": "run"
+      },
+      {
+        "name": "google-adk",
+        "kind": "package",
+        "version": ">= 2.0.0 for the Workflow API, >= 2.4.0 for ManagedAgent",
+        "for": "example"
+      },
+      {
+        "name": "Python",
+        "kind": "runtime",
+        "version": ">= 3.11 for the Workflow API",
+        "for": "example"
+      },
+      {
+        "name": "google.golang.org/adk/v2",
+        "kind": "package",
+        "version": "v2.1.0 as the adk_go template pins, >= v2.0.0 for workflows",
+        "for": "example"
+      },
+      {
+        "name": "Go",
+        "kind": "runtime",
+        "version": "not declared",
+        "for": "example"
+      },
+      {
+        "name": "google-adk[a2a] and the mcp extra",
+        "kind": "package",
+        "version": "not declared",
+        "for": "example"
+      },
+      {
+        "name": "a2ui-agent-sdk",
+        "kind": "package",
+        "version": "not declared",
+        "for": "example"
+      },
+      {
+        "name": "Node.js and npx",
+        "kind": "runtime",
+        "version": "not declared",
+        "for": "example"
+      }
+    ],
+    "credentials": [
+      {
+        "kind": "API key",
+        "name": "GEMINI_API_KEY or GOOGLE_API_KEY",
+        "used_for": "Gemini models on AI Studio and managed agents on the Gemini API",
+        "from": "environment variable",
+        "goes_to": "the Gemini API, host not named in the files"
+      },
+      {
+        "kind": "token",
+        "name": "Application Default Credentials from gcloud auth application-default login",
+        "used_for": "Gemini platform, Agent Runtime and authenticated MCP toolsets",
+        "from": "unknown",
+        "goes_to": "{location}-aiplatform.googleapis.com and the MCP server"
+      },
+      {
+        "kind": "API key",
+        "name": "OPENAI_API_KEY",
+        "used_for": "OpenAI models from ADK Go",
+        "from": "environment variable",
+        "goes_to": "the endpoint in OPENAI_BASE_URL"
+      },
+      {
+        "kind": "token",
+        "name": "ID token from fetch_id_token",
+        "used_for": "calling a remote MCP server on Cloud Run",
+        "from": "unknown",
+        "goes_to": "the MCP server at MCP_SERVER_URL"
+      },
+      {
+        "kind": "other",
+        "name": "OAuth2 client_id and client_secret, service account, API key for tools",
+        "used_for": "authenticating tools and OpenAPI toolsets",
+        "from": "unknown",
+        "goes_to": "the API the tool calls"
+      }
+    ],
+    "cost": {
+      "context_tokens": {
+        "discovery": 135,
+        "load": 1102,
+        "on_demand": 35234,
+        "on_demand_files": [
+          "references/recipes.md",
+          "references/adk-python.md",
+          "references/adk-python-workflows.md",
+          "references/adk-python-live.md",
+          "references/adk-go.md",
+          "references/adk-go-workflows.md"
+        ]
+      },
+      "run_tokens": "not examined",
+      "services": [
+        {
+          "name": "Gemini Live API",
+          "needs": "API key",
+          "price": "not declared",
+          "quota": "audio-only sessions 15 min, audio and video 2 min, connection about 10 min, absent compression",
+          "calls_per_use": "not declared"
+        },
+        {
+          "name": "Agent Runtime in Gemini platform",
+          "needs": "account",
+          "price": "not declared",
+          "quota": "Live sessions 10 min, absent compression",
+          "calls_per_use": "not declared"
+        },
+        {
+          "name": "Pub/Sub and Eventarc",
+          "needs": "account",
+          "price": "not declared",
+          "quota": "10-minute processing limit",
+          "calls_per_use": "not declared"
+        }
+      ]
+    }
+  },
+  "what_it_touches": {
+    "side_effects": {
+      "install": "changes state",
+      "run": "changes state",
+      "changes": [
+        {
+          "what": "writes and edits agent code, tests and dependencies in the project",
+          "affects": "workspace",
+          "confirmation": "not declared",
+          "reversible": "not declared"
+        },
+        {
+          "what": "deletes app/app_utils/a2a.py and the A2A tests when converting a project to Live",
+          "affects": "workspace",
+          "confirmation": "not declared",
+          "reversible": "not declared"
+        },
+        {
+          "what": "runs agents-cli scaffold enhance . on existing code",
+          "affects": "workspace",
+          "confirmation": "not declared",
+          "reversible": "not declared"
+        },
+        {
+          "what": "clones google/adk-recipes into /tmp/adk-recipes",
+          "affects": "system",
+          "confirmation": "not declared",
+          "reversible": "not declared"
+        },
+        {
+          "what": "installs google-agents-cli with uv tool install",
+          "affects": "software environment",
+          "confirmation": "not declared",
+          "reversible": "not declared"
+        },
+        {
+          "what": "deploys a Live agent with agents-cli deploy",
+          "affects": "external service",
+          "confirmation": "not declared",
+          "reversible": "not declared"
+        }
+      ]
+    },
+    "network_access": [
+      {
+        "host": "adk.dev",
+        "purpose": "data source",
+        "when": "when the docs index llms.txt and a docs page are fetched",
+        "sends": [
+          "none"
+        ],
+        "receives": "the docs index and pages"
+      },
+      {
+        "host": "github.com",
+        "purpose": "data source",
+        "when": "when google/adk-recipes or the google/adk-go examples are cloned",
+        "sends": [
+          "none"
+        ],
+        "receives": "recipe and example source code"
+      },
+      {
+        "host": "package index, not named in the files",
+        "purpose": "install",
+        "when": "when google-agents-cli is installed with uv",
+        "sends": [
+          "none"
+        ],
+        "receives": "the package"
+      },
+      {
+        "host": "{location}-aiplatform.googleapis.com",
+        "purpose": "model call",
+        "when": "when an agent deployed to Agent Runtime is called or a Live session runs",
+        "sends": [
+          "credential",
+          "user content"
+        ],
+        "receives": "agent events and audio"
+      }
+    ],
+    "tools_and_permissions": {
+      "allowed_tools": "none",
+      "tools": [
+        {
+          "tool": "agents-cli info, scaffold enhance, playground, run, eval run, deploy",
+          "kind": "program",
+          "for": "checking the project, enhancing it, testing and evaluating agents",
+          "origin": "third party"
+        },
+        {
+          "tool": "git clone and git sparse-checkout",
+          "kind": "shell command",
+          "for": "fetching a recipe to study",
+          "origin": "third party"
+        },
+        {
+          "tool": "curl https://adk.dev/llms.txt",
+          "kind": "shell command",
+          "for": "fetching the docs index",
+          "origin": "third party"
+        },
+        {
+          "tool": "uv tool install google-agents-cli",
+          "kind": "shell command",
+          "for": "installing agents-cli",
+          "origin": "third party"
+        },
+        {
+          "tool": "python -c \"import google.adk; print(google.adk.__path__[0])\"",
+          "kind": "shell command",
+          "for": "finding the installed ADK package",
+          "origin": "third party"
+        },
+        {
+          "tool": "WebFetch, Glob, Grep and Read",
+          "kind": "agent tool",
+          "for": "reading docs pages and the installed ADK source",
+          "origin": "built in"
+        }
+      ]
+    },
+    "machine_access": {
+      "paths": [
+        {
+          "path": "the project, app/agent.py, app/agent.go, app/fast_api_app.py, tests/ and .env",
+          "operation": "write",
+          "scope": "workspace"
+        },
+        {
+          "path": "app/app_utils/a2a.py when converting to Live",
+          "operation": "delete",
+          "scope": "workspace"
+        },
+        {
+          "path": "/tmp/adk-recipes",
+          "operation": "write",
+          "scope": "system"
+        },
+        {
+          "path": "the installed google/adk package",
+          "operation": "read",
+          "scope": "unknown"
+        },
+        {
+          "path": "references/ in the skill folder",
+          "operation": "read",
+          "scope": "skill folder"
+        }
+      ],
+      "settings": [
+        {
+          "name": "GOOGLE_CLOUD_PROJECT, GOOGLE_CLOUD_LOCATION, GOOGLE_GENAI_USE_ENTERPRISE",
+          "access": "read",
+          "reason": "selecting the Gemini platform backend"
+        },
+        {
+          "name": "LIVE_MODEL and LIVE_LOCATION",
+          "access": "read",
+          "reason": "overriding the Live model and its region"
+        },
+        {
+          "name": "ADK_TRIGGER_MAX_CONCURRENT, ADK_TRIGGER_MAX_RETRIES, ADK_TRIGGER_RETRY_BASE_DELAY, ADK_TRIGGER_RETRY_MAX_DELAY",
+          "access": "read",
+          "reason": "limits of the trigger endpoints"
+        },
+        {
+          "name": "OPENAI_BASE_URL",
+          "access": "read",
+          "reason": "the OpenAI-compatible endpoint for ADK Go"
+        }
+      ]
+    }
+  },
+  "what_is_known": {
+    "checks": [
+      {
+        "id": "C1",
+        "tool": "Snyk, skills.sh audit, version not stated",
+        "date": "2026-11-04",
+        "scope": "unknown",
+        "result": "pass, risk level LOW, no issues detected",
+        "report": "https://skills.sh/google/agents-cli/google-agents-cli-adk-code/security/snyk"
+      },
+      {
+        "id": "C2",
+        "tool": "Gen Agent Trust Hub, skills.sh audit, version not stated",
+        "date": "2026-11-04",
+        "scope": "SKILL.md, the metadata and the reference files, as cited in its analysis",
+        "result": "pass, risk level SAFE, a flagged curl command judged a false positive, vendor domains, uv install and documentation described",
+        "report": "https://skills.sh/google/agents-cli/google-agents-cli-adk-code/security/agent-trust-hub"
+      },
+      {
+        "id": "C3",
+        "tool": "Socket, skills.sh audit, version not stated",
+        "date": "2026-11-04",
+        "scope": "the skill package, hash 38719b6fa7220cab4992a697bd902d1e546dbde1527d48cb7574d9e81841b6d4",
+        "result": "pass, checks for malicious behavior, security concerns, code obfuscation and suspicious patterns",
+        "report": "https://skills.sh/google/agents-cli/google-agents-cli-adk-code/security/socket"
+      }
+    ],
+    "vulnerabilities": "none",
+    "risks": [
+      {
+        "risk": "Instructions hidden in a cloned recipe AGENTS.md or a fetched docs page reach the agent, since these are read before implementing, and contrib recipes are not curated.",
+        "source": "model",
+        "severity": "none",
+        "mitigation": "none stated",
+        "taxonomy": "https://www.ibm.com/docs/en/watsonx/saas?topic=ai-risk-atlas"
+      },
+      {
+        "risk": "A directory already at /tmp/adk-recipes is read as the recipes without a fresh clone, so content placed there by another process reaches the agent.",
+        "source": "model",
+        "severity": "none",
+        "mitigation": "none stated",
+        "taxonomy": "not examined"
+      }
+    ],
+    "limitations": [
+      "The Python Workflow API requires google-adk 2.0.0 or later and Python 3.11 or later.",
+      "Using output_schema disables tool calling and delegation.",
+      "google_search is model-internal grounding, and mixing it with function tools disables automatic function calling for all tools.",
+      "Live agents cannot be served over A2A or published to Gemini, and Live models reject text output.",
+      "ManagedAgent requires ADK 2.4.0 or later, and client-side tools raise NotImplementedError.",
+      "ADK Go has no OpenAPI toolset.",
+      "The Go reference reflects google.golang.org/adk/v2 v2.1.0, so a symbol can be missing in another version.",
+      "The eleven core Python recipes are the complete set, other capabilities need contrib/ or own code.",
+      "InMemoryMemoryService memories do not persist across restarts.",
+      "Pub/Sub and Eventarc have a 10-minute processing limit."
+    ],
+    "known_problems": [
+      {
+        "problem": "\"Session not found\" errors during evaluation",
+        "workaround": "set the App name to the basename of the agent directory"
+      },
+      {
+        "problem": "\"agent already has a parent\" errors",
+        "workaround": "build sub-agents with factory functions and call them"
+      },
+      {
+        "problem": "importing load_web_page from google.adk.tools imports the module",
+        "workaround": "import it from google.adk.tools.load_web_page"
+      },
+      {
+        "problem": "run_live raises \"Session not found\"",
+        "workaround": "create the session before run_live"
+      },
+      {
+        "problem": "a Live model fails under the global location",
+        "workaround": "pin the region with client_kwargs location on the model"
+      },
+      {
+        "problem": "a client stopping at turnComplete truncates -extended-thinking answers",
+        "workaround": "read interaction_status until IDLE"
+      },
+      {
+        "problem": "a Go graph hangs when a route is conditional into a JoinNode",
+        "workaround": "never route conditionally into a JoinNode"
+      },
+      {
+        "problem": "Go sample tests break unseen after replacing the sample tools",
+        "workaround": "rewrite app/agent_test.go in the same change and run go test ./..."
+      }
+    ],
+    "evaluations": "none"
+  },
+  "who_stands_behind_it": {
+    "authorship": {
+      "author": "Google, from the SKILL.md frontmatter metadata",
+      "publisher": "the google organisation on GitHub",
+      "signer": "none",
+      "contact": "not declared"
+    },
+    "license": {
+      "frontmatter": "Apache-2.0, in the metadata block",
+      "license_file": "none",
+      "registry": "not declared",
+      "repository": "Apache-2.0, as GitHub detects it"
+    },
+    "maintenance": {
+      "last_change": "2026-11-04",
+      "registry_update": "not declared",
+      "deprecated": "not declared",
+      "first_seen": "2026-04-14",
+      "content_changes": 35,
+      "releases": 29,
+      "last_release": "2026-11-04"
+    }
+  },
+  "which_files": {
+    "version": {
+      "hash": "sha256:264b8a44f1545e4b998cd46b07230c371b738b13a6d65e74a73031244912af92",
+      "left_out": "none",
+      "author_version": "1.13.0",
+      "registry_version": "not declared",
+      "commit": "896e4719"
+    },
+    "source": {
+      "kind": "repository",
+      "location": "GitHub google/agents-cli, path skills/google-agents-cli-adk-code",
+      "commit": "896e4719",
+      "retrieved": "2026-11-11",
+      "also_listed_on": "skills.sh, https://skills.sh/google/agents-cli/google-agents-cli-adk-code",
+      "homepage": "not declared",
+      "produced_by": "none"
+    },
+    "files": [
+      {
+        "path": "SKILL.md",
+        "bytes": 4407,
+        "sha256": "3f1cc46d0a63e33a22c9068897f94e34944b1e8d5072af339700d8ac3dd9773d",
+        "kind": "document",
+        "in_hash": true,
+        "executable": false
+      },
+      {
+        "path": "references/adk-go-workflows.md",
+        "bytes": 17980,
+        "sha256": "41ebd08daf020d9d24da2b9e6a3efad316bba185ab370d6e2dcb8ed770f929a7",
+        "kind": "document",
+        "in_hash": true,
+        "executable": false
+      },
+      {
+        "path": "references/adk-go.md",
+        "bytes": 23231,
+        "sha256": "6851735c644746b8025ad792139d29618124187f2851d2014d36aad871784985",
+        "kind": "document",
+        "in_hash": true,
+        "executable": false
+      },
+      {
+        "path": "references/adk-python-live.md",
+        "bytes": 34967,
+        "sha256": "1fc1f24d832ea1ae8f62d0db9bdac65679ecd24ae074743eacdf9726719e7a8b",
+        "kind": "document",
+        "in_hash": true,
+        "executable": false
+      },
+      {
+        "path": "references/adk-python-workflows.md",
+        "bytes": 17334,
+        "sha256": "d9f7e80e30a07c8781144f1df54d383b8fbbadcff215f262df8b43fbb5aa8290",
+        "kind": "document",
+        "in_hash": true,
+        "executable": false
+      },
+      {
+        "path": "references/adk-python.md",
+        "bytes": 38047,
+        "sha256": "d79c4d0e89400dfe480c85c823ff012558d2ecd47f3901692b8d0103a68515bc",
+        "kind": "document",
+        "in_hash": true,
+        "executable": false
+      },
+      {
+        "path": "references/recipes.md",
+        "bytes": 9370,
+        "sha256": "8b1915f9c7fef3ade8b490515b20f04a426500e4a71ea7d9c8997bec0813e94a",
+        "kind": "document",
+        "in_hash": true,
+        "executable": false
+      }
+    ],
+    "counts": {
+      "script": 0,
+      "document": 7,
+      "data": 0,
+      "binary": 0
+    },
+    "composition": "instructions only"
+  },
+  "about_this_card": {
+    "schema": "Skill Card v1.2",
+    "date": "2026-11-11",
+    "by": "Claude Opus 5.5, claude-opus-5-5, by hand from the skill files, the skills.sh listing and audits, and GitHub metadata, with the hash, file list, sizes, harness limits and repository figures computed by script",
+    "skill_run": false,
+    "scripts_analysed": false,
+    "security_check_run": false,
+    "external_service_contacted": false,
+    "registry_read": true,
+    "empty_values": 57
+  }
+}
