@@ -1,0 +1,57 @@
+name: Tests
+on:
+  pull_request:
+  push:
+    branches: [main]
+permissions:
+  contents: read
+jobs:
+  lint:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - run: pip install ruff black
+      - run: ruff check .
+      - run: black --check .
+
+  tests:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version: ["3.11", "3.12", "3.13"]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+      - run: pip install -e ".[dev]"
+      - run: pytest
+
+  cards:
+    name: cards are valid
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - run: pip install -e .
+      - name: Every card has a .json and a .md
+        run: |
+          status=0
+          for f in cards/*.json; do
+            [ -f "${f%.json}.md" ] || { echo "missing ${f%.json}.md"; status=1; }
+          done
+          for f in cards/*.md; do
+            [ -f "${f%.md}.json" ] || { echo "missing ${f%.md}.json"; status=1; }
+          done
+          exit $status
+      - name: Every card passes the schema checks
+        run: python -m skillcard.validate cards/*.json

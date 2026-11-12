@@ -32,6 +32,20 @@ Every run has its own folder. A phase reads what the phases before it put there 
 
 The phases only connect if each of them follows these rules. A phase only adds its own files, it does not change the files of another phase. The validation checks the card but does not change it. And we only read the files of a skill, we never run them.
 
+## Development
+
+To set up a development environment with [uv](https://docs.astral.sh/uv/):
+
+```bash
+uv venv --python 3.11
+source .venv/bin/activate
+uv pip install -e ".[dev]"
+pytest
+```
+
+## Contributing
+See [CONTRIBUTING.md](CONTRIBUTING.md) for details. Agents should also read [AGENTS.md](AGENTS.md).
+
 ## License
 
 MIT, see `LICENSE`.
