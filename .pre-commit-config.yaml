@@ -20,3 +20,10 @@ repos:
     rev: 26.10.1
     hooks:
       - id: black
+
+  - repo: https://github.com/ibm/detect-secrets
+    rev: 0.13.1+ibm.64.dss
+    hooks:
+      - id: detect-secrets
+        args: [--baseline, .secrets.baseline]
+        exclude: ^\.secrets\.baseline$

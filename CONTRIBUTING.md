@@ -44,6 +44,19 @@ pre-commit run --all-files    # run on everything, e.g. before opening a PR
 
 If a hook changes a file, review the change, stage it and commit again. CI fails the PR if lint is not clean, whether or not you installed the hooks.
 
+### Secret detection
+
+The hooks include [IBM detect-secrets](https://github.com/ibm/detect-secrets), which blocks a commit that adds something that looks like a password, key or token. It compares against [`.secrets.baseline`](.secrets.baseline), which lists findings that were reviewed and are not secrets. Currently these are 23 matches in the cards: mostly the name of the schema's credentials field, plus one example command.
+
+The hex-string check is turned off in the baseline, because every card stores SHA-256 file hashes, which look like secrets.
+
+If the hook blocks your commit:
+
+1. Check whether it is a real secret. If it is, remove it, **rotate it** (it is no longer private once it has been in a commit, even locally), and do not just add it to the baseline.
+2. If it is a false positive, regenerate the baseline and review the diff: `detect-secrets scan --update .secrets.baseline`, then `detect-secrets audit .secrets.baseline` to mark it as not a secret.
+
+Install the IBM fork rather than the Yelp original (`pip install "git+https://github.com/ibm/detect-secrets.git@0.13.1+ibm.64.dss"`) if you run it by hand, since the baseline format differs between them. Running `pre-commit` takes care of this for you.
+
 The hook versions are pinned. To update them, run `pre-commit autoupdate` and commit the result in a `[Pipeline]` or `[Docs]` PR of its own.
 
 ### Dependency updates
