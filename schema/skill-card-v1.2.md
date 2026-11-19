@@ -1,6 +1,6 @@
 # Skill Card schema v1.2
 
-## 1. What it does
+## 1. Overview
 
 This section lets readers grasp what the skill is, what it does and produces, what it needs to be given, what it is not for, and how widely it is used.
 
@@ -13,7 +13,7 @@ This section lets readers grasp what the skill is, what it does and produces, wh
 | exclusions | What should the skill not be used for? Tasks, domains, situations and settings the author rules out, and cases where another skill is the better choice. This is useful for all readers to tell an intended limit of use from a risk that a check found. |
 | adoption | How widely is the skill used? Downloads, installs, stars or likes as the registry shows them, with the date they were read and what they count. This is useful for a person to see what others have done with the skill, and the card draws no conclusion from it. |
 
-## 2. What it needs
+## 2. Requirements
 
 This section lets readers judge whether the skill can run with their model, runtime and machine, and what using it costs.
 
@@ -24,7 +24,7 @@ This section lets readers judge whether the skill can run with their model, runt
 | credentials | Which secrets does the skill need? The kinds of secret it reads or asks for, never their values, with what each is used for and where it goes. This is useful for a person to know which sensitive values the skill handles and where they can end up. |
 | cost | What does using the skill cost? The context it takes up at discovery, at load and on demand, the tokens a run consumed where measured, and paid or limited services the files name. This allows an agent to judge whether the skill fits its budget, and a person to compare one skill with another. |
 
-## 3. What it touches
+## 3. Permissions
 
 This section lets readers see what a run can change, where data goes, and what the skill can reach through the agent and on the machine.
 
@@ -35,7 +35,7 @@ This section lets readers see what a run can change, where data goes, and what t
 | tools and permissions | Which tools and permissions does the skill use? The agent tools, permissions, servers, commands and programs it uses, with what each is for. This is useful for all readers to see what the skill can do through the agent, and for a runtime to know what it must provide. |
 | machine access | Which files, folders and settings does the skill read or change? The paths it touches with the operation and whether they lie in the workspace, and the settings it reads or sets. This is useful for a person to see what the skill can reach on the machine beyond the task's own files. |
 
-## 4. What is known about it
+## 4. Checks and Evaluations
 
 This section lists what has been checked, found, measured and stated about the skill, so that readers can see what is known and by whom.
 
@@ -73,7 +73,7 @@ Every benchmark run in which an agent used the skill on a set of tasks and someo
 | date, by | When did the run take place, and who ran it? The date and the party. This is useful for readers to judge how current the result is, and whether it came from the skill's maker or from an independent party. |
 | report | Where is the full record? A link to the run record. This allows a reader to go beyond what the card carries. |
 
-## 5. Who stands behind it
+## 5. Ownership
 
 This section lets readers see whom they trust when they install the skill, under which terms they may use it, and whether it is still maintained.
 
@@ -83,7 +83,7 @@ This section lets readers see whom they trust when they install the skill, under
 | license | Under which terms may the skill be used? The license or terms of use the skill comes with, as stated. This is useful for a person to tell whether they may use, change and redistribute the skill, and whether any terms are stated at all. The card records the terms and does not interpret them. |
 | maintenance status | Is the skill still maintained? The last change to its content, any deprecation notice, and how often releases appear. This is useful for a person to judge whether to expect fixes, and whether the skill is likely to keep working with current models and runtimes. |
 
-## 6. Which files exactly
+## 6. Version
 
 This section pins the card to the exact files it describes, so that readers can match them to what they have and a reviewer can fetch them.
 

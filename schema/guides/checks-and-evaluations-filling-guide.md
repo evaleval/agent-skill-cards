@@ -1,4 +1,4 @@
-## Filling guide, What is known about it
+## Filling guide, Checks and Evaluations
 
 How the findings rows of the fourth section are filled. The guide is for the pipeline and for anyone generating a card by hand or with a model. It is not part of the card. A row holds one value per source that speaks, the author's files, a registry, a check, the assembler's model or a reviewer, each with its marker, and values that disagree all stand. An empty value is always written as unknown, not examined, none or not declared, never left blank. When no check covered a field, the check value reads not examined. The Checks and Evaluations tables are filled from the tool's output and the run record, one row per check or run, with each column as the section defines it, and a producer's own tests of its output are listed in neither. Every risk entry has the same five parts, so that risks from the author, from a checker, from the model and from a reviewer read alike and differ only in their source. The taxonomy linked is the IBM AI Risk Atlas, with the Risk Atlas Nexus used for mapping to other taxonomies, pending confirmation.
 

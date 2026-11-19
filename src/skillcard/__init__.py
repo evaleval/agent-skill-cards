@@ -11,12 +11,12 @@ SCHEMA = "Skill Card v1.2"
 
 # The sections of a card in the order of the schema, with the titles the schema gives them.
 SECTIONS = {
-    "what_it_does": "What it does",
-    "what_it_needs": "What it needs",
-    "what_it_touches": "What it touches",
-    "what_is_known": "What is known about it",
-    "who_stands_behind_it": "Who stands behind it",
-    "which_files": "Which files exactly",
+    "what_it_does": "Overview",
+    "what_it_needs": "Requirements",
+    "what_it_touches": "Permissions",
+    "what_is_known": "Checks and Evaluations",
+    "who_stands_behind_it": "Ownership",
+    "which_files": "Version",
     "about_this_card": "About this card",
 }
 

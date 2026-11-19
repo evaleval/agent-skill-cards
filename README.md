@@ -24,7 +24,7 @@ The pipeline generates a Skill Card for one skill. It has four phases. Each phas
 Every run has its own folder. A phase reads what the phases before it put there and adds its own files.
 
 - `files/` is a copy of the files of the skill.
-- `snapshot.json` says where the files came from, lists them and gives their hash. How the hash is computed is described in [schema/guides/which-files-filling-guide.md](schema/guides/which-files-filling-guide.md).
+- `snapshot.json` says where the files came from, lists them and gives their hash. How the hash is computed is described in [schema/guides/version-filling-guide.md](schema/guides/version-filling-guide.md).
 - `sources/` holds what was collected, each item as it was fetched, with a note of where and when.
 - `card.json` is the card.
 - `evidence.json` says where each value on the card came from.

@@ -1,4 +1,4 @@
-## Filling guide, What it needs
+## Filling guide, Requirements
 
 How each field of the second section is filled. The guide is for the pipeline and for anyone generating a card by hand or with a model. It is not part of the card. A row holds one value per source that speaks, the author's files, a registry, a check, the assembler's model or a reviewer, each with its marker, and values that disagree all stand. An empty value is always written as unknown, not examined, none or not declared, never left blank. When no check covered a field, the check value reads not examined. The Author value holds what the files state, a requirement named in the frontmatter, a compatibility statement, an install instruction, an import or a command in a script. What an instruction to the agent merely implies, for example that the model must see images because the agent is told to analyse one, is not recorded in this section.
 

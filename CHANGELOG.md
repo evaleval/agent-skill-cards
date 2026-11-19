@@ -4,3 +4,4 @@ All notable changes to the schema and the pipeline. The schema version (currentl
 
 ## Unreleased
 - Added CONTRIBUTING, AGENTS, PR and issue templates, and CI.
+- Renamed the card sections to Overview, Requirements, Permissions, Checks and Evaluations, Ownership and Version. The keys in the card JSON and the existing cards keep the old names for now.

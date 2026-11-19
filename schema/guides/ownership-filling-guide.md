@@ -1,4 +1,4 @@
-## Filling guide, Who stands behind it
+## Filling guide, Ownership
 
 How each field of the fifth section is filled. The guide is for the pipeline and for anyone generating a card by hand or with a model. It is not part of the card. A row holds one value per source that speaks, the author's files, a registry, a check, the assembler's model or a reviewer, each with its marker, and values that disagree all stand. An empty value is always written as unknown, not examined, none or not declared, never left blank. When no check covered a field, the check value reads not examined. A statement by the publisher outside the skill folder, for instance in the readme of the repository the skill came from, or a license the hosting platform detects, is a registry value with a link.
 

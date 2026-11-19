@@ -1,4 +1,4 @@
-## Filling guide, What it does
+## Filling guide, Overview
 
 How each field of the first section is filled. The guide is for the pipeline and for anyone generating a card by hand or with a model. It is not part of the card. A row holds one value per source that speaks, the author's files, a registry, a check, the assembler's model or a reviewer, each with its marker, and values that disagree all stand. An empty value is always written as unknown, not examined, none or not declared, never left blank. When no check covered a field, the check value reads not examined. The summary and the task list in description are the only model-written text in this section, everything else is quoted, computed or read from a registry.
 

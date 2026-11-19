@@ -1,4 +1,4 @@
-## Filling guide, Which files exactly
+## Filling guide, Version
 
 How each field of the sixth section is filled. The guide is for the pipeline and for anyone generating a card by hand or with a model. It is not part of the card. A row holds one value per source that speaks, the author's files, a registry, a check, the assembler's model or a reviewer, each with its marker, and values that disagree all stand. An empty value is always written as unknown, not examined, none or not declared, never left blank. When no check covered a field, the check value reads not examined. All three fields are computed by the assembler, with the author's version string quoted where there is one.
 
