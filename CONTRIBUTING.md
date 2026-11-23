@@ -46,7 +46,7 @@ If a hook changes a file, review the change, stage it and commit again. CI fails
 
 ### Secret detection
 
-The hooks include [IBM detect-secrets](https://github.com/ibm/detect-secrets), which blocks a commit that adds something that looks like a password, key or token. It compares against [`.secrets.baseline`](.secrets.baseline), which lists findings that were reviewed and are not secrets. Currently these are 23 matches in the cards: mostly the name of the schema's credentials field, plus one example command.
+The hooks include [IBM detect-secrets](https://github.com/ibm/detect-secrets), which blocks a commit that adds something that looks like a password, key or token. It compares against [`.secrets.baseline`](.secrets.baseline), which lists findings that were reviewed and are not secrets. Currently these are 23 matches in the cards: mostly the name of the schema's credentials field, plus one example command. One more match is the same field name in `schema/card-template.json`.
 
 The hex-string check is turned off in the baseline, because every card stores SHA-256 file hashes, which look like secrets.
 
@@ -107,7 +107,7 @@ These come from the README and every phase must keep them.
 ## Contributing cards
 
 - Cards under `cards/` are named `<owner>-<skill>-<short commit>.json` with a matching `.md`, and both files must be committed together.
-- Check committed cards with `python -m skillcard.validate cards/*.json`. It checks that the card names the schema it follows, has the seven sections, has a content hash that matches its own file list, and has no blank values. CI runs it on every card. It cannot compare the file list with the skill's files, because those are not stored with the card. That check runs only during the pipeline.
+- Check committed cards with `python -m skillcard.validate cards/*.json`. It checks that the card names the schema it follows, has the seven sections and the slots of `schema/card-template.json`, has a content hash that matches its own file list, and has no blank values. CI runs it on every card. It cannot compare the file list with the skill's files, because those are not stored with the card. That check runs only during the pipeline.
 - Generate them with the pipeline (`skillcard <skill folder>`) rather than by hand, and commit the output of a run that passed validation.
 - Every value on a card must be supported by the skill's files or by a collected source. Follow the guides in [schema/guides/](schema/guides/). Do not fill in a value you cannot support; say that it is not known.
 - Cards are model-generated and have **not** been reviewed by the authors of the skills unless a card says so. If you are the author of a skill, or you have reviewed a card, say so in your PR.
