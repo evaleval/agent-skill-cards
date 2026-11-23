@@ -378,16 +378,11 @@ def test_the_model_comes_from_the_environment_and_its_key_is_not_shown(monkeypat
     # The key of OpenRouter is not sent to another service.
     monkeypatch.setenv("SKILLCARD_MODEL", "another/model")
     monkeypatch.setenv("SKILLCARD_API_BASE", "https://router.example/v1")
-    monkeypatch.setenv("SKILLCARD_BILL_TO", "an-organisation")
     assert from_environment() is None
 
     monkeypatch.setenv("SKILLCARD_API_KEY", "another-made-up-value")
     model = from_environment()
-    assert (model.name, model.base, model.bill_to) == (
-        "another/model",
-        "https://router.example/v1",
-        "an-organisation",
-    )
+    assert (model.name, model.base) == ("another/model", "https://router.example/v1")
     assert model.key == "another-made-up-value"
 
 
@@ -405,19 +400,13 @@ def test_one_call_sends_the_instruction_and_the_material_and_reads_the_answer(mo
         return io.BytesIO(json.dumps(body).encode())
 
     monkeypatch.setattr("skillcard.net.open_request", service)
-    model = Model(
-        name="some/model",
-        base="https://service.example/v1/",
-        key="made-up",
-        bill_to="an-organisation",
-    )
+    model = Model(name="some/model", base="https://service.example/v1/", key="made-up")
     answer = model("the instruction", "the material")
 
     request = sent[0]
     body = json.loads(request.data)
     assert request.full_url == "https://service.example/v1/chat/completions"
     assert request.get_header("Authorization") == "Bearer made-up"
-    assert request.get_header("X-hf-bill-to") == "an-organisation"
     assert body["model"] == "some/model" and body["temperature"] == 0
     assert [message["content"] for message in body["messages"]] == [
         "the instruction",

@@ -2,13 +2,12 @@
 
 The composition gives a model two texts, the instruction and the material, and gets one text
 back. Any service with a chat completions address of the common kind can be used, for
-example OpenRouter or the Hugging Face router. The settings come from the environment:
+example OpenRouter. The settings come from the environment:
 
 ``SKILLCARD_API_KEY``   the key of the service. For OpenRouter, ``OPENROUTER_API_KEY`` is
                         read when it is not set
 ``SKILLCARD_MODEL``     the name of the model at that service
 ``SKILLCARD_API_BASE``  the address of the service
-``SKILLCARD_BILL_TO``   an organisation that pays, sent to the Hugging Face router
 
 Without a key no model is called. The key is read from the environment only. It is never
 written to a file, a log or a card.
@@ -39,7 +38,6 @@ class Model:
     name: str
     base: str
     key: str = field(repr=False)
-    bill_to: str = ""
 
     def __call__(self, instruction: str, material: str) -> dict:
         """Return the text of the answer with the model that gave it and the tokens used."""
@@ -54,8 +52,6 @@ class Model:
             "response_format": {"type": "json_object"},
         }
         headers = {"Authorization": f"Bearer {self.key}", "Content-Type": "application/json"}
-        if self.bill_to:
-            headers["X-HF-Bill-To"] = self.bill_to
         request = urllib.request.Request(
             f"{self.base.rstrip('/')}/chat/completions",
             data=json.dumps(body).encode("utf-8"),
@@ -104,9 +100,4 @@ def from_environment() -> Model | None:
         key = os.environ.get("OPENROUTER_API_KEY")
     if not key:
         return None
-    return Model(
-        name=os.environ.get("SKILLCARD_MODEL") or DEFAULT_MODEL,
-        base=base,
-        key=key,
-        bill_to=os.environ.get("SKILLCARD_BILL_TO") or "",
-    )
+    return Model(name=os.environ.get("SKILLCARD_MODEL") or DEFAULT_MODEL, base=base, key=key)

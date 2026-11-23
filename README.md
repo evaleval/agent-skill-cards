@@ -55,14 +55,13 @@ This is a first, simple version of every phase. It is there to be run, read and 
 
 The composition follows the approach of Toma, Grewal and Bezemer, [Automatic Model Card Generation Using an LLM](https://arxiv.org/abs/2608.24807) (2026): one instruction, a template with an instruction in every slot, only the given material, a source for every statement, and a fixed word where the material is silent. The instruction is in `src/skillcard/prompt.md`. What was sent to the model and what came back is kept in the run folder under `composition/`.
 
-A model is called when a key is set in the environment. Without a key the pipeline still runs, and every slot that a model would fill reads "not examined".
+A model is called when a key is set in the environment. For the default model, `OPENROUTER_API_KEY` is the only setting that is needed, and the others are optional. Without a key the pipeline still runs, and every slot that a model would fill reads "not examined".
 
 | Setting | Meaning | Default |
 |---|---|---|
 | `SKILLCARD_API_KEY` | The key of the model service. For OpenRouter, `OPENROUTER_API_KEY` is read when it is not set. | none |
 | `SKILLCARD_MODEL` | The model at that service. | `deepseek/deepseek-v4.1-flash-1017` |
 | `SKILLCARD_API_BASE` | The address of the service, which takes chat completions requests. | `https://openrouter.ai/api/v1` |
-| `SKILLCARD_BILL_TO` | An organisation that pays, for the Hugging Face router. | none |
 | `GITHUB_TOKEN` | A token for the GitHub API, which allows 60 requests an hour without one. | none |
 
 Each phase is one function that takes the run folder: `collect`, `compose`, `validate` and `render`. While a phase is being worked on, it can be called alone on an existing run folder. When a card is composed again, the validation and the rendering are run again as well, because their files describe the earlier card. `python -m skillcard.validate runs/webapp-testing-31ebb48b` checks the card of a run folder.

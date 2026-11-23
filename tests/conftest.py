@@ -23,7 +23,6 @@ def no_network(monkeypatch: pytest.MonkeyPatch) -> None:
         "OPENROUTER_API_KEY",
         "SKILLCARD_MODEL",
         "SKILLCARD_API_BASE",
-        "SKILLCARD_BILL_TO",
         "GITHUB_TOKEN",
     ):
         monkeypatch.delenv(name, raising=False)
