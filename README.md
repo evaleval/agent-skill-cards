@@ -46,14 +46,14 @@ It writes a run folder under `runs/` with the files above and `card.md`, the car
 
 This is a first, simple version of every phase. It is there to be run, read and extended, and the open questions of each phase are discussed in the issues.
 
-| Phase | What the first version does | Issues |
-|---|---|---|
-| Skill identification | Reads the files as the commit stores them, hashes them and writes the identity of the skill. It compares the skill with the cards in `cards/` and stops when this version of the skill already has a card. | [#1](https://github.com/evaleval/agent-skill-cards/issues/1), [#2](https://github.com/evaleval/agent-skill-cards/issues/2), [#3](https://github.com/evaleval/agent-skill-cards/issues/3) |
-| Source collection | Stores what GitHub and skills.sh say about the skill, and reports that are handed over with `--report`. Each source is one file in `src/skillcard/collect/`. | [#4](https://github.com/evaleval/agent-skill-cards/issues/4), [#5](https://github.com/evaleval/agent-skill-cards/issues/5), [#6](https://github.com/evaleval/agent-skill-cards/issues/6) |
-| Card composition | Writes the card in one call to a model, from the files, the sources, the filling guides and the card template. The hash, the file list and the sizes are computed by code. The word lists in the template are provisional. | [#7](https://github.com/evaleval/agent-skill-cards/issues/7) to [#13](https://github.com/evaleval/agent-skill-cards/issues/13) |
-| Card validation | Checks the form of the card: the sections, the slots of the template, the hash, the file list, blank values and the files that `evidence.json` names. It does not check whether what a field says is true. | none yet |
+| Phase | What the first version does |
+|---|---|
+| Skill identification | Reads the files as the commit stores them, hashes them and writes the identity of the skill. It compares the skill with the cards in `cards/` and stops when this version of the skill already has a card. |
+| Source collection | Stores what GitHub and skills.sh say about the skill, and reports that are handed over with `--report`. Each source is one file in `src/skillcard/collect/`. |
+| Card composition | Writes the card in one call to a model, from the files, the sources, the filling guides and the card template. The hash, the file list and the sizes are computed by code. The word lists in the template are provisional. |
+| Card validation | Checks the form of the card: the sections, the slots of the template, the hash, the file list, blank values and the files that `evidence.json` names. It does not check whether what a field says is true. |
 
-The composition follows the approach of Toma, Grewal and Bezemer, [Automatic Model Card Generation Using an LLM](https://arxiv.org/abs/2608.24807) (2026): one instruction, a template with an instruction in every slot, only the given material, a source for every statement, and a fixed word where the material is silent. The instruction is in `src/skillcard/prompt.md`. What was sent to the model and what came back is kept in the run folder under `composition/`.
+The composition follows the approach of Toma, Grewal and Bezemer in [Automatic Model Card Generation Using an LLM](https://arxiv.org/abs/2608.24807) (2026). This approach gives the model one instruction (`src/skillcard/prompt.md`) and a template with an instruction in every slot, and requires it to use only the given material, name a source for every statement and write a fixed word where the material is silent. The run folder keeps the request and the model's answer under `composition/`.
 
 A model is called when a key is set in the environment. For the default model, `OPENROUTER_API_KEY` is the only setting that is needed, and the others are optional. Without a key the pipeline still runs, and every slot that a model would fill reads "not examined".
 
