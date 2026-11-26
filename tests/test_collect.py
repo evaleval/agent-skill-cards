@@ -270,8 +270,8 @@ def test_reports_are_described_as_text_and_a_long_one_says_that_it_is_cut(
     collect(run_dir, offline=True, reports=(text, long, binary, text))
     blocks = {block["file"]: block["text"] for block in describe(run_dir)}
 
-    assert blocks["sources/handed-over/report.txt"] == "verdict: pass\n"
-    assert blocks["sources/handed-over/another-report.txt"] == "verdict: pass\n"
+    assert blocks["sources/handed-over/report.txt"] == text.read_bytes().decode("utf-8")
+    assert blocks["sources/handed-over/another-report.txt"] == (text.read_bytes().decode("utf-8"))
     assert blocks["sources/handed-over/long.txt"].endswith("characters are shown.")
     assert (
         blocks["sources/handed-over/report.bin"]

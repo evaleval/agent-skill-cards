@@ -1,5 +1,6 @@
 """Tests for the pipeline, run on the example skill in ``tests/fixtures``. No network."""
 
+import hashlib
 import os
 from pathlib import Path
 
@@ -7,7 +8,8 @@ import pytest
 
 from skillcard import HASH_SCHEME, read_json, write_json
 from skillcard.cli import main, run
-from skillcard.identify import identify
+from skillcard.compose import one_line
+from skillcard.identify import content_hash, file_entry, identify
 from skillcard.validate import validate
 
 # Computed outside this code base, in the example skill's folder, with
@@ -22,6 +24,54 @@ def test_the_hash_follows_the_schema_rule(skill: Path, tmp_path: Path) -> None:
     assert snapshot["hash"] == EXAMPLE_HASH
     assert snapshot["hash_scheme"] == HASH_SCHEME
     assert run_dir.name == "hello-skill-d2b31cc7"
+
+
+def test_hash_schemes_type_links_and_preserve_the_regular_file_digest() -> None:
+    regular = file_entry("target.txt", b"target\n", False)
+    link = file_entry("target.txt", b"target\n", False, "symbolic link")
+    assert content_hash([regular], "skill-tree-v1") == content_hash([regular], "skill-tree-v2")
+    assert content_hash([link], "skill-tree-v2") != content_hash([regular], "skill-tree-v2")
+    with pytest.raises(ValueError, match="cannot hash symbolic links"):
+        content_hash([link], "skill-tree-v1")
+
+
+def test_untrusted_labels_are_collapsed_and_bounded() -> None:
+    assert one_line("  a name\twith\ncontrols\x00 ", 40) == "a name with controls"
+    assert one_line("x" * 20, 8) == "xxxxxxx…"
+
+
+def test_content_reuse_requires_matching_schemes_and_exclusions() -> None:
+    from skillcard.index import compatible_content
+
+    file = file_entry("SKILL.md", b"instructions\n", False)
+    executable = file_entry("SKILL.md", b"instructions\n", True)
+    base = {
+        "hash": content_hash([file], "skill-tree-v2"),
+        "hash_scheme": "skill-tree-v2",
+        "files": [file],
+        "exclusions": [],
+    }
+    assert compatible_content(base, dict(base))
+    assert compatible_content(base, dict(base, files=[executable]))
+    assert not compatible_content(base, dict(base, hash_scheme="skill-tree-v1"))
+    assert not compatible_content(
+        base,
+        dict(base, exclusions=[{"path": "notes.md", "reason": "local report", "sha256": "none"}]),
+    )
+
+
+def test_a_left_out_file_records_why_it_was_excluded(skill: Path, tmp_path: Path) -> None:
+    (skill / "skill-card.md").write_text("A card about this skill.\n", encoding="utf-8")
+    snapshot = read_json(
+        identify(skill, tmp_path / "runs", leave_out=("skill-card.md",)) / "snapshot.json"
+    )
+    assert snapshot["exclusions"] == [
+        {
+            "path": "skill-card.md",
+            "reason": "explicit --leave-out",
+            "sha256": hashlib.sha256((skill / "skill-card.md").read_bytes()).hexdigest(),
+        }
+    ]
 
 
 def test_the_snapshot_holds_the_identity_of_a_local_skill(skill: Path, tmp_path: Path) -> None:
@@ -106,8 +156,14 @@ def test_a_link_is_not_followed(skill: Path, tmp_path: Path) -> None:
     run_dir = identify(skill, tmp_path / "runs")
     snapshot = read_json(run_dir / "snapshot.json")
 
-    assert snapshot["hash"] == EXAMPLE_HASH
-    assert snapshot["skipped"] == [{"path": "link.txt", "reason": "symbolic link, not followed"}]
+    link = next(item for item in snapshot["files"] if item["path"] == "link.txt")
+    assert snapshot["hash"] != EXAMPLE_HASH
+    assert link["file_type"] == "symbolic link"
+    assert link["bytes"] == len(os.fsencode(os.readlink(skill / "link.txt")))
+    assert (
+        link["sha256"] == hashlib.sha256(os.fsencode(os.readlink(skill / "link.txt"))).hexdigest()
+    )
+    assert "link.txt" not in [item["path"] for item in snapshot["skipped"]]
     assert not (run_dir / "files" / "link.txt").exists()
 
 
@@ -231,6 +287,7 @@ def test_the_run_stops_when_this_version_already_has_a_card(
             "same place, other files": [],
             "other place, same files": [],
             "other files, same SKILL.md": [],
+            "file_comparisons": [],
         }
 
     monkeypatch.setattr("skillcard.identify.compare_with_cards", compared)
