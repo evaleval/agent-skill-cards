@@ -2,7 +2,9 @@
 
 import hashlib
 import os
+import stat
 from pathlib import Path
+from types import SimpleNamespace
 
 import pytest
 
@@ -148,21 +150,35 @@ def test_a_left_out_document_is_listed_but_not_hashed(skill: Path, tmp_path: Pat
     }
 
 
-@pytest.mark.skipif(os.name == "nt", reason="creating a link needs extra rights on Windows")
-def test_a_link_is_not_followed(skill: Path, tmp_path: Path) -> None:
+def test_a_link_is_not_followed(
+    skill: Path, tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
     outside = tmp_path / "outside.txt"
     outside.write_text("not part of the skill\n", encoding="utf-8")
-    (skill / "link.txt").symlink_to(outside)
+    link = skill / "link.txt"
+    link.write_text("placeholder that must not be read", encoding="utf-8")
+    target = "../outside.txt"
+    original_lstat = Path.lstat
+    original_readlink = os.readlink
+
+    def lstat(path: Path):
+        return SimpleNamespace(st_mode=stat.S_IFLNK) if path == link else original_lstat(path)
+
+    def readlink(path: str | bytes | os.PathLike):
+        return target if Path(path) == link else original_readlink(path)
+
+    # Simulate the OS link metadata so this local-folder case also runs on Windows
+    # machines where creating symlinks requires an elevated privilege.
+    monkeypatch.setattr(Path, "lstat", lstat)
+    monkeypatch.setattr(os, "readlink", readlink)
     run_dir = identify(skill, tmp_path / "runs")
     snapshot = read_json(run_dir / "snapshot.json")
 
     link = next(item for item in snapshot["files"] if item["path"] == "link.txt")
     assert snapshot["hash"] != EXAMPLE_HASH
     assert link["file_type"] == "symbolic link"
-    assert link["bytes"] == len(os.fsencode(os.readlink(skill / "link.txt")))
-    assert (
-        link["sha256"] == hashlib.sha256(os.fsencode(os.readlink(skill / "link.txt"))).hexdigest()
-    )
+    assert link["bytes"] == len(os.fsencode(target))
+    assert link["sha256"] == hashlib.sha256(os.fsencode(target)).hexdigest()
     assert "link.txt" not in [item["path"] for item in snapshot["skipped"]]
     assert not (run_dir / "files" / "link.txt").exists()
 

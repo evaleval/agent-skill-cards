@@ -5,7 +5,6 @@ The repositories are made on this machine in a temporary folder. No network.
 
 import hashlib
 import json
-import os
 import shutil
 import subprocess
 from pathlib import Path
@@ -108,10 +107,16 @@ def test_the_executable_mark_is_recorded_but_does_not_change_the_hash(
     }
 
 
-@pytest.mark.skipif(os.name == "nt", reason="creating a link needs extra rights on Windows")
 def test_a_link_in_a_commit_is_not_followed(repository: Path, tmp_path: Path) -> None:
-    (repository / PATH / "link.md").symlink_to("../../README.md")
-    git(repository, "add", "-A")
+    target = "../../README.md"
+    blob = git(repository, "hash-object", "-w", "--stdin", given=target)
+    git(
+        repository,
+        "update-index",
+        "--add",
+        "--cacheinfo",
+        f"120000,{blob},{PATH}/link.md",
+    )
     git(repository, "commit", "-q", "-m", "add a link")
     run_dir = identify_repository(str(repository), PATH, tmp_path / "runs")
     snapshot = read_json(run_dir / "snapshot.json")
