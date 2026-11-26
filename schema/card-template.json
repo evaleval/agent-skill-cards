@@ -1,0 +1,313 @@
+{
+  "about": [
+    "This file writes down the shape of Skill Card v1.3, the card as data. Existing v1.2 cards remain valid. The composition gives the template to the model, and validation checks cards against it.",
+    "The keys of the sections still carry the earlier section names: what_it_does is Overview, what_it_needs is Requirements, what_it_touches is Permissions, what_is_known is Checks and Evaluations, who_stands_behind_it is Ownership, which_files is Version.",
+    "The word lists are provisional. They are the lists that the cards of 11 November 2026 follow. Which fields take a fixed list of values, and what the lists are, is decided in https://github.com/evaleval/agent-skill-cards/issues/10"
+  ],
+  "how_to_read": [
+    "Every slot of the card holds an instruction in this file. On a card the instruction is replaced by the value.",
+    "A group in curly brackets keeps exactly its keys on every card.",
+    "A list shows the form of one item. Where a list shows several forms, an item follows one of them. A card holds as many items as the skill has, or one of the four empty words in place of the whole list.",
+    "A slot that holds nothing carries one of the four empty words and is never left blank: none (nothing of this kind exists), not declared (the sources that were read do not say), not examined (nobody looked), unknown (the sources cannot answer).",
+    "Where an instruction says a word from the list, the value is one of the words under word_lists for that slot. If none fits, the value is other.",
+    "A slot whose instruction starts with Filled by the pipeline is computed by code and not written by the model."
+  ],
+  "word_lists": {
+    "what_it_does.outputs[].kind": ["information", "recommendation", "action"],
+    "what_it_does.inputs[].required": ["required", "optional", "conditional"],
+    "what_it_needs.compatibility.capabilities": ["tool calling", "vision", "code execution", "structured output", "long context"],
+    "what_it_needs.software_dependencies[].kind": ["package", "runtime", "binary", "hardware"],
+    "what_it_needs.software_dependencies[].for": ["install", "run", "example"],
+    "what_it_needs.credentials[].kind": ["API key", "token", "password", "certificate", "other"],
+    "what_it_needs.credentials[].from": ["environment variable", "prompt to the user", "command argument", "file", "unknown"],
+    "what_it_needs.cost.services[].needs": ["API key", "account", "subscription"],
+    "what_it_touches.side_effects.install": ["read only", "changes state"],
+    "what_it_touches.side_effects.run": ["read only", "changes state"],
+    "what_it_touches.side_effects.changes[].affects": ["workspace", "user home", "system", "shell environment", "software environment", "external service"],
+    "what_it_touches.side_effects.changes[].confirmation": ["yes", "no", "not declared"],
+    "what_it_touches.side_effects.changes[].reversible": ["yes", "no", "not declared"],
+    "what_it_touches.network_access[].purpose": ["data source", "install", "publish", "auth", "telemetry", "model call", "other"],
+    "what_it_touches.network_access[].sends[]": ["credential", "location", "user content", "file content", "query text", "none"],
+    "what_it_touches.tools_and_permissions.tools[].kind": ["agent tool", "shell command", "program", "external server", "permission"],
+    "what_it_touches.tools_and_permissions.tools[].origin": ["built in", "skill", "third party"],
+    "what_it_touches.machine_access.paths[].operation": ["read", "write", "delete"],
+    "what_it_touches.machine_access.paths[].scope": ["workspace", "skill folder", "user home", "system", "unknown"],
+    "what_it_touches.machine_access.settings[].access": ["read", "set"],
+    "what_is_known.vulnerabilities[].status": ["open", "fixed", "accepted", "false positive", "disputed"],
+    "what_is_known.risks[].source": ["author", "model", "review", "check with the id of the check, for example check C1"],
+    "which_files.files[].kind": ["script", "document", "data", "binary"],
+    "which_files.files[].file_type": ["regular", "symbolic link"],
+    "which_files.composition": ["instructions only", "instructions with scripts"]
+  },
+  "card": {
+    "schema": "Filled by the pipeline. The version of the schema the card follows.",
+    "skill": "Filled by the pipeline. The name of the skill.",
+    "version": "Filled by the pipeline. The repository and the short commit the files were read at, for example anthropics/skills at 2c5958ec.",
+    "what_it_does": {
+      "name": "Filled by the pipeline. The name field of the SKILL.md frontmatter exactly as written, or the name of the folder when the frontmatter has none.",
+      "summary": "Two to four sentences. What the skill is made of and does, on what material, what comes out, and when to use it. Only from the files of the skill.",
+      "tasks": ["One task the skill covers, as a short phrase. Three to seven items."],
+      "outputs": [
+        {
+          "what": "One kind of result, in a few words.",
+          "kind": "A word from the list. information is anything handed back or written as a file, recommendation is advice the user decides on, action is a change to something outside, such as a deployment, a sent message or a database change.",
+          "form": "The format of the result, for example Python file or message to the user.",
+          "destination": "Where the result ends up, for example a path the files state, a path the agent chooses, a message to the user or an action through a tool."
+        }
+      ],
+      "sample_output": "One short sample of what comes out, quoted from the files, such as a printed message, a line of a report or the name of a file that is written. Never the command that produces it. not declared when the files show commands but no output.",
+      "inputs": [
+        {
+          "what": "One kind of input, in a few words.",
+          "type": "The form of the input, for example a PDF file or a question in natural language.",
+          "required": "A word from the list.",
+          "for": "The task or the case the input belongs to, for example every task.",
+          "example": "One example value quoted from the files, or not declared."
+        }
+      ],
+      "when_input_is_missing": [
+        {
+          "case": "One case in which an input is missing or unclear.",
+          "behaviour": "What the files say happens in that case."
+        }
+      ],
+      "exclusions": ["One use the author rules out, as a short phrase. Only what the files state. A limit that a check found does not belong here."],
+      "adoption": [
+        {
+          "registry": "skills.sh",
+          "installs": "The install count exactly as the listing shows it.",
+          "first_seen": "The date the listing gives for when the skill was first seen, or not declared.",
+          "counts": "What the count belongs to, for example the skill.",
+          "read": "The date the listing was read."
+        },
+        {
+          "registry": "GitHub",
+          "stars": "The number of stars, as a number.",
+          "forks": "The number of forks, as a number.",
+          "counts": "What the counts belong to, for example the anthropics/skills repository, which holds other skills too.",
+          "read": "The date the record was read."
+        }
+      ]
+    },
+    "what_it_needs": {
+      "compatibility": {
+        "harnesses": "The harnesses the files name as needed, or not declared.",
+        "models": "The models the files name as needed, or not declared.",
+        "capabilities": "The capabilities the files name as needed, as words from the list separated by commas, or not declared.",
+        "fits": {
+          "Agent Skills specification": "One line that starts with fits, fits with a display cut, does not fit or not checked, followed by the sizes that decide it. The rules are in the Requirements guide and the sizes are measured by the pipeline.",
+          "Codex": "One line of the same form for Codex.",
+          "Claude Code": "One line of the same form for Claude Code.",
+          "ClawHub": "One line of the same form for ClawHub."
+        }
+      },
+      "software_dependencies": [
+        {
+          "name": "The name of one package, runtime, binary or piece of hardware.",
+          "kind": "A word from the list.",
+          "version": "The version as the files state it, or not declared.",
+          "for": "A word from the list. example means that it is only needed when the agent follows a code example."
+        }
+      ],
+      "credentials": [
+        {
+          "kind": "A word from the list.",
+          "name": "The name the files use for the secret, for example the name of a variable. Never the value of a secret.",
+          "used_for": "What the secret is used for.",
+          "from": "A word from the list, for where the skill gets the secret.",
+          "goes_to": "stays on the machine, or the host the secret leaves to."
+        }
+      ],
+      "cost": {
+        "context_tokens": {
+          "discovery": "Filled by the pipeline. The estimated tokens of the description that an agent reads when it selects a skill.",
+          "load": "Filled by the pipeline. The estimated tokens of SKILL.md.",
+          "on_demand": "Filled by the pipeline. The estimated tokens of the files under on_demand_files.",
+          "on_demand_files": ["The path of one document that the instructions tell the agent to read when a task needs it, as the file list writes it. Not a script that is run, not a license file, not an image, never SKILL.md."]
+        },
+        "run_tokens": "The tokens a run consumed, only as an evaluation measured them, otherwise not examined.",
+        "services": [
+          {
+            "name": "One service with a price, a quota or a rate limit that the files say the skill uses.",
+            "needs": "A word from the list.",
+            "price": "What the files state about the price, or not declared. Never a computed or estimated price.",
+            "quota": "What the files state about a quota or a rate limit, or not declared.",
+            "calls_per_use": "The number of calls one use makes as the files state it, or not declared."
+          }
+        ]
+      }
+    },
+    "what_it_touches": {
+      "side_effects": {
+        "install": "A word from the list, for what setting the skill up does as the files describe it.",
+        "run": "A word from the list, for what using the skill does.",
+        "changes": [
+          {
+            "what": "One kind of change, in a few words.",
+            "affects": "A word from the list.",
+            "confirmation": "A word from the list. yes only when the files say that a confirmation is asked first.",
+            "reversible": "A word from the list. yes or no only when the files say so."
+          }
+        ]
+      },
+      "network_access": [
+        {
+          "host": "One host or service the skill contacts when it is installed or used, as the files name it.",
+          "purpose": "A word from the list.",
+          "when": "When the connection is made.",
+          "sends": ["A word from the list, for one kind of data that goes to the host."],
+          "receives": "What comes back from the host."
+        }
+      ],
+      "tools_and_permissions": {
+        "allowed_tools": "The allowed-tools field of the SKILL.md frontmatter quoted in full, or none.",
+        "tools": [
+          {
+            "tool": "One tool, command, program, server or permission the skill uses, as the files name it.",
+            "kind": "A word from the list.",
+            "for": "What it is used for.",
+            "origin": "A word from the list. skill means that the skill brings it along."
+          }
+        ]
+      },
+      "machine_access": {
+        "paths": [
+          {
+            "path": "One path or naming pattern the skill reads, writes or deletes.",
+            "operation": "A word from the list. A change in place is a write.",
+            "scope": "A word from the list."
+          }
+        ],
+        "settings": [
+          {
+            "name": "The name of one environment variable or configuration item that is not a secret.",
+            "access": "A word from the list.",
+            "reason": "The reason the files give, or none given."
+          }
+        ]
+      }
+    },
+    "what_is_known": {
+      "checks": [
+        {
+          "id": "C1, C2 and so on, in the order of the collected checks.",
+          "tool": "The checker, where the check comes from and its version, for example Snyk, skills.sh audit, version not stated.",
+          "date": "The date the check ran, as its page or report states it.",
+          "scope": "The files or the package the check says it examined, or unknown.",
+          "result": "The verdict word in lower case as the check gives it, then the risk level and what was found, in one short phrase.",
+          "report": "The address or the file of the full report."
+        }
+      ],
+      "vulnerabilities": [
+        {
+          "finding": "One issue that a check itself lists as an issue, an alert or a failed check, with the tool's own name and code for it.",
+          "check": "The id of the check that found it.",
+          "severity": "The severity and the confidence as the tool rated them.",
+          "location": "The file and the place as the tool states them, or not stated.",
+          "status": "A word from the list. open unless the tool says otherwise.",
+          "fix": "The fix as the tool states it, or not stated."
+        }
+      ],
+      "risks": [
+        {
+          "risk": "One sentence that says what could happen to the user, their data, their system or third parties, and under which condition.",
+          "source": "Who identified the risk, as words from the list separated by commas. author when the files state the risk, check with the id of the check when a check describes it, model when the model that fills the card reads it from the files.",
+          "severity": "The severity as a source rated it, with the source, otherwise none.",
+          "mitigation": "What mitigates the risk and whether the files say it is in place, or none stated.",
+          "taxonomy": "A link to the matching entry of a risk taxonomy when one was looked up, otherwise not examined."
+        }
+      ],
+      "limitations": ["One sentence from the files on what the skill cannot do or where it degrades."],
+      "known_problems": [
+        {
+          "problem": "One problem the files name.",
+          "workaround": "The way around it as the files state it."
+        }
+      ],
+      "evaluations": [
+        {
+          "id": "E1, E2 and so on.",
+          "tasks": "The benchmark or task set, with the number of tasks and attempts.",
+          "setup": "The harness and the model the agent ran with, with versions.",
+          "result": "The scores or observations as the evaluator gave them, with and without the skill where both were measured.",
+          "date": "The date of the run.",
+          "by": "Who ran it.",
+          "report": "The address or the file of the run record."
+        }
+      ]
+    },
+    "who_stands_behind_it": {
+      "authorship": {
+        "author": "The author as the files state it, with where it is stated, for example Anthropic, PBC, from the license file. not declared when the files name nobody.",
+        "publisher": "The organisation or the account that owns the place the files come from, for example the anthropics organisation on GitHub.",
+        "signer": "Who signed the files, or none when the files and the collected sources show no signature.",
+        "contact": "An address or a page the files give for questions or problems, or not declared."
+      },
+      "license": {
+        "frontmatter": "Filled by the pipeline. The license field of the SKILL.md frontmatter exactly as written.",
+        "license_file": "The name of the license file in the folder and its terms in one clause, or none when the folder holds no license file.",
+        "registry": "The license the registry listing shows, or not declared.",
+        "repository": "The license that GitHub detects for the repository, written like this: MIT, as GitHub detects it. none when GitHub detects no license."
+      },
+      "maintenance": {
+        "last_change": "The date of the newest commit to the skill folder.",
+        "registry_update": "The date of the last update that the registry shows for the skill, or not declared.",
+        "deprecated": "A deprecation notice quoted from the files or the registry, or not declared.",
+        "first_seen": "The date of the oldest commit to the skill folder that was collected.",
+        "content_changes": "The number of commits to the skill folder that were collected, as a number, or 100 or more when the collected list stops at 100.",
+        "releases": "The number of releases of the repository, as a number, or 100 or more when the collected list stops at 100.",
+        "last_release": "The date of the newest release, or none."
+      }
+    },
+    "which_files": {
+      "version": {
+        "hash": "Filled by the pipeline. The hash over the files of the skill.",
+        "hash_scheme": "Filled by the pipeline. The named rule used to make the hash.",
+        "left_out": "Filled by the pipeline. The files that are listed but are not part of the hash, or none.",
+        "exclusions": [
+          {
+            "path": "Filled by the pipeline. The path of an item not included in the hash.",
+            "reason": "Filled by the pipeline. Why the item was not included.",
+            "sha256": "Filled by the pipeline. Its sha256 when it was a file, or none when it was not read."
+          }
+        ],
+        "author_version": "Filled by the pipeline. The version the author states in the SKILL.md frontmatter.",
+        "registry_version": "Filled by the pipeline. The version the registry states.",
+        "commit": "Filled by the pipeline. The short commit the files were read at, or none."
+      },
+      "source": {
+        "kind": "Filled by the pipeline. repository or local path.",
+        "location": "Filled by the pipeline. The place the files were read from, for example GitHub anthropics/skills, path skills/webapp-testing.",
+        "commit": "Filled by the pipeline. The short commit the files were read at, or none.",
+        "retrieved": "Filled by the pipeline. The date the files were read.",
+        "also_listed_on": "Filled by the pipeline. The registry that lists the skill, with the address of the listing.",
+        "homepage": "Filled by the pipeline. The homepage the SKILL.md frontmatter states.",
+        "produced_by": "Filled by the pipeline. The tool that generated the files, as the files state it."
+      },
+      "files": [
+        {
+          "path": "Filled by the pipeline. The path of one file inside the skill folder.",
+          "bytes": "Filled by the pipeline. Its size.",
+          "sha256": "Filled by the pipeline. The sha256 of its content.",
+          "kind": "Filled by the pipeline. A word from the list.",
+          "file_type": "Filled by the pipeline. A word from the list. A symbolic link's sha256 is over its target text, which is not followed or copied.",
+          "in_hash": "Filled by the pipeline. Whether the file is part of the hash.",
+          "executable": "Filled by the pipeline. Whether the file is marked as executable.",
+          "exclusion_reason": "Filled by the pipeline. Why the file was left out, or none."
+        }
+      ],
+      "counts": {
+        "script": "Filled by the pipeline. The number of scripts.",
+        "document": "Filled by the pipeline. The number of documents.",
+        "data": "Filled by the pipeline. The number of data files.",
+        "binary": "Filled by the pipeline. The number of binary files."
+      },
+      "composition": "Filled by the pipeline. A word from the list."
+    },
+    "about_this_card": {
+      "schema": "Filled by the pipeline. The version of the schema the card follows.",
+      "date": "Filled by the pipeline. The date the card was made.",
+      "by": "Filled by the pipeline. What made the card, from which material, and what was not checked."
+    }
+  }
+}
