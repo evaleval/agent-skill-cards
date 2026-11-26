@@ -36,6 +36,7 @@ def card(skill: Path, tmp_path: Path) -> dict:
 
 
 def test_a_generated_card_passes_the_card_checks(card: dict) -> None:
+    assert card["schema"] == "Skill Card v1.3"
     assert failed(card) == []
 
 
@@ -57,6 +58,21 @@ def test_an_edited_file_list_is_caught(card: dict) -> None:
 def test_a_blank_value_is_caught(card: dict) -> None:
     card["what_it_does"]["summary"] = ""
     assert "no value is blank" in failed(card)
+
+
+@pytest.mark.parametrize(
+    "value",
+    ["line one\nline two", "a\ttab", "# heading", "[label](https://example.test)", "<b>text</b>"],
+)
+def test_a_non_plain_text_value_is_caught(card: dict, value: str) -> None:
+    card["what_it_does"]["summary"] = value
+    check = next(
+        check
+        for check in card_checks(card)
+        if check["check"] == "card values are single-line plain text"
+    )
+    assert not check["passed"]
+    assert any("what_it_does.summary" in problem for problem in check["detail"])
 
 
 def test_a_missing_slot_is_caught(card: dict) -> None:
