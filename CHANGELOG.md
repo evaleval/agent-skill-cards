@@ -1,8 +1,10 @@
 # Changelog
 
-All notable changes to the schema and the pipeline. The schema version (currently v1.2) changes when what a card can say changes; the package version is in `src/skillcard/__init__.py`.
+All notable changes to the schema and the pipeline. The schema version (currently v1.3) changes when what a card can say changes; the package version is in `src/skillcard/__init__.py`.
 
 ## Unreleased
+- Added Skill Card v1.3 fields for the hash scheme, explicit exclusions, file object type and exclusion reason. Existing v1.2 cards remain valid.
+- Identification records source observations, reuses compatible card references for identical content at another source, and compares partial file matches across prior observations. Source-only runs write a source-specific supplement and do not create a duplicate full card.
 - Added CONTRIBUTING, AGENTS, PR and issue templates, and CI.
 - Renamed the card sections to Overview, Requirements, Permissions, Checks and Evaluations, Ownership and Version. The keys in the card JSON and the existing cards keep the old names for now.
 - Added a first version of every phase of the pipeline.

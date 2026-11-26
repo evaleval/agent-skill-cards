@@ -9,11 +9,12 @@ import yaml
 
 __version__ = "0.1.0.dev0"
 
-SCHEMA = "Skill Card v1.2"
+SCHEMA = "Skill Card v1.3"
+SUPPORTED_SCHEMAS = ("Skill Card v1.2", SCHEMA)
 
 # The name of the rule that turns the files of a skill into one hash. A hash is only compared
 # with a hash made by the same rule. The rule itself is described in identify.py.
-HASH_SCHEME = "skill-tree-v1"
+HASH_SCHEME = "skill-tree-v2"
 
 # The sections of a card in the order of the schema, with the titles the schema gives them.
 SECTIONS = {

@@ -1,6 +1,6 @@
 {
   "about": [
-    "This file writes down the shape of card.json, the card as data. It is the shape of the cards in cards/. The composition gives it to the model as the template to fill, and the validation checks every card against it.",
+    "This file writes down the shape of Skill Card v1.3, the card as data. Existing v1.2 cards remain valid. The composition gives the template to the model, and validation checks cards against it.",
     "The keys of the sections still carry the earlier section names: what_it_does is Overview, what_it_needs is Requirements, what_it_touches is Permissions, what_is_known is Checks and Evaluations, who_stands_behind_it is Ownership, which_files is Version.",
     "The word lists are provisional. They are the lists that the cards of 11 November 2026 follow. Which fields take a fixed list of values, and what the lists are, is decided in https://github.com/evaleval/agent-skill-cards/issues/10"
   ],
@@ -36,6 +36,7 @@
     "what_is_known.vulnerabilities[].status": ["open", "fixed", "accepted", "false positive", "disputed"],
     "what_is_known.risks[].source": ["author", "model", "review", "check with the id of the check, for example check C1"],
     "which_files.files[].kind": ["script", "document", "data", "binary"],
+    "which_files.files[].file_type": ["regular", "symbolic link"],
     "which_files.composition": ["instructions only", "instructions with scripts"]
   },
   "card": {
@@ -261,7 +262,15 @@
     "which_files": {
       "version": {
         "hash": "Filled by the pipeline. The hash over the files of the skill.",
+        "hash_scheme": "Filled by the pipeline. The named rule used to make the hash.",
         "left_out": "Filled by the pipeline. The files that are listed but are not part of the hash, or none.",
+        "exclusions": [
+          {
+            "path": "Filled by the pipeline. The path of an item not included in the hash.",
+            "reason": "Filled by the pipeline. Why the item was not included.",
+            "sha256": "Filled by the pipeline. Its sha256 when it was a file, or none when it was not read."
+          }
+        ],
         "author_version": "Filled by the pipeline. The version the author states in the SKILL.md frontmatter.",
         "registry_version": "Filled by the pipeline. The version the registry states.",
         "commit": "Filled by the pipeline. The short commit the files were read at, or none."
@@ -281,8 +290,10 @@
           "bytes": "Filled by the pipeline. Its size.",
           "sha256": "Filled by the pipeline. The sha256 of its content.",
           "kind": "Filled by the pipeline. A word from the list.",
+          "file_type": "Filled by the pipeline. A word from the list. A symbolic link's sha256 is over its target text, which is not followed or copied.",
           "in_hash": "Filled by the pipeline. Whether the file is part of the hash.",
-          "executable": "Filled by the pipeline. Whether the file is marked as executable."
+          "executable": "Filled by the pipeline. Whether the file is marked as executable.",
+          "exclusion_reason": "Filled by the pipeline. Why the file was left out, or none."
         }
       ],
       "counts": {
