@@ -16,17 +16,19 @@ The pipeline generates a Skill Card for one skill. It has four phases. Each phas
 
 | Phase | What it does | Reads | Writes |
 |---|---|---|---|
-| Skill identification | Pins down which skill and which files a card is about. | The skill, as a local folder or as a repository with a path and a commit | `files/` and `snapshot.json` |
+| Skill identification | Pins down source and content identity, records the observation and selects the pipeline action. | The skill, as a local folder or as a repository with a path and a commit | `files/`, `snapshot.json`, and `identity-index.json` in the output folder |
 | Source collection | Collects what is known about the skill outside its own files. | `snapshot.json` | `sources/` |
-| Card composition | Fills in the schema from the files and the collected sources. | `snapshot.json`, `files/` and `sources/` | `card.json` and `evidence.json` |
+| Card composition | Fills in a full card or a source-specific supplement. | A full run reads `snapshot.json`, `files/` and `sources/`; a source-only run reads `snapshot.json` and `sources/` | `card.json` or `source-card.json`, plus `evidence.json` |
 | Card validation | Checks the card against the files and the sources. | Everything above | `validation.json` |
 
 Every run has its own folder. A phase reads what the phases before it put there and adds its own files.
 
 - `files/` is a copy of the files of the skill.
 - `snapshot.json` says where the files came from, lists them and gives their hash, with the name of the rule that made the hash. How the hash is computed is described in [schema/guides/version-filling-guide.md](schema/guides/version-filling-guide.md).
+- `identity-index.json` is shared by runs in the same output folder. It records source version history, observations and references from compatible content identities to cards. Identification chooses `SKIP`, `FULL_ANALYSIS` or `SOURCE_ONLY`; a source-only run collects and records the new source's information, points to the existing card, and does not compose a duplicate card.
 - `sources/` holds what was collected, each item as it was fetched. `sources/log.json` says for every item where and when it was looked for and what came of it.
 - `card.json` is the card. Its shape is written down in [schema/card-template.json](schema/card-template.json).
+- `source-card.json` is written for a source-only run. It holds the source-specific fields and points to the existing content card; it does not create another full card.
 - `evidence.json` says where each value on the card came from.
 - `validation.json` says what was checked and what was flagged.
 
@@ -42,18 +44,20 @@ skillcard anthropics/skills --path skills/webapp-testing
 skillcard https://github.com/anthropics/skills --path skills/webapp-testing --commit 2c5958ecac7cee2b583967a2c4981d0f4a75c579
 ```
 
-It writes a run folder under `runs/` with the files above and `card.md`, the card as text. `owner/repo` stands for a repository on GitHub, and without `--commit` the newest commit of the default branch is read. `skillcard --help` lists the other options.
+It writes a run folder under `runs/`. A full-analysis run includes `card.json` and `card.md`; a source-only run includes `source-card.json`, which stores the new source-specific fields and points to the compatible existing card. It does not create a duplicate full card. `owner/repo` stands for a repository on GitHub, and without `--commit` the newest commit of the default branch is read. `skillcard --help` lists the other options.
 
 This is a first, simple version of every phase. It is there to be run, read and extended, and the open questions of each phase are discussed in the issues.
 
 | Phase | What the first version does |
 |---|---|
-| Skill identification | Reads the files as the commit stores them, hashes them and writes the identity of the skill. It compares the skill with the cards in `cards/` and stops when this version of the skill already has a card. |
+| Skill identification | Reads the files as the commit stores them, hashes regular files and symbolic link targets without following links, records exclusions and compares compatible schemes and manifests. The shared identity index preserves source versions and observations. Exact known versions can stop, a new source with matching content can hand off existing card references, and partial file matches require full analysis. |
 | Source collection | Stores what GitHub and skills.sh say about the skill, and reports that are handed over with `--report`. Each source is one file in `src/skillcard/collect/`. |
-| Card composition | Writes the card in one call to a model, from the files, the sources, the filling guides and the card template. The hash, the file list and the sizes are computed by code. The word lists in the template are provisional. |
+| Card composition | Writes a full card from the files and collected sources, or refreshes source-specific fields in a linked supplement from source metadata and collected sources. The hash, the file list and the sizes are computed by code. The word lists in the template are provisional. |
 | Card validation | Checks the form of the card: the sections, the slots of the template, the hash, the file list, blank values and the files that `evidence.json` names. It does not check whether what a field says is true. |
 
 The composition follows the approach of Toma, Grewal and Bezemer in [Automatic Model Card Generation Using an LLM](https://arxiv.org/abs/2608.24807) (2026). This approach gives the model one instruction (`src/skillcard/prompt.md`) and a template with an instruction in every slot, and requires it to use only the given material, name a source for every statement and write a fixed word where the material is silent. The run folder keeps the request and the model's answer under `composition/`.
+
+For a full analysis, when a model is configured, the request sends the model service the prompt, text from regular text files in the skill, and collected source and report text. A source-only run sends the prompt, current source metadata, and collected source and report text, without resending skill file contents. Binary file contents are not sent; symbolic link targets are not followed or copied, and only their target hashes are shown in a full analysis. The default endpoint is OpenRouter. `SKILLCARD_API_BASE` can point to a compatible local model service, and `--no-model` prevents a model call.
 
 A model is called when a key is set in the environment. For the default model, `OPENROUTER_API_KEY` is the only setting that is needed, and the others are optional. Without a key the pipeline still runs, and every slot that a model would fill reads "not examined".
 

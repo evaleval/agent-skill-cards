@@ -3,14 +3,20 @@
 The repositories are made on this machine in a temporary folder. No network.
 """
 
+import hashlib
+import json
 import os
+import shutil
+import subprocess
 from pathlib import Path
 
 import pytest
 from conftest import git
 
-from skillcard import read_json, write_json
+from skillcard import read_json, read_template, write_json
+from skillcard.cli import run
 from skillcard.identify import (
+    AlreadyKnown,
     compare_with_cards,
     identify,
     identify_repository,
@@ -18,6 +24,8 @@ from skillcard.identify import (
     place_of_location,
     skill_id,
 )
+from skillcard.index import IdentityIndex, source_identity
+from skillcard.source_only import empty_form, source_only_form
 
 EXAMPLE_HASH = "sha256:d2b31cc7479f1659174f058cac37282b078161782ddd4127ed1bd9c15ab7cfb8"
 PATH = "skills/hello-skill"
@@ -108,8 +116,11 @@ def test_a_link_in_a_commit_is_not_followed(repository: Path, tmp_path: Path) ->
     run_dir = identify_repository(str(repository), PATH, tmp_path / "runs")
     snapshot = read_json(run_dir / "snapshot.json")
 
-    assert snapshot["hash"] == EXAMPLE_HASH
-    assert snapshot["skipped"] == [{"path": "link.md", "reason": "symbolic link, not followed"}]
+    link = next(item for item in snapshot["files"] if item["path"] == "link.md")
+    assert snapshot["hash"] != EXAMPLE_HASH
+    assert link["file_type"] == "symbolic link"
+    assert link["sha256"] == hashlib.sha256(b"../../README.md").hexdigest()
+    assert "link.md" not in [item["path"] for item in snapshot["skipped"]]
     assert not (run_dir / "files" / "link.md").exists()
 
 
@@ -188,19 +199,32 @@ def test_version_control_data_planted_in_a_commit_is_not_written(
     blob = git(
         repository, "hash-object", "-w", "--stdin", given="[core]\n\tfsmonitor = touch planted\n"
     )
-    planted = git(repository, "mktree", given=f"100644 blob {blob}\tconfig\n")
+
+    def mktree(entries: str) -> str:
+        command = [
+            "git",
+            "-C",
+            str(repository),
+            "-c",
+            "user.name=test",
+            "-c",
+            "user.email=test@example.invalid",
+            "mktree",
+        ]
+        done = subprocess.run(
+            command, input=entries.encode("utf-8"), capture_output=True, check=True
+        )
+        return done.stdout.decode("ascii").strip()
+
+    planted = mktree(f"100644 blob {blob}\tconfig\n")
     skill = git(repository, "ls-tree", f"HEAD:{PATH}") + f"\n040000 tree {planted}\t.GIT\n"
-    skills = git(
-        repository,
-        "mktree",
-        given=f"040000 tree {git(repository, 'mktree', given=skill)}\thello-skill\n",
-    )
+    skills = mktree(f"040000 tree {mktree(skill)}\thello-skill\n")
     root = "\n".join(
         line
         for line in git(repository, "ls-tree", "HEAD").splitlines()
         if not line.endswith("\tskills")
     )
-    tree = git(repository, "mktree", given=f"{root}\n040000 tree {skills}\tskills\n")
+    tree = mktree(f"{root}\n040000 tree {skills}\tskills\n")
     commit = git(repository, "commit-tree", tree, "-p", "HEAD", "-m", "plant a folder")
     git(repository, "update-ref", "refs/heads/main", commit)
 
@@ -265,7 +289,11 @@ def _card(folder: Path, name: str, location: str, files: list[dict], digest: str
     folder.mkdir(exist_ok=True)
     card = {
         "which_files": {
-            "version": {"hash": digest},
+            "version": {
+                "hash": digest,
+                "hash_scheme": "skill-tree-v2",
+                "exclusions": [],
+            },
             "source": {"location": location},
             "files": files,
         }
@@ -294,13 +322,18 @@ def test_a_skill_is_compared_with_the_cards_by_place_and_by_files(
     _card(cards, "unrelated.json", elsewhere, [], "sha256:" + "3" * 64)
     (cards / "broken.json").write_text("not a card", encoding="utf-8")
 
-    assert compare_with_cards(snapshot, cards) == {
+    known = compare_with_cards(snapshot, cards)
+    assert {key: value for key, value in known.items() if key != "file_comparisons"} == {
         "compared_with": 5,
         "same place, same files": ["same.json"],
         "same place, other files": ["earlier.json"],
         "other place, same files": ["copy.json"],
         "other files, same SKILL.md": ["variant.json"],
     }
+    comparisons = {item["card"]: item for item in known["file_comparisons"]}
+    assert comparisons["earlier.json"]["same"] == ["SKILL.md"]
+    assert comparisons["earlier.json"]["changed"][0]["path"] == "scripts/greet.py"
+    assert comparisons["variant.json"]["same"] == ["SKILL.md"]
 
 
 def test_a_local_folder_is_never_the_same_place_as_a_card(skill: Path, tmp_path: Path) -> None:
@@ -331,3 +364,207 @@ def test_a_committed_card_is_found_for_its_own_place_and_files() -> None:
     known = compare_with_cards(snapshot, cards)
     assert known["compared_with"] == len(list(cards.glob("*.json")))
     assert known["same place, same files"] == ["anthropics-frontend-design-2c5958ec.json"]
+
+
+def _add_origin(repository: Path, name: str) -> None:
+    git(repository, "remote", "add", "origin", f"https://github.com/example/{name}.git")
+
+
+def test_same_source_and_same_version_is_skipped_from_the_identity_index(
+    repository: Path, tmp_path: Path
+) -> None:
+    _add_origin(repository, "original")
+    out = tmp_path / "runs"
+    first = run(repository, out, path=PATH, offline=True)
+
+    with pytest.raises(AlreadyKnown):
+        identify_repository(str(repository), PATH, out, stop_if_known=True)
+
+    index = IdentityIndex(out / "identity-index.json")
+    identity = source_identity(read_json(first / "snapshot.json"))
+    assert index.data["observations"][-1]["action"] == "SKIP"
+    assert index.data["observations"][-1]["existing_card"] == f"{first.name}/card.json"
+    assert index.data["sources"][identity]["versions"][0]["observations"] == 2
+    assert index.data["contents"][index.data["observations"][-1]["content_identity"]][0][
+        "analysis_cards"
+    ] == [f"{first.name}/card.json"]
+
+
+def test_new_version_at_the_same_source_keeps_version_history(
+    repository: Path, tmp_path: Path
+) -> None:
+    _add_origin(repository, "history")
+    out = tmp_path / "runs"
+    first = run(repository, out, path=PATH, offline=True)
+    first_snapshot = read_json(first / "snapshot.json")
+    (repository / PATH / "notes.md").write_text("A new note.\n", encoding="utf-8")
+    git(repository, "add", "-A")
+    git(repository, "commit", "-q", "-m", "add a note")
+
+    second = identify_repository(str(repository), PATH, out)
+    snapshot = read_json(second / "snapshot.json")
+    identity = source_identity(snapshot)
+    versions = IdentityIndex(out / "identity-index.json").data["sources"][identity]["versions"]
+
+    assert snapshot["known"]["action"] == "FULL_ANALYSIS"
+    assert len(versions) == 2
+    old = next(one for one in versions if one["hash"] == first_snapshot["hash"])
+    assert old["analysis_card"].endswith("/card.json")
+
+
+def test_matching_content_at_a_new_source_hands_off_the_card_and_source(
+    repository: Path, tmp_path: Path
+) -> None:
+    _add_origin(repository, "source-one")
+    out = tmp_path / "runs"
+    first = run(repository, out, path=PATH, offline=True)
+    second_repository = tmp_path / "second-repository"
+    shutil.copytree(repository, second_repository)
+    git(
+        second_repository,
+        "remote",
+        "set-url",
+        "origin",
+        "https://github.com/example/source-two.git",
+    )
+
+    second = identify_repository(str(second_repository), PATH, out)
+    snapshot = read_json(second / "snapshot.json")
+    index = IdentityIndex(out / "identity-index.json")
+    first_identity = source_identity(read_json(first / "snapshot.json"))
+    second_identity = source_identity(snapshot)
+
+    assert snapshot["known"]["action"] == "SOURCE_ONLY"
+    assert first_identity != second_identity
+    assert snapshot["identity_handoff"]["reuse_card"] == f"{first.name}/card.json"
+    assert snapshot["identity_handoff"]["source"] == snapshot["source"]
+    assert index.card_references_for(snapshot) == [first / "card.json"]
+    assert index.analysis_card_for(snapshot) == first / "card.json"
+    assert first_identity in index.data["sources"]
+    assert second_identity in index.data["sources"]
+
+
+def test_source_only_run_keeps_the_observation_without_composing_a_duplicate_card(
+    repository: Path, tmp_path: Path
+) -> None:
+    _add_origin(repository, "source-one")
+    out = tmp_path / "runs"
+    first = run(repository, out, path=PATH, offline=True)
+    second_repository = tmp_path / "second-repository"
+    shutil.copytree(repository, second_repository)
+    git(
+        second_repository,
+        "remote",
+        "set-url",
+        "origin",
+        "https://github.com/example/source-two.git",
+    )
+
+    requested_sections = []
+    requested_material = []
+
+    def source_model(instruction: str, material: str) -> dict:
+        form_text = instruction.split("## The template\n\n", 1)[1].split(
+            "\n\n## The fields of the schema", 1
+        )[0]
+        model_form = json.loads(form_text)["card"]
+        requested_sections.append(model_form)
+        requested_material.append(material)
+        return {
+            "text": json.dumps({"card": empty_form(model_form), "evidence": {}}),
+            "model": "test-model",
+        }
+
+    second = run(
+        second_repository,
+        out,
+        path=PATH,
+        offline=True,
+        model=source_model,
+    )
+    snapshot = read_json(second / "snapshot.json")
+    index = IdentityIndex(out / "identity-index.json")
+    supplement = read_json(second / "source-card.json")
+    source_form = source_only_form(read_template()["card"])
+
+    assert snapshot["known"]["action"] == "SOURCE_ONLY"
+    assert snapshot["known"]["reuse_card"] == f"{first.name}/card.json"
+    assert (second / "sources" / "log.json").is_file()
+    assert not (second / "card.json").exists()
+    assert not (second / "card.md").exists()
+    assert len(requested_sections) == 1
+    assert requested_sections[0] == source_form
+    assert "https://github.com/example/source-two" in requested_material[0]
+    assert "Greets a person by name" not in requested_material[0]
+    assert "Run `python scripts/greet.py NAME`" not in requested_material[0]
+    assert supplement["content_card"] == snapshot["known"]["reuse_card"]
+    assert set(supplement["sections"]["what_it_does"]) == {"adoption"}
+    assert read_json(second / "validation.json")["passed"]
+    assert index.data["observations"][-1]["action"] == "SOURCE_ONLY"
+    assert index.data["observations"][-1]["source"]["repository"] == (
+        "https://github.com/example/source-two"
+    )
+
+
+def test_source_only_indexes_a_compatible_card_found_in_the_cards_directory(
+    repository: Path, tmp_path: Path
+) -> None:
+    _add_origin(repository, "catalog-source")
+    first = run(repository, tmp_path / "first-runs", path=PATH, offline=True)
+    other = tmp_path / "catalog-copy"
+    shutil.copytree(repository, other)
+    git(other, "remote", "set-url", "origin", "https://github.com/example/new-source.git")
+
+    out = tmp_path / "new-runs"
+    run_dir = identify_repository(str(other), PATH, out, cards_dir=first)
+    snapshot = read_json(run_dir / "snapshot.json")
+    index = IdentityIndex(out / "identity-index.json")
+    content_key = snapshot["known"]["reuse_card"]
+    source_key = source_identity(snapshot)
+    version = index.data["sources"][source_key]["versions"][0]
+
+    assert snapshot["known"]["action"] == "SOURCE_ONLY"
+    assert content_key == f"../first-runs/{first.name}/card.json"
+    assert index.card_references_for(snapshot) == [first / "card.json"]
+    assert version["analysis_card"] is None
+
+
+def test_partial_file_match_is_reported_and_requires_full_analysis(
+    repository: Path, tmp_path: Path
+) -> None:
+    _add_origin(repository, "base")
+    out = tmp_path / "runs"
+    run(repository, out, path=PATH, offline=True)
+    other = tmp_path / "partial-repository"
+    shutil.copytree(repository, other)
+    git(other, "remote", "set-url", "origin", "https://github.com/example/partial.git")
+    (other / PATH / "scripts" / "greet.py").write_text("print('changed')\n", encoding="utf-8")
+    git(other, "add", "-A")
+    git(other, "commit", "-q", "-m", "change the script")
+
+    run_dir = identify_repository(str(other), PATH, out)
+    snapshot = read_json(run_dir / "snapshot.json")
+    comparisons = snapshot["known"]["file_comparisons"]
+    assert snapshot["known"]["action"] == "FULL_ANALYSIS"
+    assert "partial file matches" in snapshot["known"]["action_reason"]
+    assert comparisons
+    assert comparisons[0]["same"] == ["SKILL.md"]
+    assert comparisons[0]["changed"][0]["path"] == "scripts/greet.py"
+
+
+def test_partial_matches_include_prior_source_versions_without_a_card(
+    repository: Path, tmp_path: Path
+) -> None:
+    _add_origin(repository, "uncomposed")
+    out = tmp_path / "runs"
+    identify_repository(str(repository), PATH, out)
+    (repository / PATH / "scripts" / "greet.py").write_text("print('changed')\n", encoding="utf-8")
+    git(repository, "add", "-A")
+    git(repository, "commit", "-q", "-m", "change the script")
+
+    run_dir = identify_repository(str(repository), PATH, out)
+    comparisons = read_json(run_dir / "snapshot.json")["known"]["file_comparisons"]
+
+    assert len(comparisons) == 1
+    assert comparisons[0]["same"] == ["SKILL.md"]
+    assert comparisons[0]["changed"][0]["path"] == "scripts/greet.py"

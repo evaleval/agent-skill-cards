@@ -9,6 +9,7 @@ from skillcard import read_json
 from skillcard.collect import collect, handed_over
 from skillcard.compose import compose
 from skillcard.identify import AlreadyKnown, identify, identify_repository
+from skillcard.index import IdentityIndex
 from skillcard.model import from_environment
 from skillcard.render import render
 from skillcard.validate import validate
@@ -28,7 +29,7 @@ def run(
     model=None,
     fetch=None,
 ) -> Path:
-    """Generate the card for one skill and return the run folder.
+    """Process one skill and return its run folder.
 
     ``skill`` is a folder on this machine, or a repository when ``path`` names the folder of
     the skill inside it. Each phase reads the run folder and adds its own output to it. A
@@ -36,8 +37,9 @@ def run(
     the phase before it.
 
     When ``cards_dir`` holds a card for the same place and the same files, ``AlreadyKnown``
-    is raised and nothing is written, unless ``again`` is set. ``model`` and ``fetch`` are
-    the functions that call a model and the network. Without ``model`` no model is called.
+    is raised and nothing is written, unless ``again`` is set. A source-only observation collects
+    source data and returns without composing another card. ``model`` and ``fetch`` are the
+    functions that call a model and the network. Without ``model`` no model is called.
     """
     handed_over.check(reports)
     if path is None:
@@ -47,9 +49,18 @@ def run(
             str(skill), path, out_dir, commit, cards_dir, stop_if_known=not again
         )
     collect(run_dir, fetch=fetch, offline=offline, reports=reports)
+    snapshot = read_json(run_dir / "snapshot.json")
+    if snapshot["known"]["action"] == "SOURCE_ONLY":
+        compose(run_dir, model)
+        validate(run_dir)
+        return run_dir
     compose(run_dir, model)
-    validate(run_dir)
+    validation = validate(run_dir)
     render(run_dir)
+    if validation["passed"]:
+        IdentityIndex(Path(out_dir) / "identity-index.json").complete(
+            read_json(run_dir / "snapshot.json"), run_dir
+        )
     return run_dir
 
 
@@ -146,6 +157,16 @@ def main(argv: list[str] | None = None) -> int:
         parser.exit(2, f"skillcard: {error}\n")
 
     known = read_json(run_dir / "snapshot.json")["known"]
+    print(f"identity action: {known['action']} ({known['action_reason']})")
+    if known["action"] == "SOURCE_ONLY" and known.get("reuse_card"):
+        print(f"existing content card: {known['reuse_card']}")
+        print(f"source-specific supplement: {run_dir / 'source-card.json'}")
+        print("no duplicate content card was composed")
+        passed = read_json(run_dir / "validation.json")["passed"]
+        print(
+            "validation passed" if passed else f"validation failed, see {run_dir}/validation.json"
+        )
+        return 0 if passed else 1
     for case, said in (
         ("same place, other files", "another version of this skill has a card"),
         ("other place, same files", "the same files have a card under another place"),

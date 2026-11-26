@@ -37,6 +37,6 @@ The filling guides below say what belongs in each field. Where a guide asks for 
 
 Return one JSON object with exactly two keys and no text around it.
 
-`card` holds the five sections `what_it_does`, `what_it_needs`, `what_it_touches`, `what_is_known` and `who_stands_behind_it`, each in the form of the template.
+`card` holds exactly the section keys shown in the template, each in the form shown there.
 
-`evidence` says where each field came from. It holds one entry for each field of these five sections, named by section and field, for example `what_it_does.outputs`. The value of an entry is the list of the blocks the field was taken from, each named by the path in its BEGIN line, for example `files/SKILL.md`. A field that holds only an empty word has an empty list.
+`evidence` says where each returned field came from. It holds one entry for each field in the template, named by section and field, for example `what_it_does.outputs`. The value of an entry is the list of the blocks the field was taken from, each named by the path in its BEGIN line, for example `files/SKILL.md`. A field that holds only an empty word has an empty list.
